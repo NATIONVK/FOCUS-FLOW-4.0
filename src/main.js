@@ -7,9 +7,10 @@ const $ = (s, root=document) => root.querySelector(s);
 const esc = (v='') => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const store = new Store();
 let page = 'overview';
-let timer = new FocusTimer(store, render);
+let timer = new FocusTimer(store, () => { if ($('#clock')) paintTimer(); });
 let selectedSubject = store.data.subjects[0]?.id || '';
 
+function paintTimer() { const clock=$('#clock'); if(!clock)return; clock.textContent=fmt(timer.elapsed()); $('#timerToggle')?.classList.toggle('paused',timer.paused); }
 function fmt(seconds) {
   const n=Math.max(0,Math.floor(seconds));
   return [Math.floor(n/3600),Math.floor(n%3600/60),n%60].map(x=>String(x).padStart(2,'0')).join(':');
@@ -63,10 +64,10 @@ function bind(){
   $('#toggleTheme')?.addEventListener('click',()=>{document.body.classList.toggle('light');store.data.settings.light=document.body.classList.contains('light');store.save()});
 }
 function showTimer(){
-  let elapsed=0;
-  const paint=()=>{const e=timer.elapsed();$('#clock').textContent=fmt(e);$('#timer-ring').style.setProperty('--progress',Math.min(1,e/3600));};
+  if(!timer.active) timer.start(selectedSubject);
+  const paint=()=>paintTimer();
   $('#app').innerHTML=`<div class="focus-screen"><button class="exit-focus" id="exitFocus">×</button><div class="space-particles"></div><div class="focus-orbit orbit-a"></div><div class="focus-orbit orbit-b"></div><button class="focus-core" id="timerToggle"><span class="focus-label">FOCUS SESSION</span><strong id="clock">00:00:00</strong><span class="focus-hint">TAP TO PAUSE / RESUME</span></button></div>`;
-  timer.start(selectedSubject);paint();
+  paint();
   const tick=setInterval(()=>{if(!$('#clock')){clearInterval(tick);return}paint()},250);
   $('#timerToggle').addEventListener('click',()=>{timer.toggle();});
   $('#exitFocus').addEventListener('click',()=>{clearInterval(tick);if(timer.active)timer.finish();page='overview';render()});
@@ -74,5 +75,5 @@ function showTimer(){
 function exportBackup(){const blob=new Blob([JSON.stringify(store.data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='focus-flow-backup.json';a.click();URL.revokeObjectURL(a.href)}
 function importBackup(e){const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{store.import(JSON.parse(r.result));alert('Backup restored.');render()}catch{alert('Invalid backup file.')}};r.readAsText(f)}
 store.data.settings.light&&(document.body.classList.add('light'));
-render();
+if(timer.active){selectedSubject=timer.subjectId||selectedSubject;showTimer();}else{render();}
 if('serviceWorker' in navigator && import.meta.env.PROD) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
