@@ -12,11 +12,11 @@
     "cap:sync": "cap sync android"
   },
   "dependencies": {
-    "@capacitor/android": "latest",
-    "@capacitor/core": "latest"
+    "@capacitor/android": "7.4.3",
+    "@capacitor/core": "7.4.3"
   },
   "devDependencies": {
-    "@capacitor/cli": "latest",
-    "vite": "latest"
+    "@capacitor/cli": "7.4.3",
+    "vite": "^6.4.1"
   }
 }
