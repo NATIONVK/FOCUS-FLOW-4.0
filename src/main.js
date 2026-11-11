@@ -45,17 +45,67 @@ function render() {
   bind();
 }
 function overview(t,subjects) {
-  const week=Analytics.weekly(store.data.sessions);
+  const sessions=store.data.sessions;
+  const week=Analytics.weekly(sessions);
   const goal=Math.max(1,Number(store.data.settings.dailyGoalMinutes)||120)*60;
   const progress=Math.min(100,Math.round(t.today/goal*100));
-  const streak=Analytics.streak(store.data.sessions,goal/60);
-  const recent=[...store.data.sessions].slice(-4).reverse();
-  return `<section class="welcome"><div class="welcome-copy"><span class="eyebrow">MAKE EVERY MINUTE COUNT</span><h2>Make today <em>count.</em></h2><p>Build your focus, one session at a time.</p><button class="primary" id="startFocus">Start studying <span>↗</span></button></div><div class="hero-orbit"><div class="orbit-ring"></div><div class="orbit-core">F</div><i class="orbit-dot"></i></div></section>
-  <section class="stats"><article class="stat"><span>TODAY'S FOCUS</span><strong>${(t.today/3600).toFixed(1)}<small> hrs</small></strong><small class="muted">Your progress today</small></article><article class="stat"><span>TOTAL FOCUS</span><strong>${(t.all/3600).toFixed(1)}<small> hrs</small></strong><small class="muted">All completed sessions</small></article><article class="stat"><span>SESSIONS</span><strong>${t.count}</strong><small class="muted">Completed sessions</small></article><article class="stat"><span>DAILY GOAL</span><strong>${progress}<small>%</small></strong><small class="muted">${fmt(t.today)} / ${fmt(goal)}</small></article><article class="stat"><span>GOAL STREAK</span><strong>${streak}<small> days</small></strong><small class="muted">Days you reached your target</small></article></section>
-  <section class="grid-two"><article class="panel"><div class="panel-head"><div><span class="eyebrow">YOUR ROUTINE</span><h3>Study overview</h3></div><span class="muted">Last 7 days</span></div><div class="goal-progress"><div><b>Daily study goal</b><strong>${progress}%</strong></div><div class="progress-track"><i style="width:${progress}%"></i></div></div><div class="bars">${week.map(d=>`<div class="bar-wrap"><div class="bar" style="height:${Math.max(4,Math.min(100,d.seconds/3600*12))}%"></div><small>${d.label}</small></div>`).join('')}</div></article>
-  <article class="panel"><div class="panel-head"><div><span class="eyebrow">YOUR SUBJECTS</span><h3>Study spaces</h3></div><button class="text-btn" data-page="subjects">Manage →</button></div><div class="subject-list">${subjects.slice(0,5).map(s=>`<div class="subject-row"><span class="dot" style="background:${esc(s.color)}"></span><b>${esc(s.name)}</b><span>${(Analytics.subjectSeconds(store.data.sessions,s.id)/3600).toFixed(1)}h</span></div>`).join('')||'<p class="muted">Add your first subject to begin.</p>'}</div></article></section>
-  <section class="panel"><div class="panel-head"><div><span class="eyebrow">RECENT ACTIVITY</span><h3>Recent study sessions</h3></div><button class="text-btn" data-page="history">View history →</button></div><div class="history-list">${recent.map(s=>`<div class="history-row"><div><b>${esc(store.subjectName(s.subjectId))}</b><small>${new Date(s.startedAt).toLocaleString()}</small></div><strong>${fmt(s.duration)}</strong><button class="text-btn" data-delete-session="${s.id}">Delete</button></div>`).join('')||'<p class="muted">Your completed sessions will appear here.</p>'}</div></section>
-  <section class="panel"><div class="panel-head"><div><span class="eyebrow">QUICK START</span><h3>Choose a subject</h3></div><button class="text-btn" data-page="subjects">+ Add subject</button></div><div class="quick-subjects">${subjects.map(s=>`<button class="subject-chip ${selectedSubject===s.id?'chosen':''}" data-subject="${s.id}"><i style="background:${esc(s.color)}"></i>${esc(s.name)}</button>`).join('')||'<span class="muted">Create a subject first.</span>'}</div></section>`;
+  const remaining=Math.max(0,goal-t.today);
+  const streak=Analytics.streak(sessions,goal/60);
+  const today=new Date();
+  const todayKey=today.toDateString();
+  const todayTasks=store.data.tasks.filter(x=>!x.done);
+  const overdue=todayTasks.filter(x=>x.dueDate&&x.dueDate<today.toISOString().slice(0,10));
+  const completed=store.data.tasks.filter(x=>x.done).length;
+  const todayPlans=(store.data.plans||[]).filter(p=>p.weekday===today.getDay());
+  const plannedMinutes=todayPlans.reduce((n,p)=>n+p.minutes,0);
+  const actualPlanned=todayPlans.length?sessions.filter(s=>new Date(s.startedAt).toDateString()===todayKey&&todayPlans.some(p=>p.subjectId===s.subjectId)).reduce((n,s)=>n+s.duration,0):0;
+  const planProgress=plannedMinutes?Math.min(100,Math.round(actualPlanned/(plannedMinutes*60)*100)):0;
+  const subjectStats=subjects.map(s=>({subject:s,seconds:Analytics.subjectSeconds(sessions,s.id)})).sort((a,b)=>b.seconds-a.seconds);
+  const topSubject=subjectStats[0];
+  const maxSubject=Math.max(1,...subjectStats.map(x=>x.seconds));
+  const weekTotal=week.reduce((n,d)=>n+d.seconds,0);
+  const bestDay=week.reduce((a,b)=>b.seconds>a.seconds?b:a,week[0]||{label:'—',seconds:0});
+  const recent=[...sessions].sort((a,b)=>new Date(b.startedAt)-new Date(a.startedAt)).slice(0,3);
+  const nextTasks=[...todayTasks].sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999')).slice(0,4);
+  const greeting=today.getHours()<12?'Good morning':today.getHours()<17?'Good afternoon':'Good evening';
+  return `
+  <section class="dash-hero">
+    <div class="dash-hero-copy"><span class="eyebrow">YOUR PERSONAL STUDY OS · ${today.toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})}</span><h2>${greeting}. <em>Ready to focus?</em></h2><p>Small, consistent sessions build remarkable progress. Make this session count.</p>
+      <div class="dash-actions"><button class="primary" id="startFocus">▶ Start focus session</button><button class="dash-secondary" data-page="planner">View today's plan ↗</button></div>
+      <div class="dash-hero-meta"><span><i class="online-dot"></i> Offline-first · Your data stays on this device</span><span>🔥 ${streak} day streak</span></div>
+    </div>
+    <div class="dash-goal-ring" style="--goal-progress:${progress}%"><div><strong>${progress}%</strong><small>DAILY GOAL</small><span>${fmt(remaining)} left</span></div></div>
+  </section>
+  <section class="dash-kpis">
+    <article class="dash-kpi"><span class="kpi-icon violet">◷</span><div><small>FOCUS TODAY</small><strong>${(t.today/3600).toFixed(1)} <i>hrs</i></strong><span>${fmt(t.today)} focused</span></div></article>
+    <article class="dash-kpi"><span class="kpi-icon mint">◎</span><div><small>THIS WEEK</small><strong>${(weekTotal/3600).toFixed(1)} <i>hrs</i></strong><span>Last 7 days</span></div></article>
+    <article class="dash-kpi"><span class="kpi-icon amber">✓</span><div><small>TASKS LEFT</small><strong>${todayTasks.length}</strong><span>${overdue.length?overdue.length+' overdue':'Stay on track'}</span></div></article>
+    <article class="dash-kpi"><span class="kpi-icon blue">✦</span><div><small>ALL-TIME SESSIONS</small><strong>${t.count}</strong><span>${(t.all/3600).toFixed(1)} total hours</span></div></article>
+  </section>
+  <section class="dash-main-grid">
+    <article class="panel dash-week-panel"><div class="panel-head"><div><span class="eyebrow">CONSISTENCY TRACKER</span><h3>Your focus rhythm</h3></div><span class="dash-period">LAST 7 DAYS</span></div>
+      <div class="dash-week-summary"><div><strong>${(weekTotal/3600).toFixed(1)}h</strong><small>Total focused this week</small></div><div><strong>${bestDay.label}</strong><small>Most productive day</small></div></div>
+      <div class="dash-chart" role="img" aria-label="Daily focus hours for the last seven days">${week.map(d=>{const h=(d.seconds/3600).toFixed(1);const height=Math.max(5,Math.round(d.seconds/Math.max(3600,...week.map(x=>x.seconds))*100));return `<div class="dash-chart-col"><span class="dash-chart-value">${h==='0.0'?'':h+'h'}</span><div class="dash-chart-track"><i style="height:${height}%"></i></div><small>${d.label}</small></div>`}).join('')}</div>
+      <div class="dash-chart-foot"><span><i></i> Daily focus time</span><button class="text-btn" data-page="statistics">Full analytics ↗</button></div>
+    </article>
+    <article class="panel dash-plan-panel"><div class="panel-head"><div><span class="eyebrow">TODAY'S ROADMAP</span><h3>Study plan</h3></div><button class="text-btn" data-page="planner">Manage ↗</button></div>
+      ${todayPlans.length?`<div class="dash-plan-progress"><div><b>${fmt(actualPlanned)}</b><span> / ${fmt(plannedMinutes*60)} planned</span><strong>${planProgress}%</strong></div><div class="progress-track"><i style="width:${planProgress}%"></i></div></div><div class="dash-plan-list">${todayPlans.slice(0,4).map(p=>{const s=subjects.find(x=>x.id===p.subjectId);return `<div class="dash-plan-item"><i style="background:${esc(s?.color||'#8b7cff')}"></i><span>${esc(store.subjectName(p.subjectId))}</span><b>${p.minutes}m</b><button data-start-plan="${p.id}" aria-label="Start ${esc(store.subjectName(p.subjectId))}">Start</button></div>`}).join('')}</div>`:'<div class="dash-empty"><span>◷</span><b>No study blocks planned</b><small>Give your day a simple structure.</small><button class="primary" data-page="planner">Create today's plan</button></div>'}
+    </article>
+  </section>
+  <section class="dash-lower-grid">
+    <article class="panel"><div class="panel-head"><div><span class="eyebrow">YOUR LEARNING AREAS</span><h3>Subject breakdown</h3></div><button class="text-btn" data-page="subjects">All subjects ↗</button></div>
+      <div class="dash-subject-list">${subjectStats.slice(0,5).map(({subject,seconds})=>`<div class="dash-subject"><div class="dash-subject-heading"><span><i style="background:${esc(subject.color)}"></i><b>${esc(subject.name)}</b></span><strong>${(seconds/3600).toFixed(1)}h</strong></div><div class="progress-track"><i style="width:${Math.round(seconds/maxSubject*100)}%;background:${esc(subject.color)}"></i></div></div>`).join('')||'<p class="muted">Add a subject to see your learning breakdown.</p>'}</div>
+      ${topSubject&&topSubject.seconds?'<div class="dash-insight">✦ Most studied: <b>'+esc(topSubject.subject.name)+'</b> · '+(topSubject.seconds/3600).toFixed(1)+' hours recorded</div>':''}
+    </article>
+    <article class="panel"><div class="panel-head"><div><span class="eyebrow">STAY IN CONTROL</span><h3>Task priorities</h3></div><button class="text-btn" data-page="tasks">View all ↗</button></div>
+      <div class="dash-task-summary"><div><strong>${todayTasks.length}</strong><small>Remaining</small></div><div><strong>${completed}</strong><small>Completed</small></div><div><strong>${overdue.length}</strong><small>Overdue</small></div></div>
+      <div class="dash-task-list">${nextTasks.map(x=>`<label class="dash-task-row"><input type="checkbox" data-task="${x.id}"><span>${esc(x.title)}<small>${x.dueDate?'Due '+new Date(x.dueDate+'T00:00:00').toLocaleDateString():'No deadline'}</small></span><i class="priority ${x.priority||'medium'}">${(x.priority||'medium').toUpperCase()}</i></label>`).join('')||'<p class="muted">You are all caught up. Add a task when you need one.</p>'}</div>
+      <button class="dash-add-task" id="addTask">＋ Add a task</button>
+    </article>
+  </section>
+  <section class="panel dash-recent-panel"><div class="panel-head"><div><span class="eyebrow">YOUR RECENT WINS</span><h3>Latest focus sessions</h3></div><button class="text-btn" data-page="history">Study history ↗</button></div>
+    <div class="dash-recent-list">${recent.map(s=>`<div class="dash-recent-row"><span class="dash-recent-icon">◷</span><div><b>${esc(store.subjectName(s.subjectId))}</b><small>${new Date(s.startedAt).toLocaleString()}</small></div><strong>${fmt(s.duration)}</strong></div>`).join('')||'<p class="muted">Your completed focus sessions will appear here.</p>'}</div>
+  </section>`;
 }
 function subjectPage(subjects) {return `<section class="panel"><div class="panel-head"><div><span class="eyebrow">ORGANIZE YOUR LEARNING</span><h3>Subjects</h3></div><button class="primary" id="addSubject">+ New subject</button></div><div class="subject-cards">${subjects.map(s=>`<article class="subject-card"><span class="dot" style="background:${esc(s.color)}"></span><h3>${esc(s.name)}</h3><p>${(Analytics.subjectSeconds(store.data.sessions,s.id)/3600).toFixed(2)} hours focused</p><button class="text-btn" data-edit-subject="${s.id}">Edit</button><button class="text-btn" data-delete-subject="${s.id}">Delete</button></article>`).join('')||'<p class="muted">No subjects yet.</p>'}</div></section>`;}
 function taskPage(){
