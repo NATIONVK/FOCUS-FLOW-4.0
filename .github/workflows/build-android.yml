@@ -35,6 +35,20 @@ jobs:
       - name: Add Android platform if absent
         run: |
           if [ ! -d android ]; then npx cap add android; fi
+      - name: Install native gallery bridge
+        run: |
+          mkdir -p android/app/src/main/java/com/nationvk/focusflow
+          cp native/android/GalleryPlugin.java android/app/src/main/java/com/nationvk/focusflow/GalleryPlugin.java
+          cp native/android/MainActivity.java android/app/src/main/java/com/nationvk/focusflow/MainActivity.java
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('android/app/src/main/AndroidManifest.xml')
+          s=p.read_text()
+          perms='''    <uses-permission android:name=\"android.permission.READ_MEDIA_IMAGES\" />\n    <uses-permission android:name=\"android.permission.READ_MEDIA_VISUAL_USER_SELECTED\" />\n    <uses-permission android:name=\"android.permission.READ_EXTERNAL_STORAGE\" android:maxSdkVersion=\"32\" />\n'''
+          if 'READ_MEDIA_IMAGES' not in s:
+              s=s.replace('<application', perms+'    <application', 1)
+          p.write_text(s)
+          PY
       - name: Sync Capacitor
         run: npx cap sync android
       - name: Build debug APK
