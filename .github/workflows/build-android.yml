@@ -39,6 +39,8 @@ jobs:
         run: |
           mkdir -p android/app/src/main/java/com/nationvk/focusflow
           cp native/android/GalleryPlugin.java android/app/src/main/java/com/nationvk/focusflow/GalleryPlugin.java
+          cp native/android/FocusTimerPlugin.java android/app/src/main/java/com/nationvk/focusflow/FocusTimerPlugin.java
+          cp native/android/FocusTimerService.java android/app/src/main/java/com/nationvk/focusflow/FocusTimerService.java
           cp native/android/MainActivity.java android/app/src/main/java/com/nationvk/focusflow/MainActivity.java
           python - <<'PY'
           from pathlib import Path
@@ -47,6 +49,12 @@ jobs:
           perms='''    <uses-permission android:name=\"android.permission.READ_MEDIA_IMAGES\" />\n    <uses-permission android:name=\"android.permission.READ_MEDIA_VISUAL_USER_SELECTED\" />\n    <uses-permission android:name=\"android.permission.READ_EXTERNAL_STORAGE\" android:maxSdkVersion=\"32\" />\n'''
           if 'READ_MEDIA_IMAGES' not in s:
               s=s.replace('<application', perms+'    <application', 1)
+          service='''        <service android:name=".FocusTimerService" android:exported="false" android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="Ongoing study focus timer with persistent notification" />
+        </service>
+'''
+          if 'FocusTimerService' not in s:
+              s=s.replace('</application>', service+'    </application>', 1)
           p.write_text(s)
           PY
       - name: Sync Capacitor
