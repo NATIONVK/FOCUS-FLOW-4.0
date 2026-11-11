@@ -55,14 +55,14 @@ jobs:
               '    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />'
           ]
           if 'android.permission.POST_NOTIFICATIONS' not in s:
-              s = s.replace('<application', chr(10).join(permissions) + '\\n    <application', 1)
+              s = s.replace('<application', chr(10).join(permissions) + chr(10) + '    <application', 1)
           service = [
               '        <service android:name=".FocusTimerService" android:exported="false" android:foregroundServiceType="specialUse">',
               '            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="Ongoing study focus timer with persistent notification" />',
               '        </service>'
           ]
           if 'FocusTimerService' not in s:
-              s = s.replace('</application>', '\\n'.join(service) + '\\n    </application>', 1)
+              s = s.replace('</application>', '\\n'.join(service) + chr(10) + '    </application>', 1)
           p.write_text(s)
           PY
       - name: Sync Capacitor
