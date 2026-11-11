@@ -1,3 +1,4 @@
+import { syncNativeFocusTimer, stopNativeFocusTimer } from './native-focus-timer.js';
 const ACTIVE='focus-flow-active-session';
 
 export class FocusTimer {
@@ -28,21 +29,21 @@ export class FocusTimer {
     if(this.active) return false;
     if(!subjectId) throw new Error('A subject is required to start a focus session.');
     this.subjectId=subjectId; this.startedAt=Date.now(); this.segmentStartedAt=this.startedAt;
-    this.accumulated=0; this.paused=false; this.active=true; this.persist(); this.onChange();
+    this.accumulated=0; this.paused=false; this.active=true; this.persist(); this.onChange(); syncNativeFocusTimer(this,this.store.subjectName(this.subjectId));
     return true;
   }
   toggle() {
     if(!this.active) return false;
     if(this.paused) { this.segmentStartedAt=Date.now(); this.paused=false; }
     else { this.accumulated=this.elapsed(); this.paused=true; }
-    this.persist(); this.onChange(); return true;
+    this.persist(); this.onChange(); syncNativeFocusTimer(this,this.store.subjectName(this.subjectId)); return true;
   }
   finish() {
     if(!this.active) return null;
     const duration=this.elapsed();
     const session=duration>=1?{id:crypto.randomUUID(),subjectId:this.subjectId,startedAt:new Date(this.startedAt).toISOString(),endedAt:new Date().toISOString(),duration:Math.floor(duration)}:null;
     if(session) this.store.data.sessions.push(session);
-    this.store.save(); localStorage.removeItem(ACTIVE);
+    this.store.save(); localStorage.removeItem(ACTIVE); stopNativeFocusTimer();
     this.active=false; this.paused=false; this.startedAt=0; this.segmentStartedAt=0; this.accumulated=0; this.subjectId=null;
     this.onChange(); return session?.duration??0;
   }
