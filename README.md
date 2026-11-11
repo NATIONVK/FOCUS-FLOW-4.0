@@ -15,6 +15,7 @@ A premium, offline-first study and focus tracker. Built with web technologies an
 - Session history, daily/weekly/monthly summaries
 - Tasks, notes, goals, theme and language preference
 - Offline-capable app shell and local data export/import
+- Gallery image-to-PDF maker: select multiple images, reorder pages, remove pages, choose A4/Letter/custom image-size, and export one PDF offline
 - Automated unit tests and Android debug APK workflow
 
 ## Development
