@@ -2,6 +2,7 @@ import './styles.css';
 import { Store } from './store.js';
 import { FocusTimer } from './timer.js';
 import { Analytics } from './analytics.js';
+import { renderPDFPage, bindPDFPage } from './pdf-maker.js';
 
 const $ = (s, root=document) => root.querySelector(s);
 const esc = (v='') => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -22,7 +23,7 @@ function totals() {
   return {today:todaySec,all:sessions.reduce((a,s)=>a+s.duration,0),count:sessions.length};
 }
 function nav() {
-  return ['overview','subjects','tasks','notes','history','statistics','settings'].map(p=>`<button class="nav-item ${page===p?'active':''}" data-page="${p}">${p[0].toUpperCase()+p.slice(1)}</button>`).join('');
+  return ['overview','subjects','tasks','notes','history','statistics','pdf-maker','settings'].map(p=>`<button class="nav-item ${page===p?'active':''}" data-page="${p}">${p==='pdf-maker'?'PDF Maker':p[0].toUpperCase()+p.slice(1)}</button>`).join('');
 }
 function render() {
   const t=totals(), subjects=store.data.subjects;
@@ -31,8 +32,8 @@ function render() {
     <aside class="sidebar"><div class="brand"><span class="brand-orb"></span><div>FOCUS <b>FLOW</b><small>YOUR SPACE TO GROW</small></div></div>
       <nav>${nav()}</nav><div class="side-foot"><i class="online-dot"></i> OFFLINE FIRST<br><small>NATIONVK · FOCUS FLOW 4.0</small></div></aside><nav class="mobile-nav">${nav()}</nav>
     <main class="main">
-      <header class="topbar"><div><span class="eyebrow">YOUR PERSONAL STUDY OS</span><h1>${page==='overview'?'Overview':page[0].toUpperCase()+page.slice(1)}</h1></div><div class="status"><i></i> Local data secured</div></header>
-      ${page==='overview'?overview(t,subjects):page==='subjects'?subjectPage(subjects):page==='tasks'?taskPage():page==='notes'?notesPage():page==='history'?historyPage():page==='statistics'?statisticsPage():settingsPage()}
+      <header class="topbar"><div><span class="eyebrow">YOUR PERSONAL STUDY OS</span><h1>${page==='overview'?'Overview':page==='pdf-maker'?'PDF Maker':page[0].toUpperCase()+page.slice(1)}</h1></div><div class="status"><i></i> Local data secured</div></header>
+      ${page==='overview'?overview(t,subjects):page==='subjects'?subjectPage(subjects):page==='tasks'?taskPage():page==='notes'?notesPage():page==='history'?historyPage():page==='statistics'?statisticsPage():page==='pdf-maker'?renderPDFPage():settingsPage()}
     </main>
   </div>`;
   bind();
@@ -69,17 +70,16 @@ function bind(){
   document.querySelectorAll('[data-edit-note]').forEach(b=>b.addEventListener('click',()=>{const n=store.data.notes.find(x=>x.id===b.dataset.editNote);if(!n)return;const title=prompt('Note title',n.title);if(title===null)return;const body=prompt('Note content',n.body);if(body===null)return;try{store.editNote(n.id,title,body);render()}catch(e){alert(e.message)}}));
   document.querySelectorAll('[data-delete-note]').forEach(b=>b.addEventListener('click',()=>{if(confirm('Delete this note?')){store.deleteNote(b.dataset.deleteNote);render()}}));
   document.querySelectorAll('[data-delete-session]').forEach(b=>b.addEventListener('click',()=>{if(confirm('Delete this study record?')){store.deleteSession(b.dataset.deleteSession);render()}}));
-  document.querySelectorAll('[data-delete-session]').forEach(b=>b.addEventListener('click',()=>{if(confirm('Delete this study record?')){store.deleteSession(b.dataset.deleteSession);render()}}));
   $('#exportData')?.addEventListener('click',exportBackup);
   $('#importData')?.addEventListener('change',importBackup);
   $('#toggleTheme')?.addEventListener('click',()=>{store.data.settings.light=!store.data.settings.light;document.body.classList.toggle('light',store.data.settings.light);store.save()});
+  if(page==='pdf-maker') bindPDFPage(render);
 }
 function showTimer(){
   if(!timer.active) timer.start(selectedSubject);
-  const paint=()=>paintTimer();
   $('#app').innerHTML=`<div class="focus-screen"><button class="exit-focus" id="exitFocus">×</button><div class="space-particles"></div><div class="focus-orbit orbit-a"></div><div class="focus-orbit orbit-b"></div><button class="focus-core" id="timerToggle"><span class="focus-label">FOCUS SESSION</span><strong id="clock">00:00:00</strong><span class="focus-hint">TAP TO PAUSE / RESUME</span></button></div>`;
-  paint();
-  const tick=setInterval(()=>{if(!$('#clock')){clearInterval(tick);return}paint()},250);
+  paintTimer();
+  const tick=setInterval(()=>{if(!$('#clock')){clearInterval(tick);return}paintTimer()},250);
   $('#timerToggle').addEventListener('click',()=>{timer.toggle();});
   $('#exitFocus').addEventListener('click',()=>{clearInterval(tick);if(timer.active)timer.finish();page='overview';render()});
 }
