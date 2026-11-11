@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs>
+ <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d946ef"/><stop offset=".48" stop-color="#623bff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient>
+ <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".45" stop-color="#b9c8ff"/><stop offset="1" stop-color="#6976ff"/></linearGradient>
+ <linearGradient id="flow" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#22d3ee"/><stop offset=".55" stop-color="#4776ff"/><stop offset="1" stop-color="#d946ef"/></linearGradient>
+ <radialGradient id="bg"><stop stop-color="#171447"/><stop offset="1" stop-color="#050713"/></radialGradient>
+ <filter id="glow"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<rect x="14" y="14" width="484" height="484" rx="112" fill="url(#bg)" stroke="url(#rim)" stroke-width="10"/>
+<g opacity=".55" fill="#9ab7ff"><circle cx="90" cy="96" r="2"/><circle cx="416" cy="104" r="2"/><circle cx="78" cy="344" r="2"/><circle cx="442" cy="370" r="2"/></g>
+<g filter="url(#glow)">
+ <ellipse cx="256" cy="218" rx="158" ry="96" fill="none" stroke="url(#rim)" stroke-width="7" transform="rotate(-18 256 218)"/>
+ <circle cx="256" cy="205" r="103" fill="#0b1026" stroke="url(#rim)" stroke-width="13"/>
+ <circle cx="256" cy="205" r="87" fill="none" stroke="#a5b4fc" stroke-opacity=".4" stroke-width="2"/>
+ <path d="M256 118v15 M256 277v15 M169 205h15 M328 205h15 M194 143l11 11 M307 256l11 11 M318 143l-11 11 M205 256l-11 11" stroke="url(#metal)" stroke-width="8" stroke-linecap="round"/>
+ <path d="M256 205l-2-53 M256 205l49-39" stroke="#f8fbff" stroke-width="9" stroke-linecap="round"/><circle cx="256" cy="205" r="10" fill="#d946ef"/>
+ <path d="M239 91h34l-4 18h-26z" fill="url(#rim)"/>
+ <path d="M174 291q41-30 82 0q41-30 82 0v48q-41-28-82 0q-41-28-82 0z" fill="#eef4ff" stroke="#5ee7ff" stroke-width="4"/>
+ <path d="M256 292v47 M190 304q29-13 54 0 M268 304q26-13 53 0" stroke="#9aaeff" stroke-width="5" fill="none"/>
+ <path d="M346 177l53-29-11 26 24-3-52 31 10-24z" fill="#38f59a"/>
+</g>
+<text x="256" y="400" text-anchor="middle" font-family="Arial,sans-serif" font-size="66" font-weight="900" letter-spacing="2" fill="#fff">FOCUS</text>
+<text x="256" y="452" text-anchor="middle" font-family="Arial,sans-serif" font-size="54" font-weight="900" font-style="italic" letter-spacing="3" fill="url(#flow)">FLOW 4.0</text>
+</svg>
