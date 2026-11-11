@@ -55,3 +55,5 @@ body.light .mobile-more{background:#fff;border-color:#e0e5ef;box-shadow:0 14px 3
  .dialog-actions button{min-height:46px}
 }
 @media(max-width:380px){.mobile-tab small{font-size:9px}.mobile-tab span{font-size:17px}.gallery-tools button{padding:10px}.gallery-toolbar{align-items:flex-start;flex-direction:column}}
+
+.app-dialog textarea.dialog-input{min-height:150px;resize:vertical;line-height:1.55}
