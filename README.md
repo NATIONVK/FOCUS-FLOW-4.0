@@ -35,3 +35,9 @@ All study data stays on this device by default. Export a JSON backup regularly. 
 
 ## Project status
 FOCUS FLOW 4.0 is under active development. The automated tests cover core data and timer logic; device-specific behavior still requires Android installation testing.
+
+
+### Direct Recent Photos to PDF
+- Android native gallery grid loads recent device photos directly (newest first), with paginated loading and file browser fallback.
+- Select multiple images, reorder by drag/drop or move controls, remove pages, and export a single offline PDF.
+- Photo access is requested at runtime; Android 14+ can grant selected-photo access depending on user choice.
