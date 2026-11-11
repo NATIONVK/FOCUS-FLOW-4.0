@@ -82,3 +82,17 @@ body.light .goal-setting select{background:#fff;color:#303750;border-color:#e0e5
 body.light .task{background:#f7f8fc;border:1px solid #e5e8f1}
 body.light .task-toolbar select,body.light .task-dialog .dialog-input{background:#fff;color:#20243a;border-color:#dfe3ef}
 @media(max-width:520px){.task{align-items:flex-start;flex-direction:column}.task-actions{align-self:flex-end}.task-toolbar{justify-content:space-between}}
+
+/* Weekly planner */
+.planner-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin:22px 0}
+.planner-day{border:1px solid var(--line);background:var(--panel-2);color:inherit;border-radius:12px;padding:12px 5px;display:grid;gap:5px;cursor:pointer}
+.planner-day b{font-size:13px}.planner-day small{font-size:10px;color:var(--muted)}
+.planner-day.active{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 15%,transparent)}
+.planner-day.today b:after{content:' · TODAY';font-size:8px;color:var(--accent)}
+.planner-summary{display:flex;justify-content:space-between;gap:10px;padding:14px 0;border-bottom:1px solid var(--line);font-size:14px}
+.planner-summary span{color:var(--muted)}
+.planner-list{display:grid;gap:10px;margin-top:14px}
+.planner-item{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2)}
+.planner-item>div:nth-child(2){display:grid;gap:4px;flex:1}.planner-item small{font-size:12px;color:var(--muted)}
+@media(max-width:620px){.planner-days{gap:4px}.planner-day{padding:10px 2px}.planner-day b{font-size:11px}.planner-day small{font-size:9px}.planner-item{flex-wrap:wrap}.planner-item .task-actions{margin-left:auto}}
+body.light .planner-day,body.light .planner-item{background:#f7f8fc;border-color:#e5e8f1}
