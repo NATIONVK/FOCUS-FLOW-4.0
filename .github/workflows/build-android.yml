@@ -100,6 +100,8 @@ jobs:
           from pathlib import Path
           p = Path('android/app/src/main/AndroidManifest.xml')
           s = p.read_text()
+          import re
+          s = re.sub(r'\\s+android:(?:roundIcon|icon)="[^"]*"', '', s)
           s = s.replace('<application', '<application android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round"', 1)
           p.write_text(s)
           PY
