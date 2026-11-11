@@ -62,7 +62,7 @@ jobs:
               '        </service>'
           ]
           if 'FocusTimerService' not in s:
-              s = s.replace('</application>', '\\n'.join(service) + chr(10) + '    </application>', 1)
+              s = s.replace('</application>', chr(10).join(service) + chr(10) + '    </application>', 1)
           p.write_text(s)
           PY
       - name: Sync Capacitor
