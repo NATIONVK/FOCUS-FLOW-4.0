@@ -52,7 +52,7 @@ jobs:
           service='''        <service android:name=".FocusTimerService" android:exported="false" android:foregroundServiceType="specialUse">
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="Ongoing study focus timer with persistent notification" />
         </service>
-'''
+          '''
           if 'FocusTimerService' not in s:
               s=s.replace('</application>', service+'    </application>', 1)
           p.write_text(s)
