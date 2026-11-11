@@ -16,31 +16,32 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.annotation.Permission;
+import com.getcapacitor.annotation.PermissionCallback;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 @CapacitorPlugin(
   name = "Gallery",
   permissions = {
-    @Permission(alias = "images", strings = {
-      Manifest.permission.READ_MEDIA_IMAGES,
-      Manifest.permission.READ_EXTERNAL_STORAGE,
-      "android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
-    })
+    @Permission(alias = "images14", strings = { Manifest.permission.READ_MEDIA_IMAGES, "android.permission.READ_MEDIA_VISUAL_USER_SELECTED" }),
+    @Permission(alias = "images", strings = { Manifest.permission.READ_MEDIA_IMAGES }),
+    @Permission(alias = "legacyImages", strings = { Manifest.permission.READ_EXTERNAL_STORAGE })
   }
 )
 public class GalleryPlugin extends Plugin {
+  private String permissionAlias() {
+    if (Build.VERSION.SDK_INT >= 34) return "images14";
+    if (Build.VERSION.SDK_INT >= 33) return "images";
+    return "legacyImages";
+  }
   private boolean hasImageAccess() {
-    if (Build.VERSION.SDK_INT >= 34) {
-      return getPermissionState("images") == com.getcapacitor.PermissionState.GRANTED;
-    }
-    return getPermissionState("images") == com.getcapacitor.PermissionState.GRANTED;
+    return getPermissionState(permissionAlias()) == com.getcapacitor.PermissionState.GRANTED;
   }
 
   @PluginMethod
   public void listRecentImages(PluginCall call) {
     if (!hasImageAccess()) {
-      requestPermissionForAlias("images", call, "galleryPermissionCallback");
+      requestPermissionForAlias(permissionAlias(), call, "galleryPermissionCallback");
       return;
     }
     queryImages(call);
