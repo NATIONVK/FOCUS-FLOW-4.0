@@ -29,5 +29,6 @@ export class Store {
   deleteNote(id){this.data.notes=this.data.notes.filter(x=>x.id!==id);this.save();}
   deleteSession(id){this.data.sessions=this.data.sessions.filter(x=>x.id!==id);this.save();}
   subjectName(id){return this.data.subjects.find(s=>s.id===id)?.name||'Deleted subject';}
+  setDailyGoal(minutes){const value=Number(minutes);if(!Number.isFinite(value)||value<1||value>1440)throw new Error('Daily goal must be between 1 and 1440 minutes');this.data.settings.dailyGoalMinutes=Math.round(value);this.save();}
   import(data){const clean=normalize(data);this.data=clean;this.save();}
 }
