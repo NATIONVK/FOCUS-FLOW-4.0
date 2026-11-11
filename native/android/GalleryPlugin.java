@@ -25,6 +25,7 @@ import java.io.InputStream;
   permissions = {
     @Permission(alias = "images14", strings = { Manifest.permission.READ_MEDIA_IMAGES, "android.permission.READ_MEDIA_VISUAL_USER_SELECTED" }),
     @Permission(alias = "images", strings = { Manifest.permission.READ_MEDIA_IMAGES }),
+    @Permission(alias = "selectedImages", strings = { "android.permission.READ_MEDIA_VISUAL_USER_SELECTED" }),
     @Permission(alias = "legacyImages", strings = { Manifest.permission.READ_EXTERNAL_STORAGE })
   }
 )
@@ -35,7 +36,7 @@ public class GalleryPlugin extends Plugin {
     return "legacyImages";
   }
   private boolean hasImageAccess() {
-    return getPermissionState(permissionAlias()) == com.getcapacitor.PermissionState.GRANTED;
+    return getPermissionState(permissionAlias()) == com.getcapacitor.PermissionState.GRANTED || (Build.VERSION.SDK_INT >= 34 && getPermissionState("selectedImages") == com.getcapacitor.PermissionState.GRANTED);
   }
 
   @PluginMethod
