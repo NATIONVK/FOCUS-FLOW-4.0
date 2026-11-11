@@ -9,7 +9,7 @@
     "preview": "vite preview --host 0.0.0.0",
     "test": "node --test",
     "cap:add:android": "cap add android",
-    "cap:sync": "cap sync android"
+    "cap:sync": "npm run build && npx cap sync android"
   },
   "dependencies": {
     "@capacitor/android": "7.4.3",
