@@ -58,7 +58,14 @@ export class FocusTimer {
     const duration=this.elapsed();
     const session=duration>=1?{id:globalThis.crypto?.randomUUID?.()||`session-${Date.now()}-${Math.random().toString(36).slice(2)}`,subjectId:this.subjectId,startedAt:new Date(this.startedAt).toISOString(),endedAt:new Date().toISOString(),duration:Math.floor(duration)}:null;
     if(session) this.store.data.sessions.push(session);
-    this.store.save(); try { globalThis.localStorage?.removeItem(ACTIVE); } catch(error) { console.warn('Unable to clear active timer snapshot',error); } stopNativeFocusTimer();
+    try {
+      this.store.save();
+    } catch(error) {
+      // Roll back the in-memory append so retrying Finish cannot duplicate a session.
+      if(session) this.store.data.sessions=this.store.data.sessions.filter(item=>item.id!==session.id);
+      throw error;
+    }
+    try { globalThis.localStorage?.removeItem(ACTIVE); } catch(error) { console.warn('Unable to clear active timer snapshot',error); } stopNativeFocusTimer();
     this.active=false; this.paused=false; this.startedAt=0; this.segmentStartedAt=0; this.accumulated=0; this.subjectId=null;
     this.onChange(); return session?.duration??0;
   }
