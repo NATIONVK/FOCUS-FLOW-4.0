@@ -75,7 +75,7 @@ function overview(t,subjects) {
       <div class="dash-actions"><button class="primary" id="startFocus">▶ Start focus session</button><button class="dash-secondary" data-page="planner">View today's plan ↗</button></div>
       <div class="dash-hero-meta"><span><i class="online-dot"></i> Offline-first · Your data stays on this device</span><span>🔥 ${streak} day streak</span></div>
     </div>
-    <div class="dash-goal-ring" role="progressbar" aria-label="Daily focus goal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}" style="--goal-progress:${progress}%"><div><strong>${progress}%</strong><small>DAILY GOAL</small><span>${fmt(remaining)} left</span></div></div>
+    <div class="dash-goal-ring" role="progressbar" aria-label="Daily focus goal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}" aria-valuetext="${progress}% of daily goal; ${fmt(t.today)} focused" style="--goal-progress:${progress}%"><div><strong>${progress}%</strong><small>DAILY GOAL</small><span>${fmt(remaining)} left</span></div></div>
   </section>
   <section class="dash-kpis">
     <article class="dash-kpi"><span class="kpi-icon violet">◷</span><div><small>FOCUS TODAY</small><strong>${(t.today/3600).toFixed(1)} <i>hrs</i></strong><span>${fmt(t.today)} focused</span></div></article>
