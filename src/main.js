@@ -197,7 +197,7 @@ function statisticsPage(){const sessions=store.data.sessions;const month=Analyti
 function settingsPage(){return `<section class="panel"><span class="eyebrow">YOUR DATA, YOUR CONTROL</span><h3>Settings & backup</h3><p class="muted">Your records are stored locally on this device. Export a backup before changing or reinstalling the app.</p><div class="goal-setting"><label for="dailyGoalSelect">Daily study target</label><select id="dailyGoalSelect">${[30,45,60,90,120,150,180,240,300,360,480].map(n=>`<option value="${n}" ${Number(store.data.settings.dailyGoalMinutes)===n?"selected":""}>${n<60?n+" minutes":n/60+" hour"+(n===60?"":"s")}</option>`).join("")}</select><small class="muted">Your dashboard progress and goal streak use this target.</small></div><div class="settings-actions"><button class="primary" id="exportData">Export JSON backup</button><label class="secondary upload">Import backup<input id="importData" type="file" accept="application/json"></label><button class="secondary" id="toggleTheme">Toggle appearance</button></div><p class="muted">Language preference: English interface foundation. Bangla localization is planned.</p></section>`;}
 function bind(){
   $('#customizeDashboard')?.addEventListener('click',()=>{dashboardCustomize=!dashboardCustomize;render();});
-  $('.dash-custom-toolbar')?.addEventListener('click',e=>{
+  $('.main')?.addEventListener('click',e=>{
     const move=e.target.closest('[data-dash-move]');
     const hide=e.target.closest('[data-dash-hide]');
     const restore=e.target.closest('[data-restore-widget]');
