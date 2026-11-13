@@ -179,7 +179,7 @@ test('failed backup restore keeps the existing in-memory records intact',()=>{
   try{
     const store=new Store();const before=store.data;
     const backup={...before,tasks:[{id:'backup-task',title:'Imported task'}]};
-    assert.throws(()=>store.import(backup),/quota exceeded/);
+    assert.throws(()=>store.import(backup),/ডেটা সংরক্ষণ করা যায়নি/);
     assert.equal(store.data,before);
     assert.equal(store.data.tasks.length,0);
   }finally{globalThis.localStorage=old}
