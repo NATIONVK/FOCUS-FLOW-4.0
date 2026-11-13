@@ -16,5 +16,9 @@ public class FocusTimerPlugin extends Plugin {
   i.putExtra("subject",call.getString("subject","Focus session")); i.putExtra("elapsed",Math.max(0L,call.getLong("elapsedMs",0L))); i.putExtra("paused",call.getBoolean("paused",false));
   if(Build.VERSION.SDK_INT>=26)getContext().startForegroundService(i); else getContext().startService(i); call.resolve();
  }
- @PluginMethod public void stopTimer(PluginCall call) { getContext().startService(new Intent(getContext(),FocusTimerService.class).setAction(FocusTimerService.STOP)); call.resolve(); }
+ @PluginMethod public void stopTimer(PluginCall call) {
+  getContext().stopService(new Intent(getContext(),FocusTimerService.class));
+  getContext().getSharedPreferences("focus_timer",0).edit().clear().apply();
+  call.resolve();
+ }
 }
