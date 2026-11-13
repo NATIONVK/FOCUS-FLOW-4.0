@@ -3,7 +3,7 @@ import { Store } from './store.js';
 import { FocusTimer } from './timer.js';
 import { syncNativeFocusTimer } from './native-focus-timer.js';
 import { Analytics } from './analytics.js';
-import { renderPDFPage, bindPDFPage } from './pdf-maker.js';
+import { renderPDFStudioPage, bindPDFStudioPage } from './pdf-studio.js';
 
 const $ = (s, root=document) => root.querySelector(s);
 const esc = (v='') => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -70,7 +70,7 @@ function render() {
       <nav>${nav()}</nav><div class="side-foot"><i class="online-dot"></i> OFFLINE FIRST<br><small>NATIONVK · FOCUS FLOW 5.0</small></div></aside><nav class="mobile-nav">${mobileNav()}</nav>
     <main class="main">
       <header class="topbar"><div><span class="eyebrow">YOUR PERSONAL STUDY OS</span><h1>${page==='overview'?'Overview':page==='dashboard'?'Dashboard':page==='pdf-maker'?'PDF Maker':page[0].toUpperCase()+page.slice(1)}</h1></div><div class="status ${store.storageAvailable?'':'storage-offline'}"><i></i> ${store.storageAvailable?'Local data secured':'Storage unavailable'}</div></header>
-      ${page==='overview'?overview(t,subjects):page==='dashboard'?dashboardPage(t,subjects):page==='subjects'?subjectPage(subjects):page==='tasks'?taskPage():page==='planner'?plannerPage():page==='notes'?notesPage():page==='history'?historyPage():page==='statistics'?statisticsPage():page==='pdf-maker'?renderPDFPage():settingsPage()}
+      ${page==='overview'?overview(t,subjects):page==='dashboard'?dashboardPage(t,subjects):page==='subjects'?subjectPage(subjects):page==='tasks'?taskPage():page==='planner'?plannerPage():page==='notes'?notesPage():page==='history'?historyPage():page==='statistics'?statisticsPage():page==='pdf-maker'?renderPDFStudioPage():settingsPage()}
     </main>
   </div>`;
   if(page==='overview') applyDashboardLayout();
@@ -315,7 +315,7 @@ function bind(){
   $('#exportData')?.addEventListener('click',exportBackup);
   $('#importData')?.addEventListener('change',importBackup);
   $('#toggleTheme')?.addEventListener('click',()=>{store.data.settings.light=!store.data.settings.light;document.body.classList.toggle('light',store.data.settings.light);store.save()});
-  if(page==='pdf-maker') bindPDFPage(render);
+  if(page==='pdf-maker') bindPDFStudioPage();
 }
 async function exitTimerView(){
   if(!timer.active||!timerScreenActive)return;
