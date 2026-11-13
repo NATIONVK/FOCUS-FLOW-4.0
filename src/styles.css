@@ -246,3 +246,32 @@ body.light .dash-insight-card{background:linear-gradient(145deg,#f4f2ff,#fff);bo
 @keyframes beamSweep{0%,100%{filter:drop-shadow(0 0 3px #9e8aff);opacity:.2}50%{filter:drop-shadow(0 0 9px #d6c5ff);opacity:.7}}
 @media(max-width:700px){.bh-light-beams i{filter:drop-shadow(0 0 3px #b99aff);opacity:.35}.focus-core{transform:translateZ(18px)}}
 @media(prefers-reduced-motion:reduce){.bh-light-beams i{animation:none!important;opacity:.22}}
+
+/* Minimal black-hole clock: the timer is the only visible interface. */
+.focus-screen .exit-focus,.focus-screen .focus-label,.focus-screen .focus-hint,.focus-screen .focus-state{display:none!important}
+.focus-screen .focus-core{width:46%;height:46%;min-width:220px;min-height:220px;padding:0;gap:0;cursor:pointer;color:var(--timer-color,#c9baff);border-color:var(--timer-color,#9c78ff);box-shadow:inset 0 0 42px color-mix(in srgb,var(--timer-color,#9c78ff) 14%,transparent),0 0 34px color-mix(in srgb,var(--timer-color,#9c78ff) 42%,transparent),0 0 100px color-mix(in srgb,var(--timer-color,#9c78ff) 24%,transparent);transition:color .7s ease,border-color .7s ease,box-shadow .7s ease}
+.focus-screen .focus-core:before{border-color:color-mix(in srgb,var(--timer-color,#9c78ff) 72%,transparent);box-shadow:0 0 26px color-mix(in srgb,var(--timer-color,#9c78ff) 70%,transparent),inset 0 0 22px color-mix(in srgb,var(--timer-color,#9c78ff) 28%,transparent);transition:border-color .7s ease,box-shadow .7s ease}
+.focus-screen #clock{display:flex;align-items:center;justify-content:center;white-space:nowrap;font-size:clamp(28px,7.2vw,52px);letter-spacing:0;font-weight:650;line-height:1;font-variant-numeric:tabular-nums;color:var(--timer-color,#c9baff);text-shadow:0 0 12px color-mix(in srgb,var(--timer-color,#9c78ff) 72%,transparent),0 0 34px color-mix(in srgb,var(--timer-color,#9c78ff) 42%,transparent);transition:color .35s ease,text-shadow .35s ease}
+.focus-screen .time-main{color:inherit;transition:color .35s ease}
+.focus-screen .time-seconds{color:var(--seconds-color,#fff0bd);text-shadow:0 0 12px var(--seconds-color,#fff0bd),0 0 30px color-mix(in srgb,var(--seconds-color,#fff0bd) 55%,transparent);transition:color .25s ease,text-shadow .25s ease}
+.blackhole-scene[data-focus-level="1"]{--timer-color:#a99aff}
+.blackhole-scene[data-focus-level="2"]{--timer-color:#73d9ff}
+.blackhole-scene[data-focus-level="3"]{--timer-color:#55f0c0}
+.blackhole-scene[data-focus-level="4"]{--timer-color:#f4df70}
+.blackhole-scene[data-focus-level="5"]{--timer-color:#ff9b67}
+.blackhole-scene[data-focus-level="6"]{--timer-color:#ff6fbc}
+.blackhole-scene[data-second-step="0"]{--seconds-color:#ffffff}
+.blackhole-scene[data-second-step="1"]{--seconds-color:#a8e8ff}
+.blackhole-scene[data-second-step="2"]{--seconds-color:#a9a0ff}
+.blackhole-scene[data-second-step="3"]{--seconds-color:#e0a7ff}
+.blackhole-scene[data-second-step="4"]{--seconds-color:#ff9fdb}
+.blackhole-scene[data-second-step="5"]{--seconds-color:#ffad8a}
+.blackhole-scene[data-second-step="6"]{--seconds-color:#ffd27d}
+.blackhole-scene[data-second-step="7"]{--seconds-color:#f7f58a}
+.blackhole-scene[data-second-step="8"]{--seconds-color:#a7f5bd}
+.blackhole-scene[data-second-step="9"]{--seconds-color:#72e8df}
+.blackhole-scene[data-second-step="10"]{--seconds-color:#83baff}
+.blackhole-scene[data-second-step="11"]{--seconds-color:#c5a0ff}
+.blackhole-scene.is-paused .focus-core{filter:saturate(.55);opacity:.82}
+@media(max-width:700px){.focus-screen .focus-core{min-width:190px;min-height:190px}.focus-screen #clock{font-size:clamp(27px,7.5vw,46px)}}
+@media(max-height:650px){.focus-screen .focus-core{min-width:175px;min-height:175px}}
