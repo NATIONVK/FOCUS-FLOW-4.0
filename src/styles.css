@@ -147,3 +147,20 @@ body.light .dash-hero{background:radial-gradient(ellipse at 85% 15%,#7764c51c,tr
 .dash-insight-note{margin:13px 2px 0;color:var(--muted);font-size:10px;line-height:1.5}
 body.light .dash-insight-card{background:linear-gradient(145deg,#f4f2ff,#fff);border-color:#e1e5ef}
 @media(max-width:700px){.dash-insights-grid{grid-template-columns:1fr;gap:9px}.dash-insight-card{grid-template-columns:34px 1fr;column-gap:10px;align-items:center;padding:12px}.dash-insight-icon{grid-row:1/3}.dash-insight-card>small,.dash-insight-card>strong,.dash-insight-card>span:last-child{grid-column:2}.dash-insight-card>strong{font-size:18px}}
+
+/* Monthly dashboard progress and calendar heatmap */
+.dash-month-panel{margin-bottom:16px}
+.dash-month-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:8px 0 14px}
+.dash-month-metrics>div{display:grid;gap:5px;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
+.dash-month-metrics strong{font:700 clamp(19px,2.5vw,26px) 'DM Mono',monospace}
+.dash-month-metrics small{font-size:10px;color:var(--muted)}
+.dash-month-track{height:9px;border-radius:20px;background:var(--panel2);overflow:hidden}
+.dash-month-track i{display:block;height:100%;border-radius:20px;background:linear-gradient(90deg,#8b78f5,#62d9e8);transition:width .4s ease}
+.dash-heatmap-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:20px 0 10px;font-size:11px}
+.dash-heatmap-head span{font-size:9px;color:var(--muted)}
+.dash-heatmap{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.dash-heat-cell{display:grid;place-items:center;aspect-ratio:1;min-width:0;border-radius:8px;background:var(--panel2);font:10px 'DM Mono',monospace;color:var(--muted);border:1px solid transparent}
+.dash-heat-cell.partial{background:#8b78f52b;color:#c7bcff;border-color:#8b78f544}
+.dash-heat-cell.met{background:linear-gradient(145deg,#f4d47d,#c58d32);color:#241a08;border-color:#f7dc91;font-weight:800;box-shadow:0 0 12px #d8a74330}
+.dash-heat-cell.blank{visibility:hidden}
+@media(max-width:480px){.dash-month-metrics{gap:7px}.dash-month-metrics>div{padding:10px 8px}.dash-month-metrics small{font-size:9px}.dash-heatmap{gap:4px}.dash-heat-cell{border-radius:6px;font-size:9px}}
