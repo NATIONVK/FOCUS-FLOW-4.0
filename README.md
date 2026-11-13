@@ -56,8 +56,9 @@ The Android app is packaged with **Capacitor 7**. The repository includes native
 - **Vite 6** — development server and production bundling
 - **Capacitor 7** — Android packaging and native bridge
 - **Java** — Android foreground timer and gallery integration
+- **Python 3** — tested Android build preparation (manifest permissions, foreground timer service, and launcher resources)
 - **jsPDF** — offline PDF generation
-- **Node.js test runner** — core logic tests
+- **Node.js + Python unittest** — JavaScript core tests and build-tool regression tests
 - **GitHub Actions + Gradle** — automated quality checks and APK builds
 
 ## 🗂️ Project structure
@@ -74,7 +75,8 @@ FOCUS-FLOW-4.0/
 │   ├── store.js             # Local app data and persistence
 │   ├── styles.css           # Responsive UI and themes
 │   └── timer.js             # Focus timer logic
-├── tests/                   # Core unit tests
+├── scripts/                 # Python Android build-preparation tooling
+├── tests/                   # JavaScript core and Python tooling tests
 ├── index.html               # Web app entry point
 ├── manifest.webmanifest     # PWA metadata and icon
 └── package.json             # Scripts and dependencies
@@ -89,6 +91,7 @@ git clone https://github.com/NATIONVK/FOCUS-FLOW-4.0.git
 cd FOCUS-FLOW-4.0
 npm install
 npm test
+python -m unittest discover -s tests -p 'test_*.py'
 npm run dev
 ```
 
@@ -139,6 +142,7 @@ Suggestions, bug reports, and pull requests are welcome. Before opening a pull r
 
 ```bash
 npm test
+python -m unittest discover -s tests -p 'test_*.py'
 npm run build
 ```
 
