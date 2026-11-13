@@ -185,10 +185,28 @@ function overview(t,subjects) {
     <div class="dash-recent-list">${recent.map(s=>`<div class="dash-recent-row"><span class="dash-recent-icon">◷</span><div><b>${esc(store.subjectName(s.subjectId))}</b><small>${new Date(s.startedAt).toLocaleString()}</small></div><strong>${fmt(s.duration)}</strong></div>`).join('')||'<p class="muted">Your completed focus sessions will appear here.</p>'}</div>
   </section>`;
 }
+function dashboardInsights(sessions,subjectData){
+  const goal=store.data.settings.dailyGoalMinutes||120;
+  const streak=Analytics.streak(sessions,goal);
+  const consistency=Analytics.consistency(sessions,goal);
+  const comparison=Analytics.periodComparison(sessions);
+  const trend=value=>value===null?'—':(value>0?'+':'')+value+'%';
+  const tone=value=>value===null?'neutral':value>0?'positive':value<0?'negative':'neutral';
+  const top=subjectData[0];
+  const ranking=subjectData.slice(0,5).map((item,index)=>'<div class="ranking-row"><span class="rank-number">'+(index+1)+'</span><span class="ranking-name">'+esc(item.name)+'</span><span class="ranking-track"><i style="width:'+Math.max(3,item.share)+'%;background:'+esc(item.color)+'"></i></span><b>'+(item.seconds/3600).toFixed(1)+'h</b></div>').join('');
+  return '<section class="panel dashboard-insights-panel"><div class="panel-head"><div><span class="eyebrow">SMART PRODUCTIVITY INSIGHTS</span><h3>Your study intelligence</h3></div><span class="muted">Daily goal · '+goal+' min</span></div>'+
+    '<div class="insight-grid"><article class="insight-card"><span class="insight-icon">🔥</span><small>STUDY STREAK</small><strong>'+streak+' days</strong><span>'+(streak?'Keep the momentum going':'Start a new streak today')+'</span></article>'+
+    '<article class="insight-card"><span class="insight-icon">🎯</span><small>MONTHLY CONSISTENCY</small><strong>'+consistency.score+'%</strong><span>'+consistency.met+'/'+consistency.elapsed+' goal days completed</span></article>'+
+    '<article class="insight-card"><span class="insight-icon">🏆</span><small>TOP SUBJECT</small><strong>'+(top?esc(top.name):'—')+'</strong><span>'+(top?(top.seconds/3600).toFixed(1)+'h · '+top.share+'% of focus time':'Record a session to rank subjects')+'</span></article></div>'+
+    '<div class="comparison-grid"><div><b>Weekly comparison</b><span>'+(comparison.week.current/3600).toFixed(1)+'h <small>vs '+(comparison.week.previous/3600).toFixed(1)+'h previous 7 days</small></span><em class="'+tone(comparison.week.change)+'">'+trend(comparison.week.change)+'</em></div>'+
+    '<div><b>Monthly comparison</b><span>'+(comparison.month.current/3600).toFixed(1)+'h <small>vs '+(comparison.month.previous/3600).toFixed(1)+'h previous period</small></span><em class="'+tone(comparison.month.change)+'">'+trend(comparison.month.change)+'</em></div></div>'+
+    (ranking?'<div class="subject-ranking"><b>Subject performance ranking</b>'+ranking+'</div>':'')+'</section>';
+}
+
 function dashboardPage(t,subjects){
   const sessions=store.data.sessions,week=Analytics.weekly(sessions),total=week.reduce((n,d)=>n+d.seconds,0);
   const taskTotal=store.data.tasks.length,taskDone=store.data.tasks.filter(x=>x.done).length,taskPct=taskTotal?Math.round(taskDone/taskTotal*100):0;
-  const subjectData=subjects.map(sub=>({name:sub.name,color:sub.color,seconds:Analytics.subjectSeconds(sessions,sub.id)})).filter(x=>x.seconds>0).sort((a,b)=>b.seconds-a.seconds);
+  const subjectData=Analytics.subjectRanking(sessions,subjects);
   const max=Math.max(1,...week.map(x=>x.seconds));
   const points=week.map((d,i)=>({x:40+i*85,y:170-(d.seconds/max)*125,label:d.label,value:d.seconds}));
   const line=points.map((p,i)=>(i?'L':'M')+` ${p.x} ${p.y}`).join(' ');
