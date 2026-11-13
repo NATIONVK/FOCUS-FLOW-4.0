@@ -64,6 +64,8 @@ function overview(t,subjects) {
   const topSubject=subjectStats[0];
   const maxSubject=Math.max(1,...subjectStats.map(x=>x.seconds));
   const weekTotal=week.reduce((n,d)=>n+d.seconds,0);
+  const goalDays=week.filter(d=>d.seconds>=goal).length;
+  const activeDays=week.filter(d=>d.seconds>0).length;
   const bestDay=week.reduce((a,b)=>b.seconds>a.seconds?b:a,week[0]||{label:'—',seconds:0});
   const recent=[...sessions].sort((a,b)=>new Date(b.startedAt)-new Date(a.startedAt)).slice(0,3);
   const taskPriorityRank={high:0,medium:1,low:2};
@@ -85,8 +87,8 @@ function overview(t,subjects) {
   </section>
   <section class="dash-main-grid">
     <article class="panel dash-week-panel"><div class="panel-head"><div><span class="eyebrow">CONSISTENCY TRACKER</span><h3>Your focus rhythm</h3></div><span class="dash-period">LAST 7 DAYS</span></div>
-      <div class="dash-week-summary"><div><strong>${(weekTotal/3600).toFixed(1)}h</strong><small>Total focused this week</small></div><div><strong>${(weekTotal/7/3600).toFixed(1)}h</strong><small>Daily average</small></div><div><strong>${bestDay.seconds?bestDay.label:'—'}</strong><small>Most productive day</small></div></div>
-      <div class="dash-chart" role="img" aria-label="Daily focus hours: ${week.map(d=>`${d.label} ${(d.seconds/3600).toFixed(1)} hours`).join(", ")}">${week.map(d=>{const h=(d.seconds/3600).toFixed(1);const height=d.seconds?Math.max(5,Math.round(d.seconds/Math.max(1,...week.map(x=>x.seconds))*100)):0;return `<div class="dash-chart-col"><span class="dash-chart-value">${h==='0.0'?'':h+'h'}</span><div class="dash-chart-track"><i style="height:${height}%"></i></div><small>${d.label}</small></div>`}).join('')}</div>
+      <div class="dash-week-summary"><div><strong>${(weekTotal/3600).toFixed(1)}h</strong><small>Total focused this week</small></div><div><strong>${(weekTotal/7/3600).toFixed(1)}h</strong><small>Daily average</small></div><div><strong>${goalDays}/7</strong><small>Daily goals met</small></div><div><strong>${bestDay.seconds?bestDay.label:'—'}</strong><small>Most productive day</small></div></div>
+      <div class="dash-chart" role="img" aria-label="Daily focus hours: ${week.map(d=>`${d.label} ${(d.seconds/3600).toFixed(1)} hours`).join(", ")}">${week.map(d=>{const h=(d.seconds/3600).toFixed(1);const height=d.seconds?Math.max(5,Math.round(d.seconds/Math.max(1,...week.map(x=>x.seconds))*100)):0;return `<div class="dash-chart-col"><span class="dash-chart-value">${h==='0.0'?'':h+'h'}</span><div class="dash-chart-track ${d.seconds>=goal?'goal-met':''}"><i style="height:${height}%"></i></div><small>${d.label}</small></div>`}).join('')}</div>
       <div class="dash-chart-foot"><span><i></i> Daily focus time</span><button class="text-btn" data-page="statistics">Full analytics ↗</button></div>
     </article>
     <article class="panel dash-plan-panel"><div class="panel-head"><div><span class="eyebrow">TODAY'S ROADMAP</span><h3>Study plan</h3></div><button class="text-btn" data-page="planner">Manage ↗</button></div>
