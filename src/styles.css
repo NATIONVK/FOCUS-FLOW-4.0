@@ -176,3 +176,35 @@ body.light .dash-insight-card{background:linear-gradient(145deg,#f4f2ff,#fff);bo
 .dash-widget-controls button{border:1px solid #4b426e;background:#211d36;color:#e3ddff;border-radius:7px;padding:5px 9px;font-size:10px;font-weight:700}
 [data-dashboard-widget][hidden]{display:none!important}
 @media(max-width:480px){.dash-custom-toolbar{align-items:flex-start}.dash-custom-toolbar>div{flex:1 1 100%}.dash-widget-controls{gap:5px}.dash-widget-controls button{padding:6px 7px}}
+
+/* FOCUS FLOW 5.0 · Black-hole timer visual system */
+.focus-screen{isolation:isolate;background:radial-gradient(ellipse at 50% 48%,#17102c 0,#090914 43%,#03040a 78%);--bh-violet:#9c78ff;--bh-blue:#5dd9ed;--bh-gold:#ffb45f}
+.focus-screen:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 52%,transparent 0 24%,#05050c88 62%,#020309 100%);z-index:0}
+.focus-nebula{position:absolute;width:min(110vw,900px);aspect-ratio:1;border-radius:50%;background:conic-gradient(from 20deg,transparent,#6d42c522,transparent,#42a7c422,transparent,#b34eaa22,transparent);filter:blur(34px);animation:nebulaTurn 55s linear infinite;pointer-events:none}
+.blackhole-scene{position:relative;width:min(94vw,650px);height:min(94vw,650px);max-height:82vh;display:grid;place-items:center;isolation:isolate;z-index:1;perspective:900px}
+.bh-starfield{position:absolute;inset:0;border-radius:50%;background-image:radial-gradient(#fff 0.7px,transparent 1.2px),radial-gradient(#9e8cff 1px,transparent 1.5px),radial-gradient(#6edff2 0.8px,transparent 1.4px);background-size:43px 43px,79px 79px,113px 113px;background-position:4px 10px,31px 17px,12px 53px;mask-image:radial-gradient(circle,transparent 0 17%,#000 39% 70%,transparent 75%);opacity:.65;animation:starDrift 45s linear infinite}
+.bh-lensing{position:absolute;width:60%;height:60%;border-radius:50%;border:2px solid #c7b8ff55;box-shadow:0 0 22px #a58aff99,0 0 65px #795bff55,inset 0 0 30px #a78cff33;transform:rotateX(72deg) rotateZ(-16deg);filter:blur(.3px);animation:lensingPulse 5s ease-in-out infinite}
+.bh-disk{position:absolute;left:50%;top:50%;border-radius:50%;transform:translate(-50%,-50%) rotateX(72deg);pointer-events:none}
+.bh-disk-outer{width:88%;height:43%;background:conic-gradient(from 0deg,transparent 0 8%,#5a45b7 12%,#b18bff 18%,#ffbd75 23%,#fff0c9 26%,#d16dff 31%,#4b48b8 38%,transparent 47% 55%,#4b8bd4 62%,#9e80ff 68%,#ffb46d 73%,#fff0c4 77%,#9c68e9 82%,transparent 91%);filter:blur(5px) drop-shadow(0 0 14px #b38aff);opacity:.95;animation:diskSpin 12s linear infinite}
+.bh-disk-inner{width:67%;height:30%;border:10px solid transparent;background:linear-gradient(#080710,#080710) padding-box,conic-gradient(from 80deg,transparent,#f6d5a0,#a88bff,#5cbee8,transparent,#f2a5ff,transparent) border-box;filter:blur(2px) drop-shadow(0 0 13px #ffbd75);animation:diskSpin 6s linear infinite reverse}
+.bh-corona{position:absolute;width:48%;height:48%;border-radius:50%;background:radial-gradient(circle,#020208 0 43%,#070611 46%,#0d0a1c 52%,#9275ff55 56%,#f7c5ff99 58%,#8e70ff55 61%,transparent 69%);box-shadow:0 0 28px #a98aff77,0 0 85px #7a5cff55;z-index:1}
+.focus-core{z-index:2;width:46%;height:46%;min-width:220px;min-height:220px;background:radial-gradient(circle at 50% 48%,#020207 0 55%,#080713 68%,#17102b 77%,transparent 79%);box-shadow:inset 0 0 35px #6e55ba22,0 0 28px #9c78ff22;border:1px solid #b9a5ff55;backdrop-filter:blur(2px);transition:filter .4s ease,border-color .4s ease}
+.focus-core:before{inset:-7px;border:1px solid #c4b6ff66;box-shadow:0 0 24px #9b7aff77,inset 0 0 20px #9b7aff22}
+.focus-core strong{font-size:clamp(26px,6.5vw,48px);letter-spacing:1px;font-variant-numeric:tabular-nums}
+.focus-label{font-size:clamp(8px,1.5vw,10px);max-width:85%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.focus-hint{font-size:8px}
+.focus-state{margin-top:12px;font:8px 'DM Mono',monospace;letter-spacing:1.7px;color:#8ce6ee;text-shadow:0 0 12px #64ddeb88}
+.bh-particle{position:absolute;z-index:2;width:7px;height:7px;border-radius:50%;background:#ffe3b5;box-shadow:0 0 12px 4px #ffb56b99;animation:particleOrbit 8s linear infinite}
+.bh-particle-a{left:17%;top:43%}.bh-particle-b{right:16%;top:55%;width:4px;height:4px;animation-duration:11s;animation-direction:reverse;background:#9beeff;box-shadow:0 0 12px #5dd9ed}.bh-particle-c{left:47%;top:10%;width:5px;height:5px;animation-duration:14s}
+.blackhole-scene.is-paused .bh-disk-outer,.blackhole-scene.is-paused .bh-disk-inner,.blackhole-scene.is-paused .bh-starfield,.blackhole-scene.is-paused .bh-particle{animation-play-state:paused}
+.blackhole-scene.is-paused .bh-disk-outer{filter:blur(7px);opacity:.55}
+.blackhole-scene.is-paused .bh-corona{box-shadow:0 0 18px #9b8bdc44}
+.blackhole-scene.is-paused .focus-state{color:#b5a5ff}
+@keyframes diskSpin{to{transform:translate(-50%,-50%) rotateX(72deg) rotateZ(360deg)}}
+@keyframes nebulaTurn{to{transform:rotate(360deg) scale(1.08)}}
+@keyframes starDrift{to{background-position:47px 53px,110px 96px,125px 166px}}
+@keyframes lensingPulse{50%{opacity:.55;transform:rotateX(72deg) rotateZ(4deg) scale(1.04)}}
+@keyframes particleOrbit{to{transform:rotate(360deg) translateX(65px) rotate(-360deg)}}
+@media(max-width:700px){.blackhole-scene{width:min(98vw,560px);height:min(98vw,560px);max-height:75vh}.focus-core{min-width:190px;min-height:190px}.bh-disk-outer{filter:blur(4px)}}
+@media(max-height:650px){.blackhole-scene{width:min(76vh,600px);height:min(76vh,600px)}.focus-core{min-width:175px;min-height:175px}}
+@media(prefers-reduced-motion:reduce){.focus-nebula,.bh-starfield,.bh-disk-outer,.bh-disk-inner,.bh-lensing,.bh-particle{animation:none!important}.focus-core:before{animation:none!important}.space-particles{animation:none!important}}
