@@ -244,3 +244,47 @@ test('period comparison handles zero previous activity without division by zero'
   assert.equal(result.week.change,null);
   assert.equal(result.month.change,null);
 });
+
+
+test('store refuses to report success when localStorage is unavailable',()=>{
+  const old=globalThis.localStorage;
+  try{
+    globalThis.localStorage=undefined;
+    const store=new Store();
+    assert.equal(store.storageAvailable,false);
+    assert.throws(()=>store.addTask('Must not pretend to save'),/Storage/);
+    assert.equal(store.data.tasks.length,0);
+    assert.equal(store.storageAvailable,false);
+  }finally{globalThis.localStorage=old;}
+});
+test('store verifies a write by reading the exact saved snapshot back',()=>{
+  const old=globalThis.localStorage;
+  globalThis.localStorage={getItem:()=>null,setItem:()=>{},removeItem:()=>{}};
+  try{
+    const store=new Store();
+    assert.throws(()=>store.addTask('Unverified write'),/ডেটা সংরক্ষণ হয়নি/);
+    assert.equal(store.data.tasks.length,0);
+    assert.equal(store.storageAvailable,false);
+  }finally{globalThis.localStorage=old;}
+});
+test('timer refuses to start when active-session persistence is unavailable',()=>{
+  const old=globalThis.localStorage;
+  try{
+    globalThis.localStorage=undefined;
+    const timer=new FocusTimer(memory());
+    assert.throws(()=>timer.start('x'),/Storage/);
+    assert.equal(timer.active,false);
+    assert.equal(timer.subjectId,null);
+  }finally{globalThis.localStorage=old;}
+});
+test('timer finish retry after active snapshot cleanup failure does not duplicate history',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v),removeItem:()=>{throw new Error('blocked')}};
+  try{
+    const s=memory();const timer=new FocusTimer(s);timer.start('x');timer.segmentStartedAt=Date.now()-2500;
+    assert.throws(()=>timer.finish(),/Duplicate Session/);
+    assert.equal(s.data.sessions.length,1);
+    assert.throws(()=>timer.finish(),/Duplicate Session/);
+    assert.equal(s.data.sessions.length,1);
+  }finally{globalThis.localStorage=old;}
+});
