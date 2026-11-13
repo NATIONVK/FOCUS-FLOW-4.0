@@ -275,3 +275,53 @@ body.light .dash-insight-card{background:linear-gradient(145deg,#f4f2ff,#fff);bo
 .blackhole-scene.is-paused .focus-core{filter:saturate(.55);opacity:.82}
 @media(max-width:700px){.focus-screen .focus-core{min-width:190px;min-height:190px}.focus-screen #clock{font-size:clamp(27px,7.5vw,46px)}}
 @media(max-height:650px){.focus-screen .focus-core{min-width:175px;min-height:175px}}
+
+
+/* Dedicated analytics dashboard charts and nested task progress */
+.dashboard-chart-panel{overflow:hidden}
+.chart-select{min-height:42px;max-width:190px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#171c2c;color:var(--text);font:600 12px Manrope,system-ui,sans-serif}
+.dashboard-bars{height:245px;display:flex;align-items:stretch;justify-content:space-around;gap:clamp(8px,3vw,22px);padding:18px 10px 0}
+.dashboard-bar-col{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:9px}
+.dashboard-bar-col>b{font:10px 'DM Mono',monospace;color:var(--muted);height:14px}
+.dashboard-bar-col>div{height:175px;width:min(42px,75%);display:flex;align-items:flex-end;background:#252b3d;border-radius:9px;overflow:hidden}
+.dashboard-bar-col i{display:block;width:100%;min-height:3px;border-radius:8px;background:linear-gradient(180deg,#65dce8,#8c70ff);box-shadow:0 0 20px #8c70ff55}
+.dashboard-bar-col small,.chart-label{font-size:10px;fill:var(--muted);color:var(--muted)}
+.dashboard-svg{display:block;width:100%;height:auto;min-height:190px;overflow:visible;margin-top:16px}
+.chart-gridline{stroke:var(--line);stroke-width:1;stroke-dasharray:4 5}
+.chart-line{fill:none;stroke:#9b83ff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px #9b83ff88)}
+.chart-area{fill:url(#dashboardAreaFill);fill:#8c70ff20;stroke:none}
+.chart-point{fill:#65dce8;stroke:#111522;stroke-width:3}
+.dash-pie-layout{display:flex;align-items:center;justify-content:center;gap:clamp(24px,6vw,60px);padding:24px 8px;flex-wrap:wrap}
+.dash-pie{width:190px;height:190px;flex:0 0 190px;border-radius:50%;border:9px solid #171c2c;box-shadow:0 0 35px #8b7cff22}
+.dash-pie-legend{display:grid;gap:12px;min-width:min(100%,220px)}
+.dash-pie-legend>div{display:grid;grid-template-columns:12px minmax(80px,1fr) auto;align-items:center;gap:9px;font-size:12px}
+.dash-pie-legend i{width:10px;height:10px;border-radius:50%}.dash-pie-legend span{color:var(--muted)}.dash-pie-legend b{font:11px 'DM Mono',monospace}
+.dashboard-task-breakdown{display:flex;justify-content:space-between;gap:12px;margin-top:14px;color:var(--muted);font-size:12px}.dashboard-task-breakdown b{color:var(--text);margin-left:5px}
+.task-card{display:block;gap:0;padding:16px 18px;border:1px solid var(--line)}
+.task-main{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.task-main>label{display:flex;align-items:center;gap:12px;min-width:0;flex:1;font-weight:700}
+.task-main>label>span{min-width:0;overflow-wrap:anywhere}
+.task-main .task-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.task-progress-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 7px;color:var(--muted);font-size:11px}
+.task-progress-head b{color:#b6a5ff;font:700 12px 'DM Mono',monospace}
+.task-progress{height:7px}.task-progress i{background:linear-gradient(90deg,#8b7cff,#57dfc0);transition:width .25s ease}
+.subtask-list{display:grid;gap:7px;margin:13px 0 0 28px;padding-left:13px;border-left:1px solid #3a4057}
+.subtask-row{display:flex;align-items:center;gap:9px;min-height:36px;font-size:12px;color:#c6cbe0}
+.subtask-row input{accent-color:#8b7cff;width:16px;height:16px}
+.subtask-row span{flex:1;overflow-wrap:anywhere}
+.subtask-delete{min-width:34px!important;min-height:32px!important;font-size:18px}
+body.light .chart-select{background:#f5f6fb;color:#303750;border-color:#e0e5ef}
+body.light .dashboard-bar-col>div{background:#e7e9f2}
+body.light .dash-pie{border-color:#fff}
+body.light .task-card{background:#fff;border-color:#e1e5ef}
+body.light .subtask-row{color:#4d5670}
+@media(max-width:700px){
+ .chart-select{max-width:100%;width:100%}
+ .dashboard-chart-panel .panel-head{display:grid;grid-template-columns:1fr}
+ .dashboard-bars{height:220px;gap:7px;padding-inline:0}
+ .dashboard-bar-col>div{height:155px;width:min(30px,75%)}
+ .dash-pie{width:160px;height:160px;flex-basis:160px}
+ .task-main{align-items:flex-start;flex-direction:column}
+ .task-main .task-actions{width:100%;justify-content:flex-start}
+ .subtask-list{margin-left:8px}
+}
