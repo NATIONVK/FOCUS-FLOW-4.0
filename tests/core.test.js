@@ -202,3 +202,19 @@ test('failed local persistence rolls back the in-memory mutation',()=>{
     assert.equal(map.get('focus-flow-v4'),persisted);
   }finally{globalThis.localStorage=old}
 });
+
+
+test('dashboard chart preference validates, persists and restores',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};
+  try{
+    const store=new Store();
+    assert.equal(store.data.settings.dashboardChartType,'bar');
+    store.setDashboardChartType('area');
+    assert.equal(new Store().data.settings.dashboardChartType,'area');
+    assert.throws(()=>store.setDashboardChartType('radar'),/Invalid dashboard chart type/);
+    const legacy={...store.data,settings:{light:false,dailyGoalMinutes:120}};
+    store.import(legacy);
+    assert.equal(store.data.settings.dashboardChartType,'bar');
+  }finally{globalThis.localStorage=old}
+});
