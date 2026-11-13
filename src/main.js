@@ -172,4 +172,5 @@ function exportBackup(){const blob=new Blob([JSON.stringify(store.data,null,2)],
 function importBackup(e){const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{store.import(JSON.parse(r.result));render();toast('Backup restored successfully','success')}catch{toast('Invalid backup file. Choose a valid Focus Flow backup.','error')}};r.readAsText(f)}
 store.data.settings.light&&(document.body.classList.add('light'));
 if(timer.active){selectedSubject=timer.subjectId||selectedSubject;showTimer();}else{render();}
+if(store.recoveryAvailable) toast('A damaged local-data snapshot was preserved for recovery. Check device storage before continuing.','error');
 if('serviceWorker' in navigator && import.meta.env.PROD) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
