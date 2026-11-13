@@ -196,6 +196,27 @@ function historyPage(){return `<section class="panel"><div class="panel-head"><d
 function statisticsPage(){const sessions=store.data.sessions;const month=Analytics.monthly(sessions);const week=Analytics.weekly(sessions);const total=sessions.reduce((n,s)=>n+s.duration,0);return `<section class="stats"><article class="stat"><span>THIS MONTH</span><strong>${(month/3600).toFixed(1)}<small> hrs</small></strong></article><article class="stat"><span>ALL-TIME FOCUS</span><strong>${(total/3600).toFixed(1)}<small> hrs</small></strong></article><article class="stat"><span>COMPLETED SESSIONS</span><strong>${sessions.length}</strong></article><article class="stat"><span>AVERAGE SESSION</span><strong>${sessions.length?(total/sessions.length/60).toFixed(0):0}<small> min</small></strong></article></section><section class="panel"><div class="panel-head"><div><span class="eyebrow">CONSISTENCY</span><h3>Last 7 days</h3></div></div><div class="bars">${week.map(d=>`<div class="bar-wrap"><div class="bar" title="${fmt(d.seconds)}" style="height:${Math.max(4,Math.min(100,d.seconds/3600*12))}%"></div><small>${d.label}</small></div>`).join('')}</div></section><section class="panel"><span class="eyebrow">WHERE YOUR TIME GOES</span><h3>Subject breakdown</h3><div class="subject-list">${store.data.subjects.map(s=>`<div class="subject-row"><span class="dot" style="background:${esc(s.color)}"></span><b>${esc(s.name)}</b><span>${(Analytics.subjectSeconds(sessions,s.id)/3600).toFixed(2)}h</span></div>`).join('')||'<p class="muted">No subjects yet.</p>'}</div></section>`;}
 function settingsPage(){return `<section class="panel"><span class="eyebrow">YOUR DATA, YOUR CONTROL</span><h3>Settings & backup</h3><p class="muted">Your records are stored locally on this device. Export a backup before changing or reinstalling the app.</p><div class="goal-setting"><label for="dailyGoalSelect">Daily study target</label><select id="dailyGoalSelect">${[30,45,60,90,120,150,180,240,300,360,480].map(n=>`<option value="${n}" ${Number(store.data.settings.dailyGoalMinutes)===n?"selected":""}>${n<60?n+" minutes":n/60+" hour"+(n===60?"":"s")}</option>`).join("")}</select><small class="muted">Your dashboard progress and goal streak use this target.</small></div><div class="settings-actions"><button class="primary" id="exportData">Export JSON backup</button><label class="secondary upload">Import backup<input id="importData" type="file" accept="application/json"></label><button class="secondary" id="toggleTheme">Toggle appearance</button></div><p class="muted">Language preference: English interface foundation. Bangla localization is planned.</p></section>`;}
 function bind(){
+  $('#customizeDashboard')?.addEventListener('click',()=>{dashboardCustomize=!dashboardCustomize;render();});
+  $('.dash-custom-toolbar')?.addEventListener('click',e=>{
+    const move=e.target.closest('[data-dash-move]');
+    const hide=e.target.closest('[data-dash-hide]');
+    const restore=e.target.closest('[data-restore-widget]');
+    const layout=store.data.settings.dashboardLayout||{order:[],hidden:[]};
+    const widgets=[...$('.main').querySelectorAll('[data-dashboard-widget]')];
+    const order=widgets.map(x=>x.dataset.dashboardWidget);
+    const hidden=[...(layout.hidden||[])];
+    if(move){
+      const el=move.closest('[data-dashboard-widget]');const index=order.indexOf(el?.dataset.dashboardWidget);const next=index+Number(move.dataset.dashMove);
+      if(index<0||next<0||next>=order.length)return;
+      [order[index],order[next]]=[order[next],order[index]];
+      saveDashboardLayout(order,hidden);render();
+    }else if(hide){
+      const id=hide.dataset.dashHide;if(!hidden.includes(id))hidden.push(id);
+      saveDashboardLayout(order,hidden);render();
+    }else if(restore){
+      const id=restore.dataset.restoreWidget;saveDashboardLayout(order,hidden.filter(x=>x!==id));render();
+    }
+  });
   document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>{page=b.dataset.page;render()}));
   $('#moreNavToggle')?.addEventListener('click',()=>{const menu=$('#mobileMore');menu.hidden=!menu.hidden;});
   document.querySelectorAll('[data-subject]').forEach(b=>b.addEventListener('click',()=>{selectedSubject=b.dataset.subject;render()}));
