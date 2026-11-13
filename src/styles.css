@@ -135,3 +135,15 @@ body.light .dash-hero{background:radial-gradient(ellipse at 85% 15%,#7764c51c,tr
 
 /* Dashboard: highlight days that reached the daily focus target */
 .dash-chart-track.goal-met i{background:linear-gradient(180deg,#f6d477,#d69b36);box-shadow:0 0 14px #e9b94a44}
+
+/* Dashboard smart study pattern cards */
+.dash-insights-panel{margin-bottom:16px}
+.dash-insights-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:8px}
+.dash-insight-card{display:grid;align-content:start;gap:8px;min-width:0;padding:16px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,var(--panel2),transparent)}
+.dash-insight-icon{display:grid;place-items:center;width:32px;height:32px;border-radius:10px;background:#9a83ff20;color:#b7a7ff;font-size:17px}
+.dash-insight-card>small{font:9px 'DM Mono',monospace;letter-spacing:1px;color:var(--muted)}
+.dash-insight-card>strong{font-size:clamp(17px,2vw,23px);overflow-wrap:anywhere}
+.dash-insight-card>span:last-child{font-size:10px;line-height:1.5;color:var(--muted)}
+.dash-insight-note{margin:13px 2px 0;color:var(--muted);font-size:10px;line-height:1.5}
+body.light .dash-insight-card{background:linear-gradient(145deg,#f4f2ff,#fff);border-color:#e1e5ef}
+@media(max-width:700px){.dash-insights-grid{grid-template-columns:1fr;gap:9px}.dash-insight-card{grid-template-columns:34px 1fr;column-gap:10px;align-items:center;padding:12px}.dash-insight-icon{grid-row:1/3}.dash-insight-card>small,.dash-insight-card>strong,.dash-insight-card>span:last-child{grid-column:2}.dash-insight-card>strong{font-size:18px}}
