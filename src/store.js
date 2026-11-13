@@ -19,16 +19,21 @@ function normalize(data){
   return {version:4,subjects:subjects.length?subjects:d.subjects,sessions,tasks,plans,notes,settings:{...d.settings,light:!!settings.light,dailyGoalMinutes:Number.isFinite(Number(settings.dailyGoalMinutes))?Math.max(1,Math.min(1440,Number(settings.dailyGoalMinutes))):120,dashboardLayout,dashboardChartType}};
 }
 export class Store {
-  constructor(){this.recoveryAvailable=false;this.data=this.load();}
+  constructor(){this.recoveryAvailable=false;this.storageAvailable=false;this.storageError='';this.onStorageStatusChange=null;this.data=this.load();}
+  notifyStorageStatus(){this.onStorageStatusChange?.({available:this.storageAvailable,error:this.storageError});}
   load(){
     let raw=null;
     try{
-      raw=globalThis.localStorage?.getItem(KEY);
+      const storage=globalThis.localStorage;
+      if(!storage||typeof storage.getItem!=='function'||typeof storage.setItem!=='function')throw new Error('Browser storage is unavailable');
+      raw=storage.getItem(KEY);
+      this.storageAvailable=true;this.storageError='';
       if(!raw){const safe=defaults();this.lastSavedSnapshot=JSON.stringify(safe);return safe;}
       const clean=normalize(JSON.parse(raw));
       this.lastSavedSnapshot=JSON.stringify(clean);
       return clean;
     }catch(error){
+      this.storageAvailable=false;this.storageError=error?.message||'Storage unavailable';
       if(typeof raw==='string'&&raw.length){
         try{
           const storage=globalThis.localStorage;
@@ -46,15 +51,20 @@ export class Store {
   }
   save(){
     try{
+      const storage=globalThis.localStorage;
+      if(!storage||typeof storage.setItem!=='function'||typeof storage.getItem!=='function')throw new Error('Browser storage is unavailable');
       const serialized=JSON.stringify(this.data);
-      globalThis.localStorage?.setItem(KEY,serialized);
+      storage.setItem(KEY,serialized);
+      if(storage.getItem(KEY)!==serialized)throw new Error('Storage write verification failed');
       this.lastSavedSnapshot=serialized;
+      this.storageAvailable=true;this.storageError='';this.notifyStorageStatus();
       return true;
     }catch(error){
       // Restore the last known-good snapshot so failed writes never leave phantom in-memory changes.
       try{if(this.lastSavedSnapshot)this.data=normalize(JSON.parse(this.lastSavedSnapshot));}catch(restoreError){console.error('FOCUS FLOW could not restore its last saved snapshot',restoreError);}
+      this.storageAvailable=false;this.storageError=error?.message||'Storage write failed';this.notifyStorageStatus();
       console.error('FOCUS FLOW could not save local data',error);
-      throw new Error('ডিভাইসে জায়গা বা storage permission পরীক্ষা করুন। ডেটা সংরক্ষণ করা যায়নি।');
+      throw new Error('ডিভাইসের Storage unavailable বা full। ডেটা সংরক্ষণ হয়নি—Backup Export করে রাখুন।');
     }
   }
   addSubject(name){name=text(name,80);if(!name)throw new Error('Subject name is required');if(this.data.subjects.some(s=>s.name.toLowerCase()===name.toLowerCase()))throw new Error('Subject already exists');const colors=['#8b7cff','#38d6b0','#ffbd59','#ff6b83','#5ea8ff'];this.data.subjects.push({id:makeId(),name,color:colors[this.data.subjects.length%colors.length],goalMinutes:120});this.save();}
