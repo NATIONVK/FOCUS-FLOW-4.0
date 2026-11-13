@@ -22,18 +22,18 @@ export class Store {
   constructor(){this.recoveryAvailable=false;this.storageAvailable=false;this.storageError='';this.onStorageStatusChange=null;this.data=this.load();}
   notifyStorageStatus(){this.onStorageStatusChange?.({available:this.storageAvailable,error:this.storageError});}
   load(){
-    let raw=null;
+    let raw=null;let storageReadable=false;
     try{
       const storage=globalThis.localStorage;
       if(!storage||typeof storage.getItem!=='function'||typeof storage.setItem!=='function')throw new Error('Browser storage is unavailable');
-      raw=storage.getItem(KEY);
+      raw=storage.getItem(KEY);storageReadable=true;
       this.storageAvailable=true;this.storageError='';
       if(!raw){const safe=defaults();this.lastSavedSnapshot=JSON.stringify(safe);return safe;}
       const clean=normalize(JSON.parse(raw));
       this.lastSavedSnapshot=JSON.stringify(clean);
       return clean;
     }catch(error){
-      this.storageAvailable=false;this.storageError=error?.message||'Storage unavailable';
+      this.storageAvailable=storageReadable;this.storageError=storageReadable?'Saved data was invalid; a recovery copy was attempted':(error?.message||'Storage unavailable');
       if(typeof raw==='string'&&raw.length){
         try{
           const storage=globalThis.localStorage;
