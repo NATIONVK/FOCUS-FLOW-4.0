@@ -333,7 +333,7 @@ async function finishFocusSession(){
   try{
     const duration=timer.finish();
     timerScreenActive=false;
-    if(history.state?.focusFlowTimer)history.replaceState({},'',location.pathname+location.search);
+    if(history.state?.focusFlowTimer)history.back();
     page='history';render();
     toast(duration?('Session saved · '+fmt(duration)):'Session finished','success');
   }catch(error){toast(error.message||'Session save করা যায়নি।','error');}
