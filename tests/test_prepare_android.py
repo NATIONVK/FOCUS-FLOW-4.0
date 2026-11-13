@@ -35,6 +35,10 @@ class PrepareAndroidTests(unittest.TestCase):
             root = Path(temp) / "res"
             write_icon_resources(root)
             self.assertTrue((root / "drawable/ic_launcher_foreground.xml").is_file())
+            foreground = (root / "drawable/ic_launcher_foreground.xml").read_text(encoding="utf-8")
+            self.assertIn("#d946ef", foreground)
+            self.assertIn("#38f59a", foreground)
+            self.assertIn("android:viewportWidth=\"108\"", foreground)
             self.assertTrue((root / "mipmap-anydpi-v26/ic_launcher.xml").is_file())
             self.assertTrue((root / "mipmap-anydpi-v26/ic_launcher_round.xml").is_file())
             self.assertTrue((root / "values/ic_launcher_background.xml").is_file())
