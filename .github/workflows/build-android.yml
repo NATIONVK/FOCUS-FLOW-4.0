@@ -53,10 +53,23 @@ jobs:
           cp native/android/FocusTimerPlugin.java android/app/src/main/java/com/nationvk/focusflow/FocusTimerPlugin.java
           cp native/android/FocusTimerService.java android/app/src/main/java/com/nationvk/focusflow/FocusTimerService.java
           cp native/android/MainActivity.java android/app/src/main/java/com/nationvk/focusflow/MainActivity.java
-      - name: Prepare Android manifest and launcher icons with Python
-        run: python scripts/prepare_android.py android/app/src/main/AndroidManifest.xml android/app/src/main/res
       - name: Sync Capacitor
         run: npx cap sync android
+      - name: Apply FOCUS FLOW launcher logo after Capacitor sync
+        run: |
+          python scripts/prepare_android.py android/app/src/main/AndroidManifest.xml android/app/src/main/res
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          manifest = Path("android/app/src/main/AndroidManifest.xml").read_text(encoding="utf-8")
+          assert re.search(r'<application\\b[^>]*android:icon="@mipmap/ic_launcher"', manifest), "Launcher icon is not assigned to the application"
+          assert re.search(r'<application\\b[^>]*android:roundIcon="@mipmap/ic_launcher_round"', manifest), "Round launcher icon is not assigned"
+          res = Path("android/app/src/main/res")
+          assert (res / "mipmap-anydpi-v26/ic_launcher.xml").is_file(), "Adaptive launcher icon missing"
+          assert (res / "mipmap-anydpi-v26/ic_launcher_round.xml").is_file(), "Round adaptive launcher icon missing"
+          assert (res / "drawable/ic_launcher_foreground.xml").is_file(), "Launcher foreground artwork missing"
+          print("Verified: FOCUS FLOW launcher logo is assigned after Capacitor sync.")
+          PY
       - name: Build debug APK
         working-directory: android
         run: |
