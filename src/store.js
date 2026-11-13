@@ -1,7 +1,7 @@
 const KEY='focus-flow-v4';
 const RECOVERY_KEY='focus-flow-v4-recovery';
 const makeId=()=>globalThis.crypto?.randomUUID?.()||`id-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-const defaults=()=>({version:4,subjects:[{id:makeId(),name:'General Study',color:'#8b7cff',goalMinutes:120}],sessions:[],tasks:[],plans:[],notes:[],settings:{light:false,dailyGoalMinutes:120}});
+const defaults=()=>({version:4,subjects:[{id:makeId(),name:'General Study',color:'#8b7cff',goalMinutes:120}],sessions:[],tasks:[],plans:[],notes:[],settings:{light:false,dailyGoalMinutes:120,dashboardLayout:{order:[],hidden:[]}}});
 const text=(v,max=500)=>typeof v==='string'?v.trim().slice(0,max):'';
 const validDate=v=>typeof v==='string'&&Number.isFinite(Date.parse(v));
 function normalize(data){
