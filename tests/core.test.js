@@ -171,3 +171,16 @@ test('subtasks persist, update parent completion and survive backup import',()=>
     assert.equal(restored.data.tasks[0].subtasks.length,1);
   }finally{globalThis.localStorage=old}
 });
+
+
+test('failed backup restore keeps the existing in-memory records intact',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={getItem:k=>map.get(k)||null,setItem:(k,v)=>{throw new Error('quota exceeded')},removeItem:k=>map.delete(k)};
+  try{
+    const store=new Store();const before=store.data;
+    const backup={...before,tasks:[{id:'backup-task',title:'Imported task'}]};
+    assert.throws(()=>store.import(backup),/quota exceeded/);
+    assert.equal(store.data,before);
+    assert.equal(store.data.tasks.length,0);
+  }finally{globalThis.localStorage=old}
+});
