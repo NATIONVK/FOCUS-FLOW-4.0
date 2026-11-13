@@ -10,13 +10,28 @@ export class FocusTimer {
   }
   restore() {
     try {
-      const s=JSON.parse(localStorage.getItem(ACTIVE));
-      if(!s || !s.subjectId || !Number.isFinite(s.startedAt)) return;
+      const raw=globalThis.localStorage?.getItem(ACTIVE);
+      if(!raw)return;
+      const s=JSON.parse(raw);
+      const valid=s&&typeof s==='object'&&!Array.isArray(s)
+        &&typeof s.subjectId==='string'&&s.subjectId.trim().length>0
+        &&Number.isFinite(s.startedAt)&&s.startedAt>0
+        &&Number.isFinite(s.segmentStartedAt)&&s.segmentStartedAt>0
+        &&Number.isFinite(s.accumulated)&&s.accumulated>=0
+        &&typeof s.paused==='boolean';
+      if(!valid){
+        globalThis.localStorage?.removeItem(ACTIVE);
+        console.warn('Discarded an invalid active focus session snapshot');
+        return;
+      }
       this.subjectId=s.subjectId; this.startedAt=s.startedAt;
-      this.segmentStartedAt=Number(s.segmentStartedAt)||0;
-      this.accumulated=Math.max(0,Number(s.accumulated)||0);
-      this.paused=!!s.paused; this.active=true;
-    } catch(error) { console.warn('Unable to restore active focus session',error); try { globalThis.localStorage?.removeItem(ACTIVE); } catch {} }
+      this.segmentStartedAt=s.segmentStartedAt;
+      this.accumulated=s.accumulated;
+      this.paused=s.paused; this.active=true;
+    } catch(error) {
+      console.warn('Unable to restore active focus session',error);
+      try { globalThis.localStorage?.removeItem(ACTIVE); } catch {}
+    }
   }
   persist() {
     try { localStorage.setItem(ACTIVE,JSON.stringify({subjectId:this.subjectId,startedAt:this.startedAt,segmentStartedAt:this.segmentStartedAt,accumulated:this.accumulated,paused:this.paused})); }
