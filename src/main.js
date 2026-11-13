@@ -74,7 +74,7 @@ function overview(t,subjects) {
       <div class="dash-actions"><button class="primary" id="startFocus">▶ Start focus session</button><button class="dash-secondary" data-page="planner">View today's plan ↗</button></div>
       <div class="dash-hero-meta"><span><i class="online-dot"></i> Offline-first · Your data stays on this device</span><span>🔥 ${streak} day streak</span></div>
     </div>
-    <div class="dash-goal-ring" style="--goal-progress:${progress}%"><div><strong>${progress}%</strong><small>DAILY GOAL</small><span>${fmt(remaining)} left</span></div></div>
+    <div class="dash-goal-ring" role="progressbar" aria-label="Daily focus goal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}" style="--goal-progress:${progress}%"><div><strong>${progress}%</strong><small>DAILY GOAL</small><span>${fmt(remaining)} left</span></div></div>
   </section>
   <section class="dash-kpis">
     <article class="dash-kpi"><span class="kpi-icon violet">◷</span><div><small>FOCUS TODAY</small><strong>${(t.today/3600).toFixed(1)} <i>hrs</i></strong><span>${fmt(t.today)} focused</span></div></article>
@@ -84,8 +84,8 @@ function overview(t,subjects) {
   </section>
   <section class="dash-main-grid">
     <article class="panel dash-week-panel"><div class="panel-head"><div><span class="eyebrow">CONSISTENCY TRACKER</span><h3>Your focus rhythm</h3></div><span class="dash-period">LAST 7 DAYS</span></div>
-      <div class="dash-week-summary"><div><strong>${(weekTotal/3600).toFixed(1)}h</strong><small>Total focused this week</small></div><div><strong>${bestDay.label}</strong><small>Most productive day</small></div></div>
-      <div class="dash-chart" role="img" aria-label="Daily focus hours for the last seven days">${week.map(d=>{const h=(d.seconds/3600).toFixed(1);const height=Math.max(5,Math.round(d.seconds/Math.max(3600,...week.map(x=>x.seconds))*100));return `<div class="dash-chart-col"><span class="dash-chart-value">${h==='0.0'?'':h+'h'}</span><div class="dash-chart-track"><i style="height:${height}%"></i></div><small>${d.label}</small></div>`}).join('')}</div>
+      <div class="dash-week-summary"><div><strong>${(weekTotal/3600).toFixed(1)}h</strong><small>Total focused this week</small></div><div><strong>${(weekTotal/7/3600).toFixed(1)}h</strong><small>Daily average</small></div><div><strong>${bestDay.seconds?bestDay.label:'—'}</strong><small>Most productive day</small></div></div>
+      <div class="dash-chart" role="img" aria-label="Daily focus hours for the last seven days">${week.map(d=>{const h=(d.seconds/3600).toFixed(1);const height=d.seconds?Math.max(5,Math.round(d.seconds/Math.max(1,...week.map(x=>x.seconds))*100)):0;return `<div class="dash-chart-col"><span class="dash-chart-value">${h==='0.0'?'':h+'h'}</span><div class="dash-chart-track"><i style="height:${height}%"></i></div><small>${d.label}</small></div>`}).join('')}</div>
       <div class="dash-chart-foot"><span><i></i> Daily focus time</span><button class="text-btn" data-page="statistics">Full analytics ↗</button></div>
     </article>
     <article class="panel dash-plan-panel"><div class="panel-head"><div><span class="eyebrow">TODAY'S ROADMAP</span><h3>Study plan</h3></div><button class="text-btn" data-page="planner">Manage ↗</button></div>
