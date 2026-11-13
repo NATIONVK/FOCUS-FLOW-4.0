@@ -13,7 +13,7 @@ let selectedSubject = store.data.subjects[0]?.id || '';
 let taskFilter = 'all';
 let plannerDay = new Date().getDay();
 let dashboardCustomize = false;
-let dashboardChartType = 'bar';
+let dashboardChartType = store.data.settings.dashboardChartType || 'bar';
 
 function paintTimer() {
   const clock=$('#clock'); if(!clock)return;
@@ -265,7 +265,7 @@ function bind(){
   document.querySelectorAll('[data-edit-plan]').forEach(b=>b.addEventListener('click',async()=>{const p=store.data.plans.find(x=>x.id===b.dataset.editPlan);if(!p)return;const value=await askPlanForm(p);if(value){try{store.updatePlan(p.id,value);plannerDay=value.weekday;render();toast('Study block updated','success')}catch(e){toast(e.message,'error')}}}));
   document.querySelectorAll('[data-delete-plan]').forEach(b=>b.addEventListener('click',()=>{store.deletePlan(b.dataset.deletePlan);render();toast('Study block removed','success')}));
   $('#addTask')?.addEventListener('click',async()=>{const value=await askTaskForm();if(value){try{store.addTask(value.title,value.priority,value.dueDate);render();toast('Task added','success')}catch(e){toast(e.message,'error')}}});
-  $('#dashboardChartType')?.addEventListener('change',e=>{dashboardChartType=e.target.value;render()});
+  $('#dashboardChartType')?.addEventListener('change',e=>{try{store.setDashboardChartType(e.target.value);dashboardChartType=store.data.settings.dashboardChartType;render();toast('Chart preference saved','success')}catch(error){e.target.value=dashboardChartType;toast(error.message,'error')}});
   document.querySelectorAll('[data-add-subtask]').forEach(b=>b.addEventListener('click',async()=>{const title=await askText('Add sub-task','What is the next small step?');if(title){try{store.addSubtask(b.dataset.addSubtask,title);render();toast('Sub-task added','success')}catch(e){toast(e.message,'error')}}}));
   document.querySelectorAll('[data-subtask]').forEach(b=>b.addEventListener('change',()=>{store.toggleSubtask(b.dataset.subtaskTask,b.dataset.subtask,b.checked);render()}));
   document.querySelectorAll('[data-delete-subtask]').forEach(b=>b.addEventListener('click',()=>{store.deleteSubtask(b.dataset.deleteSubtaskTask,b.dataset.deleteSubtask);render();toast('Sub-task removed','success')}));
