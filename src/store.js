@@ -49,7 +49,7 @@ export class Store {
   deletePlan(id){this.data.plans=this.data.plans.filter(p=>p.id!==id);this.save();}
   updateTask(id,patch={}){const t=this.data.tasks.find(x=>x.id===id);if(!t)throw new Error('Task not found');if(patch.title!==undefined){const title=text(patch.title,300);if(!title)throw new Error('Task title is required');t.title=title;}if(patch.priority!==undefined){if(!['low','medium','high'].includes(patch.priority))throw new Error('Invalid task priority');t.priority=patch.priority;}if(patch.dueDate!==undefined){if(patch.dueDate&&!/^\d{4}-\d{2}-\d{2}$/.test(patch.dueDate))throw new Error('Invalid due date');t.dueDate=patch.dueDate;}this.save();}
   toggleTask(id,done){const t=this.data.tasks.find(x=>x.id===id);if(!t)return;t.done=!!done;if(t.done)t.subtasks=(t.subtasks||[]).map(x=>({...x,done:true}));else if((t.subtasks||[]).length)t.subtasks=t.subtasks.map(x=>({...x,done:false}));this.save();}
-  addSubtask(taskId,title){const t=this.data.tasks.find(x=>x.id===taskId);if(!t)throw new Error('Task not found');title=text(title,200);if(!title)throw new Error('Sub-task title is required');t.subtasks=t.subtasks||[];t.subtasks.push({id:makeId(),title,done:false});t.done=false;this.save();}
+  addSubtask(taskId,title){const t=this.data.tasks.find(x=>x.id===taskId);if(!t)throw new Error('Task not found');title=text(title,200);if(!title)throw new Error('Sub-task title is required');t.subtasks=t.subtasks||[];if(t.subtasks.length>=100)throw new Error('A task can contain up to 100 sub-tasks');t.subtasks.push({id:makeId(),title,done:false});t.done=false;this.save();}
   toggleSubtask(taskId,subtaskId,done){const t=this.data.tasks.find(x=>x.id===taskId);const sub=t?.subtasks?.find(x=>x.id===subtaskId);if(!sub)return;sub.done=!!done;t.done=t.subtasks.length>0&&t.subtasks.every(x=>x.done);this.save();}
   deleteSubtask(taskId,subtaskId){const t=this.data.tasks.find(x=>x.id===taskId);if(!t)return;t.subtasks=(t.subtasks||[]).filter(x=>x.id!==subtaskId);t.done=t.subtasks.length>0&&t.subtasks.every(x=>x.done);this.save();}
   deleteTask(id){this.data.tasks=this.data.tasks.filter(x=>x.id!==id);this.save();}
@@ -60,5 +60,5 @@ export class Store {
   subjectName(id){return this.data.subjects.find(s=>s.id===id)?.name||'Deleted subject';}
   setDashboardLayout(layout={}){const allowed=['hero','kpis','week','month','insights','lower','recent'];const clean=list=>Array.isArray(list)?[...new Set(list.filter(x=>allowed.includes(x)))]:[];this.data.settings.dashboardLayout={order:clean(layout.order),hidden:clean(layout.hidden)};this.save();}
   setDailyGoal(minutes){const value=Number(minutes);if(!Number.isFinite(value)||value<1||value>1440)throw new Error('Daily goal must be between 1 and 1440 minutes');this.data.settings.dailyGoalMinutes=Math.round(value);this.save();}
-  import(data){const clean=normalize(data);this.data=clean;this.save();}
+  import(data){const clean=normalize(data);const previous=this.data;this.data=clean;try{this.save();}catch(error){this.data=previous;throw error;}}
 }
