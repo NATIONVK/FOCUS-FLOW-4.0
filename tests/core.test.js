@@ -184,3 +184,21 @@ test('failed backup restore keeps the existing in-memory records intact',()=>{
     assert.equal(store.data.tasks.length,0);
   }finally{globalThis.localStorage=old}
 });
+
+test('failed local persistence rolls back the in-memory mutation',()=>{
+  const old=globalThis.localStorage;const map=new Map();let failWrites=false;
+  globalThis.localStorage={
+    getItem:k=>map.get(k)||null,
+    setItem:(k,v)=>{if(failWrites)throw new Error('QuotaExceededError');map.set(k,v);},
+    removeItem:k=>map.delete(k)
+  };
+  try{
+    const store=new Store();
+    store.addTask('Saved task');
+    const persisted=map.get('focus-flow-v4');
+    failWrites=true;
+    assert.throws(()=>store.addTask('Unsaved task'),/ডিভাইসে জায়গা/);
+    assert.deepEqual(store.data.tasks.map(t=>t.title),['Saved task']);
+    assert.equal(map.get('focus-flow-v4'),persisted);
+  }finally{globalThis.localStorage=old}
+});
