@@ -347,3 +347,15 @@ body.light .subtask-row{color:#4d5670}
 .rank-number{display:grid;place-items:center;width:23px;height:23px;border-radius:7px;background:#8b7cff20;color:#b9aaff;font-weight:800}
 .ranking-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ranking-track{height:7px;border-radius:20px;background:var(--line);overflow:hidden}.ranking-track i{display:block;height:100%;border-radius:20px}.ranking-row>b{text-align:right;font:11px 'DM Mono',monospace}
 @media(max-width:600px){.insight-grid{grid-template-columns:1fr}.insight-card{grid-template-columns:28px 1fr;align-items:center}.insight-card .insight-icon{grid-row:span 2}.insight-card strong,.insight-card>span:last-child{grid-column:2}.comparison-grid{grid-template-columns:1fr}.ranking-row{grid-template-columns:25px minmax(70px,1fr) 75px 42px;gap:7px}}
+
+/* Focus session controls and persistent-storage warning */
+.storage-offline{color:#ff8794!important}.storage-offline i{background:#ff687a!important}
+.storage-warning{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:-8px 0 18px;padding:13px 15px;border:1px solid #e56d7655;border-radius:13px;background:#e56d7614;color:var(--text)}
+.storage-warning>div{display:grid;gap:4px;min-width:0}.storage-warning b{font-size:12px;color:#ff8a96}.storage-warning span{font-size:11px;color:var(--muted);line-height:1.5}.storage-warning button{flex:0 0 auto;min-height:42px}
+.exit-focus{display:grid;place-items:center;width:44px;height:44px;min-width:44px;min-height:44px;top:max(14px,env(safe-area-inset-top));left:14px;border:1px solid #ffffff45;border-radius:13px;background:#0b0d1dbb;color:#fff;font-size:27px;line-height:1;cursor:pointer;backdrop-filter:blur(12px)}
+.focus-session-controls{position:absolute;z-index:4;left:16px;right:16px;bottom:max(18px,env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:12px}
+.focus-session-label{font:11px 'DM Mono',monospace;letter-spacing:1px;color:#c4b8f5;text-shadow:0 2px 10px #000}
+.finish-session-btn{min-height:48px;min-width:190px;padding:0 24px;border:1px solid #ffb8a966;border-radius:15px;background:linear-gradient(135deg,#e8a34b,#d66b52);color:#160e13;font-weight:800;font-size:13px;box-shadow:0 8px 30px #d66b5233;cursor:pointer}
+.finish-session-btn:active,.exit-focus:active{transform:scale(.97)}
+@media(max-height:560px){.focus-core{width:min(55vh,250px);height:min(55vh,250px)}.focus-session-controls{gap:6px}.finish-session-btn{min-height:42px}}
+@media(max-width:480px){.storage-warning{align-items:flex-start;flex-direction:column}.storage-warning button{width:100%}}
