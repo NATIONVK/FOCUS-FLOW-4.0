@@ -1,6 +1,7 @@
 import './styles.css';
 import { Store } from './store.js';
 import { FocusTimer } from './timer.js';
+import { syncNativeFocusTimer } from './native-focus-timer.js';
 import { Analytics } from './analytics.js';
 import { renderPDFPage, bindPDFPage } from './pdf-maker.js';
 
@@ -342,6 +343,7 @@ function showTimer(){
     try{timer.start(selectedSubject);}catch(error){toast(error.message||'Timer শুরু করা যায়নি।','error');return;}
   }
   timerScreenActive=true;
+  syncNativeFocusTimer(timer,store.subjectName(timer.subjectId));
   if(!history.state?.focusFlowTimer)history.pushState({focusFlowTimer:true},'','#focus');
   $('#app').innerHTML=`<div class="focus-screen"><button type="button" class="exit-focus" id="exitFocus" aria-label="Exit focus screen" title="Exit focus screen">×</button><div class="space-particles" aria-hidden="true"></div><div class="focus-nebula" aria-hidden="true"></div><div class="focus-orbit orbit-a" aria-hidden="true"></div><div class="focus-orbit orbit-b" aria-hidden="true"></div><div class="blackhole-scene ${timer.paused?'is-paused':''}" id="blackholeScene"><div class="bh-starfield" aria-hidden="true"></div><div class="bh-lensing" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-a" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-b" aria-hidden="true"></div><div class="bh-light-beams" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-energy-waves" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-disk bh-disk-outer" aria-hidden="true"></div><div class="bh-disk bh-disk-inner" aria-hidden="true"></div><div class="bh-corona" aria-hidden="true"></div><button class="focus-core" id="timerToggle" aria-label="Pause or resume focus timer"><strong id="clock" aria-live="off">00:00:00</strong></button><span class="bh-particle bh-particle-a" aria-hidden="true"></span><span class="bh-particle bh-particle-b" aria-hidden="true"></span><span class="bh-particle bh-particle-c" aria-hidden="true"></span></div><div class="focus-session-controls"><span class="focus-session-label">${esc(store.subjectName(timer.subjectId))} · ${timer.paused?'Paused':'Focusing'}</span><button type="button" class="finish-session-btn" id="finishFocus">✓ Finish Session</button></div></div>`;
   paintTimer();
@@ -354,7 +356,7 @@ function exportBackup(){const blob=new Blob([JSON.stringify(store.data,null,2)],
 function importBackup(e){const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{store.import(JSON.parse(r.result));render();toast('Backup restored successfully','success')}catch{toast('Invalid backup file. Choose a valid Focus Flow backup.','error')}};r.readAsText(f)}
 window.addEventListener('popstate',async()=>{if(!timerScreenActive||!timer.active)return;const leave=await askConfirm('Focus Screen থেকে বের হবে? Timer ব্যাকগ্রাউন্ডে চলতে থাকবে; Finish হবে না।');if(leave){timerScreenActive=false;page='overview';render();toast('Timer continues in background','success');}else{history.pushState({focusFlowTimer:true},'','#focus');}});
 window.addEventListener('pagehide',()=>{if(timer.active){try{timer.persist();}catch(error){console.error('Could not persist timer during page hide',error);}}});
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&timer.active){try{timer.persist();}catch(error){toast('Timer backup failed: '+error.message,'error');}}});
+document.addEventListener('visibilitychange',()=>{if(timer.active){if(document.visibilityState==='hidden'){try{timer.persist();}catch(error){toast('Timer backup failed: '+error.message,'error');}}else{syncNativeFocusTimer(timer,store.subjectName(timer.subjectId));}}});
 store.data.settings.light&&(document.body.classList.add('light'));
 if(timer.active){selectedSubject=timer.subjectId||selectedSubject;showTimer();}else{render();}
 if(store.recoveryAvailable) toast('A damaged local-data snapshot was preserved for recovery. Check device storage before continuing.','error');
