@@ -2,6 +2,28 @@ export class Analytics {
   static dateKey(date=new Date()){const y=date.getFullYear();const m=String(date.getMonth()+1).padStart(2,'0');const d=String(date.getDate()).padStart(2,'0');return `${y}-${m}-${d}`;}
   static subjectSeconds(sessions,id){return sessions.filter(s=>s.subjectId===id).reduce((n,s)=>n+s.duration,0);}
   static weekly(sessions,now=new Date()){return Array.from({length:7},(_,i)=>{const d=new Date(now);d.setHours(0,0,0,0);d.setDate(d.getDate()-6+i);const seconds=sessions.filter(s=>new Date(s.startedAt).toDateString()===d.toDateString()).reduce((n,s)=>n+s.duration,0);return {label:d.toLocaleDateString(undefined,{weekday:'short'}),seconds};});}
+
+  static subjectRanking(sessions,subjects=[]){
+    const total=sessions.reduce((sum,s)=>sum+Math.max(0,Number(s.duration)||0),0);
+    return subjects.map(subject=>({id:subject.id,name:subject.name,color:subject.color,seconds:this.subjectSeconds(sessions,subject.id),share:total?Math.round(this.subjectSeconds(sessions,subject.id)/total*100):0}))
+      .filter(item=>item.seconds>0).sort((a,b)=>b.seconds-a.seconds);
+  }
+  static rangeSeconds(sessions,start,end){
+    return sessions.reduce((sum,s)=>{const time=new Date(s.startedAt).getTime();return Number.isFinite(time)&&time>=start.getTime()&&time<end.getTime()?sum+Math.max(0,Number(s.duration)||0):sum;},0);
+  }
+  static periodComparison(sessions,now=new Date()){
+    const today=new Date(now);today.setHours(0,0,0,0);
+    const weekStart=new Date(today);weekStart.setDate(weekStart.getDate()-6);
+    const previousWeekStart=new Date(weekStart);previousWeekStart.setDate(previousWeekStart.getDate()-7);
+    const previousWeekEnd=new Date(weekStart);
+    const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
+    const previousMonthStart=new Date(now.getFullYear(),now.getMonth()-1,1);
+    const elapsedDays=today.getDate();
+    const previousMonthEnd=new Date(previousMonthStart);previousMonthEnd.setDate(Math.min(elapsedDays,new Date(previousMonthStart.getFullYear(),previousMonthStart.getMonth()+1,0).getDate())+1);
+    const tomorrow=new Date(today);tomorrow.setDate(tomorrow.getDate()+1);
+    const compare=(current,previous)=>({current,previous,change:previous?Math.round((current-previous)/previous*100):null});
+    return {week:compare(this.rangeSeconds(sessions,weekStart,tomorrow),this.rangeSeconds(sessions,previousWeekStart,previousWeekEnd)),month:compare(this.rangeSeconds(sessions,monthStart,tomorrow),this.rangeSeconds(sessions,previousMonthStart,previousMonthEnd))};
+  }
   static monthly(sessions,year=new Date().getFullYear(),month=new Date().getMonth()){return sessions.filter(s=>{const d=new Date(s.startedAt);return d.getFullYear()===year&&d.getMonth()===month;}).reduce((n,s)=>n+s.duration,0);}
 
   static monthlyDays(sessions,year=new Date().getFullYear(),month=new Date().getMonth(),now=new Date()){
