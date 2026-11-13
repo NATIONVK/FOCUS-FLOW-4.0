@@ -42,7 +42,9 @@ public class GalleryPlugin extends Plugin {
   @PluginMethod
   public void listRecentImages(PluginCall call) {
     if (!hasImageAccess()) {
-      requestPermissionForAlias(permissionAlias(), call, "galleryPermissionCallback");
+      // Android 14+ supports limited photo access. Request this first so users can
+      // select only the photos they want to expose to the app.
+      requestPermissionForAlias(Build.VERSION.SDK_INT >= 34 ? "selectedImages" : permissionAlias(), call, "galleryPermissionCallback");
       return;
     }
     queryImages(call);
