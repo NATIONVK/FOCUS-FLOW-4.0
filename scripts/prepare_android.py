@@ -22,13 +22,17 @@ SERVICE = '''        <service android:name=".FocusTimerService" android:exported
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="Ongoing study focus timer with persistent notification" />
         </service>'''
 FOREGROUND_ICON = '''<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
-  <path android:fillColor="#080b14" android:pathData="M0,0h108v108h-108z"/>
-  <path android:strokeColor="#8b5cf6" android:strokeWidth="3" android:fillColor="#10132b" android:pathData="M54,12a34,34 0,1 0,0.1 0z"/>
-  <path android:strokeColor="#22d3ee" android:strokeWidth="2" android:fillColor="#00000000" android:pathData="M54,16a30,30 0,1 0,0.1 0z"/>
-  <path android:strokeColor="#ffffff" android:strokeWidth="4" android:strokeLineCap="round" android:pathData="M54,54L54,31 M54,54L70,42"/>
-  <path android:fillColor="#d946ef" android:pathData="M58,54a4,4 0,1 1,-8 0a4,4 0,1 1,8 0"/>
-  <path android:fillColor="#eef4ff" android:pathData="M23,78q15,-12 31,0q16,-12 31,0v13q-15,-10 -31,0q-16,-10 -31,0z"/>
-  <path android:fillColor="#38f59a" android:pathData="M73,26l15,-8l-3,8l7,-1l-15,10l3,-8z"/>
+  <path android:fillColor="#050713" android:pathData="M0,0h108v108h-108z"/>
+  <path android:strokeColor="#d946ef" android:strokeWidth="2.5" android:fillColor="#11102b" android:pathData="M54,8a46,46 0,1 0,0.1 0z"/>
+  <path android:strokeColor="#22d3ee" android:strokeWidth="2" android:fillColor="#00000000" android:pathData="M54,13a41,41 0,1 0,0.1 0z"/>
+  <path android:strokeColor="#8b5cf6" android:strokeWidth="5" android:fillColor="#00000000" android:pathData="M14,52c7,-19 22,-29 40,-29s33,10 40,29"/>
+  <path android:strokeColor="#c4b5fd" android:strokeWidth="2" android:fillColor="#00000000" android:pathData="M22,54c9,-12 20,-18 32,-18s23,6 32,18"/>
+  <path android:fillColor="#02030a" android:pathData="M39,48a15,15 0,1 0,30 0a15,15 0,1 0,-30 0"/>
+  <path android:strokeColor="#ffffff" android:strokeWidth="3.5" android:strokeLineCap="round" android:pathData="M54,48L54,29 M54,48L68,39"/>
+  <path android:fillColor="#d946ef" android:pathData="M58,48a4,4 0,1 1,-8 0a4,4 0,1 1,8 0"/>
+  <path android:fillColor="#eef4ff" android:pathData="M22,72q16,-12 32,0q16,-12 32,0v17q-16,-10 -32,0q-16,-10 -32,0z"/>
+  <path android:strokeColor="#9aaeff" android:strokeWidth="2" android:pathData="M54,72v17 M28,78q12,-6 22,0 M58,78q10,-6 22,0"/>
+  <path android:fillColor="#38f59a" android:pathData="M72,20l17,-9l-4,10l9,-1l-18,13l4,-10z"/>
 </vector>
 '''
 ADAPTIVE_ICON = '''<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
