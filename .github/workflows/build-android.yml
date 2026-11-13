@@ -16,6 +16,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
@@ -51,6 +55,17 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew --no-daemon assembleDebug
+      - name: Generate release metadata and APK size report
+        run: >-
+          python scripts/release_manager.py
+          --apk android/app/build/outputs/apk/debug/app-debug.apk
+          --output release-report
+      - name: Upload release report
+        uses: actions/upload-artifact@v4
+        with:
+          name: focus-flow-release-report
+          path: release-report/*
+          retention-days: 30
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
