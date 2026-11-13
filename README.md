@@ -31,7 +31,7 @@ The app is designed to keep your study records on your device by default. You ca
 | **Overview & Goals** | See today's study time, daily-goal progress, streaks, pending tasks, and today's planned work. |
 | **Statistics & History** | Review study sessions and daily, weekly, monthly, and subject-level progress. |
 | **Notes** | Keep quick study notes in the same workspace. |
-| **PDF Maker** | Select multiple photos, reorder pages, choose page sizing, and export a PDF offline. Android can show recent gallery photos directly, with file-picker fallback. |
+| **PDF Master Studio** | Open and render PDFs, page previews, zoom, text search, bookmarks, pen annotations, photo-to-PDF creation, merge, extract, rotate, metadata inspection, text export, print, and recent-file history. |
 | **Themes & Settings** | Personalize the workspace and manage local data, including backup and restore options. |
 
 ## 📱 Android app
@@ -57,7 +57,9 @@ The Android app is packaged with **Capacitor 7**. The repository includes native
 - **Capacitor 7** — Android packaging and native bridge
 - **Java** — Android foreground timer and gallery integration
 - **Python 3** — Android build preparation, project health audits, and QA automation
-- **jsPDF** — offline PDF generation
+- **jsPDF** — offline photo-to-PDF generation
+- **PDF.js** — local PDF rendering, page navigation, text search, and text extraction
+- **pdf-lib** — local PDF merging, page extraction, rotation, and annotated-copy export
 - **Node.js + Python unittest** — JavaScript core tests and build-tool regression tests
 - **GitHub Actions + Gradle** — automated quality checks and APK builds
 
@@ -72,6 +74,8 @@ FOCUS-FLOW-4.0/
 │   ├── analytics.js         # Study analytics and streak calculations
 │   ├── main.js              # App rendering and interactions
 │   ├── pdf-maker.js         # Image selection and PDF creation
+│   ├── pdf-studio.js        # PDF reader, annotation, page tools, and file workspace
+│   ├── pdf-studio.css       # Responsive PDF Studio interface
 │   ├── store.js             # Local app data and persistence
 │   ├── styles.css           # Responsive UI and themes
 │   └── timer.js             # Focus timer logic
