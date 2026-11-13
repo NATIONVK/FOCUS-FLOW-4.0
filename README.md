@@ -31,8 +31,12 @@ The app is designed to keep your study records on your device by default. You ca
 | **Overview & Goals** | See today's study time, daily-goal progress, streaks, pending tasks, and today's planned work. |
 | **Statistics & History** | Review study sessions and daily, weekly, monthly, and subject-level progress. |
 | **Notes** | Keep quick study notes in the same workspace. |
-| **PDF Master Studio** | Open and render PDFs, page previews, zoom, text search, bookmarks, pen annotations, photo-to-PDF creation, merge, extract, rotate, metadata inspection, text export, print, and recent-file history. |
+| **PDF Master Studio** | PDF reading, page thumbnails, zoom, text search, bookmarks, reading-position recovery, pen annotations, photo-to-PDF with image quality and scan filters, merge, extract, rotate, text/image overlays, watermark, page numbers, crop, duplicate, delete, reorder, metadata, text export, print, and recent-file history. |
 | **Themes & Settings** | Personalize the workspace and manage local data, including backup and restore options. |
+
+### PDF Studio implementation notes
+
+PDF processing runs locally in the app. The current web/Capacitor implementation provides PDF.js rendering and pdf-lib page/document operations. Text overlay is additive and does not rewrite existing PDF text objects. Password encryption/decryption, Bangla/English OCR, automatic edge detection and perspective correction, digital-signature verification, PDF repair, and DOCX conversion are not yet implemented; they are not advertised as available tools. Android-specific OCR requires a native ML Kit/Tesseract bridge and language model packaging before it can be considered offline-ready.
 
 ## 📱 Android app
 
