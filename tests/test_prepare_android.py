@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from prepare_android import prepare_manifest, write_icon_resources
+from scripts.prepare_android import prepare_manifest, write_icon_resources
 
 
 class PrepareAndroidTests(unittest.TestCase):
