@@ -54,7 +54,7 @@ function overview(t,subjects) {
   const today=new Date();
   const todayKey=today.toDateString();
   const todayTasks=store.data.tasks.filter(x=>!x.done);
-  const overdue=todayTasks.filter(x=>x.dueDate&&x.dueDate<today.toISOString().slice(0,10));
+  const overdue=todayTasks.filter(x=>x.dueDate&&x.dueDate<Analytics.dateKey(today));
   const completed=store.data.tasks.filter(x=>x.done).length;
   const todayPlans=(store.data.plans||[]).filter(p=>p.weekday===today.getDay());
   const plannedMinutes=todayPlans.reduce((n,p)=>n+p.minutes,0);
@@ -110,7 +110,7 @@ function overview(t,subjects) {
 }
 function subjectPage(subjects) {return `<section class="panel"><div class="panel-head"><div><span class="eyebrow">ORGANIZE YOUR LEARNING</span><h3>Subjects</h3></div><button class="primary" id="addSubject">+ New subject</button></div><div class="subject-cards">${subjects.map(s=>`<article class="subject-card"><span class="dot" style="background:${esc(s.color)}"></span><h3>${esc(s.name)}</h3><p>${(Analytics.subjectSeconds(store.data.sessions,s.id)/3600).toFixed(2)} hours focused</p><button class="text-btn" data-edit-subject="${s.id}">Edit</button><button class="text-btn" data-delete-subject="${s.id}">Delete</button></article>`).join('')||'<p class="muted">No subjects yet.</p>'}</div></section>`;}
 function taskPage(){
- const tasks=store.data.tasks.filter(x=>taskFilter==='all'||(taskFilter==='active'&&!x.done)||(taskFilter==='done'&&x.done)||(taskFilter==='overdue'&&!x.done&&x.dueDate&&x.dueDate<new Date().toISOString().slice(0,10)));
+ const tasks=store.data.tasks.filter(x=>taskFilter==='all'||(taskFilter==='active'&&!x.done)||(taskFilter==='done'&&x.done)||(taskFilter==='overdue'&&!x.done&&x.dueDate&&x.dueDate<Analytics.dateKey(new Date())));
  const rank={high:0,medium:1,low:2};
  tasks.sort((a,b)=>(a.done-b.done)||((a.dueDate||'9999').localeCompare(b.dueDate||'9999'))||(rank[a.priority||'medium']-rank[b.priority||'medium']));
  const today=new Date().toISOString().slice(0,10);
