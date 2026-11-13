@@ -41,3 +41,29 @@ test('store validates and persists daily study target',()=>{
 test('tasks support priority and optional due dates and remain backward compatible',()=>{const old=globalThis.localStorage;const map=new Map();globalThis.localStorage={getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};try{const store=new Store();store.addTask('Read probability','high','2026-11-20');const task=store.data.tasks[0];assert.equal(task.priority,'high');assert.equal(task.dueDate,'2026-11-20');store.updateTask(task.id,{priority:'low',dueDate:''});assert.equal(task.priority,'low');assert.equal(task.dueDate,'');assert.throws(()=>store.addTask('Bad task','urgent'));assert.throws(()=>store.updateTask(task.id,{dueDate:'tomorrow'}));const imported=store.data;imported.tasks.push({id:'old',title:'Legacy task'});store.import(imported);assert.equal(store.data.tasks.find(x=>x.id==='old').priority,'medium');}finally{globalThis.localStorage=old}});
 
 test('weekly planner validates, stores, updates and deletes study blocks',()=>{const old=globalThis.localStorage;const map=new Map();globalThis.localStorage={getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};try{const s=new Store();const subject=s.data.subjects[0].id;const p=s.addPlan(1,subject,90);assert.equal(p.minutes,90);assert.equal(s.data.plans.length,1);s.updatePlan(p.id,{weekday:3,minutes:120});assert.equal(s.data.plans[0].weekday,3);assert.equal(s.data.plans[0].minutes,120);assert.throws(()=>s.addPlan(8,subject,60));assert.throws(()=>s.addPlan(1,subject,2));s.deletePlan(p.id);assert.equal(s.data.plans.length,0);const legacy={...s.data};delete legacy.plans;s.import(legacy);assert.deepEqual(s.data.plans,[]);}finally{globalThis.localStorage=old}});
+
+
+test('corrupt local data is preserved before safe defaults load',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};
+  try{
+    map.set('focus-flow-v4','{broken-json');
+    const store=new Store();
+    assert.equal(store.recoveryAvailable,true);
+    assert.equal(map.get('focus-flow-v4-recovery'),'{broken-json');
+    assert.equal(store.data.sessions.length,0);
+  }finally{globalThis.localStorage=old}
+});
+
+test('timer finish works when crypto.randomUUID is unavailable',()=>{
+  const oldStorage=globalThis.localStorage;const oldCrypto=globalThis.crypto;const map=new Map();
+  globalThis.localStorage={setItem:(k,v)=>map.set(k,v),getItem:k=>map.get(k)||null,removeItem:k=>map.delete(k)};
+  try{
+    Object.defineProperty(globalThis,'crypto',{configurable:true,value:{}});
+    const s=memory();const timer=new FocusTimer(s);timer.start('x');timer.segmentStartedAt=Date.now()-1500;
+    assert.ok(timer.finish()>=1);assert.match(s.data.sessions[0].id,/^session-/);
+  }finally{
+    globalThis.localStorage=oldStorage;
+    Object.defineProperty(globalThis,'crypto',{configurable:true,value:oldCrypto});
+  }
+});
