@@ -14,7 +14,21 @@ let taskFilter = 'all';
 let plannerDay = new Date().getDay();
 let dashboardCustomize = false;
 
-function paintTimer() { const clock=$('#clock'); if(!clock)return; const elapsed=timer.elapsed();clock.textContent=fmt(elapsed); $('#timerToggle')?.classList.toggle('paused',timer.paused); const scene=$('#blackholeScene');scene?.classList.toggle('is-paused',timer.paused);scene?.style.setProperty('--bh-energy',String(Math.min(1,0.25+elapsed/7200)));scene?.setAttribute('data-focus-level',String(Math.min(3,Math.floor(elapsed/1800)))); const state=$('#focusState');if(state)state.textContent=timer.paused?'SINGULARITY STABILIZED · PAUSED':`EVENT HORIZON ACTIVE · LEVEL ${Math.min(3,Math.floor(elapsed/1800))+1}`; }
+function paintTimer() {
+  const clock=$('#clock'); if(!clock)return;
+  const elapsed=Math.floor(timer.elapsed());
+  const hours=String(Math.floor(elapsed/3600)).padStart(2,'0');
+  const minutes=String(Math.floor(elapsed%3600/60)).padStart(2,'0');
+  const seconds=String(elapsed%60).padStart(2,'0');
+  clock.innerHTML=`<span class="time-main">${hours}:${minutes}:</span><span class="time-seconds">${seconds}</span>`;
+  $('#timerToggle')?.classList.toggle('paused',timer.paused);
+  const scene=$('#blackholeScene');
+  scene?.classList.toggle('is-paused',timer.paused);
+  scene?.style.setProperty('--bh-energy',String(Math.min(1,0.25+elapsed/7200)));
+  const level=Math.min(5,Math.floor(elapsed/600));
+  scene?.setAttribute('data-focus-level',String(level+1));
+  scene?.setAttribute('data-second-step',String(Math.floor((elapsed%60)/5)));
+}
 function fmt(seconds) {
   const n=Math.max(0,Math.floor(seconds));
   return [Math.floor(n/3600),Math.floor(n%3600/60),n%60].map(x=>String(x).padStart(2,'0')).join(':');
@@ -246,11 +260,11 @@ function bind(){
 }
 function showTimer(){
   if(!timer.active) timer.start(selectedSubject);
-  $('#app').innerHTML=`<div class="focus-screen"><button class="exit-focus" id="exitFocus">×</button><div class="space-particles" aria-hidden="true"></div><div class="focus-nebula" aria-hidden="true"></div><div class="focus-orbit orbit-a" aria-hidden="true"></div><div class="focus-orbit orbit-b" aria-hidden="true"></div><div class="blackhole-scene ${timer.paused?'is-paused':''}" id="blackholeScene"><div class="bh-starfield" aria-hidden="true"></div><div class="bh-lensing" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-a" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-b" aria-hidden="true"></div><div class="bh-light-beams" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-energy-waves" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-disk bh-disk-outer" aria-hidden="true"></div><div class="bh-disk bh-disk-inner" aria-hidden="true"></div><div class="bh-corona" aria-hidden="true"></div><button class="focus-core" id="timerToggle" aria-label="Pause or resume focus timer"><span class="focus-label">${esc(store.subjectName(timer.subjectId))} · FOCUS SESSION</span><strong id="clock">00:00:00</strong><span class="focus-hint">TAP TO PAUSE / RESUME</span><span class="focus-state" id="focusState">${timer.paused?'PAUSED':'EVENT HORIZON ACTIVE'}</span></button><span class="bh-particle bh-particle-a" aria-hidden="true"></span><span class="bh-particle bh-particle-b" aria-hidden="true"></span><span class="bh-particle bh-particle-c" aria-hidden="true"></span></div></div>`;
+  $('#app').innerHTML=`<div class="focus-screen"><div class="space-particles" aria-hidden="true"></div><div class="focus-nebula" aria-hidden="true"></div><div class="focus-orbit orbit-a" aria-hidden="true"></div><div class="focus-orbit orbit-b" aria-hidden="true"></div><div class="blackhole-scene ${timer.paused?'is-paused':''}" id="blackholeScene"><div class="bh-starfield" aria-hidden="true"></div><div class="bh-lensing" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-a" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-b" aria-hidden="true"></div><div class="bh-light-beams" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-energy-waves" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-disk bh-disk-outer" aria-hidden="true"></div><div class="bh-disk bh-disk-inner" aria-hidden="true"></div><div class="bh-corona" aria-hidden="true"></div><button class="focus-core" id="timerToggle" aria-label="Pause or resume focus timer"><strong id="clock" aria-live="off">00:00:00</strong></button><span class="bh-particle bh-particle-a" aria-hidden="true"></span><span class="bh-particle bh-particle-b" aria-hidden="true"></span><span class="bh-particle bh-particle-c" aria-hidden="true"></span></div></div>`;
   paintTimer();
   const tick=setInterval(()=>{if(!$('#clock')){clearInterval(tick);return}paintTimer()},250);
   $('#timerToggle').addEventListener('click',()=>{timer.toggle();});
-  $('#exitFocus').addEventListener('click',async()=>{if(timer.active&&!await askConfirm('Finish and save this focus session?'))return;clearInterval(tick);if(timer.active)timer.finish();page='overview';render()});
+
 }
 function exportBackup(){const blob=new Blob([JSON.stringify(store.data,null,2)],{type:'application/json'});const a=document.createElement('a');const url=URL.createObjectURL(blob);a.href=url;a.download='focus-flow-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Backup export started','success')}
 function importBackup(e){const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{store.import(JSON.parse(r.result));render();toast('Backup restored successfully','success')}catch{toast('Invalid backup file. Choose a valid Focus Flow backup.','error')}};r.readAsText(f)}
