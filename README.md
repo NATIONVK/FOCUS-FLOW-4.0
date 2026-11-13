@@ -161,3 +161,14 @@ No license has been added yet. Unless a license is added to this repository, sta
   <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/issues">Report an issue</a> ·
   <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions">Builds & checks</a>
 </div>
+
+
+### Python release tooling
+
+Generate a release metadata and notes report (optionally including APK size):
+
+```bash
+python scripts/release_manager.py --apk android/app/build/outputs/apk/debug/app-debug.apk --output release-report
+```
+
+The Android build workflow uploads the APK and a separate release-report artifact containing version, commit, branch, recent commit subjects, and APK size.
