@@ -66,7 +66,8 @@ function overview(t,subjects) {
   const weekTotal=week.reduce((n,d)=>n+d.seconds,0);
   const bestDay=week.reduce((a,b)=>b.seconds>a.seconds?b:a,week[0]||{label:'—',seconds:0});
   const recent=[...sessions].sort((a,b)=>new Date(b.startedAt)-new Date(a.startedAt)).slice(0,3);
-  const nextTasks=[...todayTasks].sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999')).slice(0,4);
+  const taskPriorityRank={high:0,medium:1,low:2};
+  const nextTasks=[...todayTasks].sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999')||(taskPriorityRank[a.priority||'medium']-taskPriorityRank[b.priority||'medium'])||a.title.localeCompare(b.title)).slice(0,4);
   const greeting=today.getHours()<12?'Good morning':today.getHours()<17?'Good afternoon':'Good evening';
   return `
   <section class="dash-hero">
