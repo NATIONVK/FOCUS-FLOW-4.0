@@ -3,25 +3,33 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+
+# Keep only the newest APK build for the main branch.
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
+
 jobs:
   test-and-build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
+          cache: npm
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.x'
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
@@ -31,7 +39,7 @@ jobs:
           node --version
           npm --version
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       - name: Run unit tests
         run: npm test
       - name: Build web app
@@ -61,13 +69,14 @@ jobs:
           --apk android/app/build/outputs/apk/debug/app-debug.apk
           --output release-report
       - name: Upload release report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: focus-flow-release-report
           path: release-report/*
+          if-no-files-found: error
           retention-days: 30
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: focus-flow-4.0-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
