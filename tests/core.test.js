@@ -218,3 +218,29 @@ test('dashboard chart preference validates, persists and restores',()=>{
     assert.equal(store.data.settings.dashboardChartType,'bar');
   }finally{globalThis.localStorage=old}
 });
+
+test('subject ranking orders focused subjects and calculates share',()=>{
+  const sessions=[{subjectId:'math',duration:7200},{subjectId:'stats',duration:3600},{subjectId:'math',duration:3600}];
+  const ranked=Analytics.subjectRanking(sessions,[{id:'stats',name:'Statistics'},{id:'math',name:'Math'},{id:'none',name:'Unused'}]);
+  assert.deepEqual(ranked.map(x=>[x.name,x.seconds,x.share]),[['Math',10800,75],['Statistics',3600,25]]);
+});
+test('period comparison compares rolling seven-day and month-to-date windows',()=>{
+  const now=new Date(2026,10,13,12);
+  const sessions=[
+    {startedAt:new Date(2026,10,12,9).toISOString(),duration:7200},
+    {startedAt:new Date(2026,10,5,9).toISOString(),duration:3600},
+    {startedAt:new Date(2026,9,12,9).toISOString(),duration:1800}
+  ];
+  const result=Analytics.periodComparison(sessions,now);
+  assert.equal(result.week.current,7200);
+  assert.equal(result.week.previous,3600);
+  assert.equal(result.week.change,100);
+  assert.equal(result.month.current,7200);
+  assert.equal(result.month.previous,1800);
+  assert.equal(result.month.change,300);
+});
+test('period comparison handles zero previous activity without division by zero',()=>{
+  const result=Analytics.periodComparison([],new Date(2026,10,13,12));
+  assert.equal(result.week.change,null);
+  assert.equal(result.month.change,null);
+});
