@@ -14,7 +14,7 @@ let taskFilter = 'all';
 let plannerDay = new Date().getDay();
 let dashboardCustomize = false;
 
-function paintTimer() { const clock=$('#clock'); if(!clock)return; clock.textContent=fmt(timer.elapsed()); $('#timerToggle')?.classList.toggle('paused',timer.paused); }
+function paintTimer() { const clock=$('#clock'); if(!clock)return; clock.textContent=fmt(timer.elapsed()); $('#timerToggle')?.classList.toggle('paused',timer.paused); $('#blackholeScene')?.classList.toggle('is-paused',timer.paused); const state=$('#focusState');if(state)state.textContent=timer.paused?'SINGULARITY STABILIZED · PAUSED':'EVENT HORIZON ACTIVE'; }
 function fmt(seconds) {
   const n=Math.max(0,Math.floor(seconds));
   return [Math.floor(n/3600),Math.floor(n%3600/60),n%60].map(x=>String(x).padStart(2,'0')).join(':');
@@ -246,7 +246,7 @@ function bind(){
 }
 function showTimer(){
   if(!timer.active) timer.start(selectedSubject);
-  $('#app').innerHTML=`<div class="focus-screen"><button class="exit-focus" id="exitFocus">×</button><div class="space-particles"></div><div class="focus-orbit orbit-a"></div><div class="focus-orbit orbit-b"></div><button class="focus-core" id="timerToggle"><span class="focus-label">${esc(store.subjectName(timer.subjectId))} · FOCUS SESSION</span><strong id="clock">00:00:00</strong><span class="focus-hint">TAP TO PAUSE / RESUME</span></button></div>`;
+  $('#app').innerHTML=`<div class="focus-screen"><button class="exit-focus" id="exitFocus">×</button><div class="space-particles" aria-hidden="true"></div><div class="focus-nebula" aria-hidden="true"></div><div class="focus-orbit orbit-a" aria-hidden="true"></div><div class="focus-orbit orbit-b" aria-hidden="true"></div><div class="blackhole-scene ${timer.paused?'is-paused':''}" id="blackholeScene"><div class="bh-starfield" aria-hidden="true"></div><div class="bh-lensing" aria-hidden="true"></div><div class="bh-disk bh-disk-outer" aria-hidden="true"></div><div class="bh-disk bh-disk-inner" aria-hidden="true"></div><div class="bh-corona" aria-hidden="true"></div><button class="focus-core" id="timerToggle" aria-label="Pause or resume focus timer"><span class="focus-label">${esc(store.subjectName(timer.subjectId))} · FOCUS SESSION</span><strong id="clock">00:00:00</strong><span class="focus-hint">TAP TO PAUSE / RESUME</span><span class="focus-state" id="focusState">${timer.paused?'PAUSED':'EVENT HORIZON ACTIVE'}</span></button><span class="bh-particle bh-particle-a" aria-hidden="true"></span><span class="bh-particle bh-particle-b" aria-hidden="true"></span><span class="bh-particle bh-particle-c" aria-hidden="true"></span></div></div>`;
   paintTimer();
   const tick=setInterval(()=>{if(!$('#clock')){clearInterval(tick);return}paintTimer()},250);
   $('#timerToggle').addEventListener('click',()=>{timer.toggle();});
