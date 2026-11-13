@@ -12,6 +12,7 @@ let timer = new FocusTimer(store, () => { if ($('#clock')) paintTimer(); });
 let selectedSubject = store.data.subjects[0]?.id || '';
 let taskFilter = 'all';
 let plannerDay = new Date().getDay();
+let dashboardCustomize = false;
 
 function paintTimer() { const clock=$('#clock'); if(!clock)return; clock.textContent=fmt(timer.elapsed()); $('#timerToggle')?.classList.toggle('paused',timer.paused); }
 function fmt(seconds) {
@@ -42,8 +43,35 @@ function render() {
       ${page==='overview'?overview(t,subjects):page==='subjects'?subjectPage(subjects):page==='tasks'?taskPage():page==='planner'?plannerPage():page==='notes'?notesPage():page==='history'?historyPage():page==='statistics'?statisticsPage():page==='pdf-maker'?renderPDFPage():settingsPage()}
     </main>
   </div>`;
+  if(page==='overview') applyDashboardLayout();
   bind();
 }
+const DASH_WIDGETS=[['hero','Welcome'],['kpis','Quick stats'],['week','Weekly focus & plan'],['month','Monthly progress'],['insights','Smart insights'],['lower','Subjects & tasks'],['recent','Recent sessions']];
+function applyDashboardLayout(){
+  const main=$('.main');if(!main)return;
+  const widgets=[...main.querySelectorAll('[data-dashboard-widget]')];
+  const settings=store.data.settings.dashboardLayout||{order:[],hidden:[]};
+  const order=[...settings.order.filter(id=>DASH_WIDGETS.some(x=>x[0]===id)),...DASH_WIDGETS.map(x=>x[0]).filter(id=>!settings.order.includes(id))];
+  order.forEach(id=>{const el=widgets.find(x=>x.dataset.dashboardWidget===id);if(el)main.appendChild(el);});
+  const hidden=new Set(settings.hidden||[]);
+  widgets.forEach(el=>{el.hidden=hidden.has(el.dataset.dashboardWidget);});
+  const toolbar=document.createElement('section');toolbar.className='dash-custom-toolbar';
+  toolbar.innerHTML='<div><b>Dashboard layout</b><small>Arrange your cards and hide the ones you do not need.</small></div><button class="dash-custom-toggle" id="customizeDashboard">'+(dashboardCustomize?'Done':'Customize')+'</button>';
+  if(dashboardCustomize){
+    const restore=document.createElement('div');restore.className='dash-restore-list';
+    (settings.hidden||[]).forEach(id=>{const item=DASH_WIDGETS.find(x=>x[0]===id);if(item){const b=document.createElement('button');b.className='dash-restore-btn';b.dataset.restoreWidget=id;b.textContent='+ '+item[1];restore.appendChild(b);}});
+    toolbar.appendChild(restore);
+    widgets.forEach(el=>{
+      if(hidden.has(el.dataset.dashboardWidget))return;
+      const id=el.dataset.dashboardWidget;const title=DASH_WIDGETS.find(x=>x[0]===id)?.[1]||id;
+      const controls=document.createElement('div');controls.className='dash-widget-controls';
+      controls.innerHTML='<span>'+title+'</span><button type="button" data-dash-move="-1" aria-label="Move '+title+' up">↑</button><button type="button" data-dash-move="1" aria-label="Move '+title+' down">↓</button><button type="button" data-dash-hide="'+id+'">Hide</button>';
+      el.prepend(controls);
+    });
+  }
+  const header=main.querySelector('.topbar');header?.after(toolbar);
+}
+function saveDashboardLayout(order,hidden){store.setDashboardLayout({order,hidden});}
 function overview(t,subjects) {
   const sessions=store.data.sessions;
   const week=Analytics.weekly(sessions);
@@ -83,20 +111,20 @@ function overview(t,subjects) {
   const nextTasks=[...todayTasks].sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999')||(taskPriorityRank[a.priority||'medium']-taskPriorityRank[b.priority||'medium'])||a.title.localeCompare(b.title)).slice(0,4);
   const greeting=today.getHours()<12?'Good morning':today.getHours()<17?'Good afternoon':'Good evening';
   return `
-  <section class="dash-hero">
+  <section class="dash-hero" data-dashboard-widget="hero">
     <div class="dash-hero-copy"><span class="eyebrow">YOUR PERSONAL STUDY OS · ${today.toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})}</span><h2>${greeting}. <em>Ready to focus?</em></h2><p>Small, consistent sessions build remarkable progress. Make this session count.</p>
       <div class="dash-actions"><button class="primary" id="startFocus">▶ Start focus session</button><button class="dash-secondary" data-page="planner">View today's plan ↗</button></div>
       <div class="dash-hero-meta"><span><i class="online-dot"></i> Offline-first · Your data stays on this device</span><span>🔥 ${streak} day streak</span></div>
     </div>
     <div class="dash-goal-ring" role="progressbar" aria-label="Daily focus goal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}" aria-valuetext="${progress}% of daily goal; ${fmt(t.today)} focused" style="--goal-progress:${progress}%"><div><strong>${progress}%</strong><small>DAILY GOAL</small><span>${fmt(remaining)} left</span></div></div>
   </section>
-  <section class="dash-kpis">
+  <section class="dash-kpis" data-dashboard-widget="kpis">
     <article class="dash-kpi"><span class="kpi-icon violet">◷</span><div><small>FOCUS TODAY</small><strong>${(t.today/3600).toFixed(1)} <i>hrs</i></strong><span>${fmt(t.today)} focused</span></div></article>
     <article class="dash-kpi"><span class="kpi-icon mint">◎</span><div><small>THIS WEEK</small><strong>${(weekTotal/3600).toFixed(1)} <i>hrs</i></strong><span>Last 7 days</span></div></article>
     <article class="dash-kpi"><span class="kpi-icon amber">✓</span><div><small>TASKS LEFT</small><strong>${todayTasks.length}</strong><span>${overdue.length?overdue.length+' overdue':'Stay on track'}</span></div></article>
     <article class="dash-kpi"><span class="kpi-icon blue">✦</span><div><small>ALL-TIME SESSIONS</small><strong>${t.count}</strong><span>${(t.all/3600).toFixed(1)} total hours</span></div></article>
   </section>
-  <section class="dash-main-grid">
+  <section class="dash-main-grid" data-dashboard-widget="week">
     <article class="panel dash-week-panel"><div class="panel-head"><div><span class="eyebrow">CONSISTENCY TRACKER</span><h3>Your focus rhythm</h3></div><span class="dash-period">LAST 7 DAYS</span></div>
       <div class="dash-week-summary"><div><strong>${(weekTotal/3600).toFixed(1)}h</strong><small>Total focused this week</small></div><div><strong>${(weekTotal/7/3600).toFixed(1)}h</strong><small>Daily average</small></div><div><strong>${goalDays}/7</strong><small>Daily goals met</small></div><div><strong>${bestDay.seconds?bestDay.label:'—'}</strong><small>Most productive day</small></div></div>
       <div class="dash-chart" role="img" aria-label="Daily focus hours: ${week.map(d=>`${d.label} ${(d.seconds/3600).toFixed(1)} hours`).join(", ")}">${week.map(d=>{const h=(d.seconds/3600).toFixed(1);const height=d.seconds?Math.max(5,Math.round(d.seconds/Math.max(1,...week.map(x=>x.seconds))*100)):0;return `<div class="dash-chart-col"><span class="dash-chart-value">${h==='0.0'?'':h+'h'}</span><div class="dash-chart-track ${d.seconds>=goal?'goal-met':''}"><i style="height:${height}%"></i></div><small>${d.label}</small></div>`}).join('')}</div>
@@ -106,7 +134,7 @@ function overview(t,subjects) {
       ${todayPlans.length?`<div class="dash-plan-progress"><div><b>${fmt(actualPlanned)}</b><span> / ${fmt(plannedMinutes*60)} planned</span><strong>${planProgress}%</strong></div><div class="progress-track" role="progressbar" aria-label="Today study plan progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${planProgress}"><i style="width:${planProgress}%"></i></div></div><div class="dash-plan-list">${todayPlans.slice(0,4).map(p=>{const s=subjects.find(x=>x.id===p.subjectId);return `<div class="dash-plan-item"><i style="background:${esc(s?.color||'#8b7cff')}"></i><span>${esc(store.subjectName(p.subjectId))}</span><b>${p.minutes}m</b><button data-start-plan="${p.id}" aria-label="Start ${esc(store.subjectName(p.subjectId))}">Start</button></div>`}).join('')}</div>`:'<div class="dash-empty"><span>◷</span><b>No study blocks planned</b><small>Give your day a simple structure.</small><button class="primary" data-page="planner">Create today’s plan</button></div>'}
     </article>
   </section>
-  <section class="panel dash-month-panel">
+  <section class="panel dash-month-panel" data-dashboard-widget="month">
     <div class="panel-head"><div><span class="eyebrow">MONTHLY PERFORMANCE</span><h3>${today.toLocaleDateString(undefined,{month:'long',year:'numeric'})}</h3></div><span class="dash-period">${monthDays.length} DAYS ELAPSED</span></div>
     <div class="dash-month-metrics">
       <div><strong>${(monthTotal/3600).toFixed(1)}h</strong><small>Focused this month</small></div>
@@ -118,7 +146,7 @@ function overview(t,subjects) {
     <div class="dash-heatmap" role="img" aria-label="Monthly study calendar. ${monthConsistency.met} of ${monthConsistency.elapsed} elapsed days met the daily goal.">${[...Array(monthStartOffset).fill(null),...monthDays].map(d=>d?`<span class="dash-heat-cell ${d.seconds>=goal?'met':d.seconds>0?'partial':'empty'}" title="${d.key}: ${fmt(d.seconds)} focused" aria-label="${d.key}: ${fmt(d.seconds)} focused">${d.day}</span>`:`<span class="dash-heat-cell blank" aria-hidden="true"></span>`).join('')}</div>
     <p class="dash-insight-note">${monthConsistency.met} goal days out of ${monthConsistency.elapsed} elapsed days this month. Score = goal days ÷ elapsed days; it updates as the month progresses.</p>
   </section>
-  <section class="panel dash-insights-panel">
+  <section class="panel dash-insights-panel" data-dashboard-widget="insights">
     <div class="panel-head"><div><span class="eyebrow">YOUR STUDY PATTERNS</span><h3>Smart productivity insights</h3></div><span class="dash-period">BASED ON YOUR SESSIONS</span></div>
     <div class="dash-insights-grid">
       <div class="dash-insight-card"><span class="dash-insight-icon">◷</span><small>YOUR PEAK PERIOD</small><strong>${hasTimePattern?bestPeriod.label:'Not enough data'}</strong><span>${hasTimePattern?bestPeriod.range+' · '+(bestPeriod.seconds/3600).toFixed(1)+'h recorded':'Complete sessions to discover your strongest time'}</span></div>
@@ -127,7 +155,7 @@ function overview(t,subjects) {
     </div>
     <p class="dash-insight-note">Insights use your saved session start times and durations on this device. They describe your recorded history, not a prediction.</p>
   </section>
-  <section class="dash-lower-grid">
+  <section class="dash-lower-grid" data-dashboard-widget="lower">
     <article class="panel"><div class="panel-head"><div><span class="eyebrow">YOUR LEARNING AREAS</span><h3>Subject breakdown</h3></div><button class="text-btn" data-page="subjects">All subjects ↗</button></div>
       <div class="dash-subject-list">${subjectStats.slice(0,5).map(({subject,seconds})=>`<div class="dash-subject"><div class="dash-subject-heading"><span><i style="background:${esc(subject.color)}"></i><b>${esc(subject.name)}</b></span><strong>${(seconds/3600).toFixed(1)}h</strong></div><div class="progress-track" role="progressbar" aria-label="${esc(subject.name)} focus share" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(seconds/maxSubject*100)}"><i style="width:${Math.round(seconds/maxSubject*100)}%;background:${esc(subject.color)}"></i></div></div>`).join('')||'<p class="muted">Add a subject to see your learning breakdown.</p>'}</div>
       ${topSubject&&topSubject.seconds?'<div class="dash-insight">✦ Most studied: <b>'+esc(topSubject.subject.name)+'</b> · '+(topSubject.seconds/3600).toFixed(1)+' hours recorded</div>':''}
@@ -138,7 +166,7 @@ function overview(t,subjects) {
       <button class="dash-add-task" id="addTask">＋ Add a task</button>
     </article>
   </section>
-  <section class="panel dash-recent-panel"><div class="panel-head"><div><span class="eyebrow">YOUR RECENT WINS</span><h3>Latest focus sessions</h3></div><button class="text-btn" data-page="history">Study history ↗</button></div>
+  <section class="panel dash-recent-panel" data-dashboard-widget="recent"><div class="panel-head"><div><span class="eyebrow">YOUR RECENT WINS</span><h3>Latest focus sessions</h3></div><button class="text-btn" data-page="history">Study history ↗</button></div>
     <div class="dash-recent-list">${recent.map(s=>`<div class="dash-recent-row"><span class="dash-recent-icon">◷</span><div><b>${esc(store.subjectName(s.subjectId))}</b><small>${new Date(s.startedAt).toLocaleString()}</small></div><strong>${fmt(s.duration)}</strong></div>`).join('')||'<p class="muted">Your completed focus sessions will appear here.</p>'}</div>
   </section>`;
 }
