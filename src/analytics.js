@@ -4,6 +4,21 @@ export class Analytics {
   static weekly(sessions,now=new Date()){return Array.from({length:7},(_,i)=>{const d=new Date(now);d.setHours(0,0,0,0);d.setDate(d.getDate()-6+i);const seconds=sessions.filter(s=>new Date(s.startedAt).toDateString()===d.toDateString()).reduce((n,s)=>n+s.duration,0);return {label:d.toLocaleDateString(undefined,{weekday:'short'}),seconds};});}
   static monthly(sessions,year=new Date().getFullYear(),month=new Date().getMonth()){return sessions.filter(s=>{const d=new Date(s.startedAt);return d.getFullYear()===year&&d.getMonth()===month;}).reduce((n,s)=>n+s.duration,0);}
 
+  static monthlyDays(sessions,year=new Date().getFullYear(),month=new Date().getMonth(),now=new Date()){
+    const daysInMonth=new Date(year,month+1,0).getDate();
+    const currentMonth=year===now.getFullYear()&&month===now.getMonth();
+    const count=currentMonth?now.getDate():daysInMonth;
+    return Array.from({length:count},(_,i)=>{
+      const date=new Date(year,month,i+1);
+      return {date,key:this.dateKey(date),day:i+1,seconds:this.dailySeconds(sessions,date)};
+    });
+  }
+  static consistency(sessions,goalMinutes=120,now=new Date()){
+    const goal=Math.max(1,Number(goalMinutes)||120)*60;
+    const days=this.monthlyDays(sessions,now.getFullYear(),now.getMonth(),now);
+    const met=days.filter(d=>d.seconds>=goal).length;
+    return {score:days.length?Math.round(met/days.length*100):0,met,elapsed:days.length};
+  }
   static dailySeconds(sessions,date=new Date()){
     const key=date.toDateString();
     return sessions.filter(s=>new Date(s.startedAt).toDateString()===key).reduce((n,s)=>n+s.duration,0);
