@@ -16,7 +16,7 @@ export class FocusTimer {
       this.segmentStartedAt=Number(s.segmentStartedAt)||0;
       this.accumulated=Math.max(0,Number(s.accumulated)||0);
       this.paused=!!s.paused; this.active=true;
-    } catch { localStorage.removeItem(ACTIVE); }
+    } catch(error) { console.warn('Unable to restore active focus session',error); try { globalThis.localStorage?.removeItem(ACTIVE); } catch {} }
   }
   persist() {
     try { localStorage.setItem(ACTIVE,JSON.stringify({subjectId:this.subjectId,startedAt:this.startedAt,segmentStartedAt:this.segmentStartedAt,accumulated:this.accumulated,paused:this.paused})); }
@@ -41,9 +41,9 @@ export class FocusTimer {
   finish() {
     if(!this.active) return null;
     const duration=this.elapsed();
-    const session=duration>=1?{id:crypto.randomUUID(),subjectId:this.subjectId,startedAt:new Date(this.startedAt).toISOString(),endedAt:new Date().toISOString(),duration:Math.floor(duration)}:null;
+    const session=duration>=1?{id:globalThis.crypto?.randomUUID?.()||`session-${Date.now()}-${Math.random().toString(36).slice(2)}`,subjectId:this.subjectId,startedAt:new Date(this.startedAt).toISOString(),endedAt:new Date().toISOString(),duration:Math.floor(duration)}:null;
     if(session) this.store.data.sessions.push(session);
-    this.store.save(); localStorage.removeItem(ACTIVE); stopNativeFocusTimer();
+    this.store.save(); try { globalThis.localStorage?.removeItem(ACTIVE); } catch(error) { console.warn('Unable to clear active timer snapshot',error); } stopNativeFocusTimer();
     this.active=false; this.paused=false; this.startedAt=0; this.segmentStartedAt=0; this.accumulated=0; this.subjectId=null;
     this.onChange(); return session?.duration??0;
   }
