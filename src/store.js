@@ -23,8 +23,10 @@ export class Store {
     let raw=null;
     try{
       raw=globalThis.localStorage?.getItem(KEY);
-      if(!raw)return defaults();
-      return normalize(JSON.parse(raw));
+      if(!raw){const safe=defaults();this.lastSavedSnapshot=JSON.stringify(safe);return safe;}
+      const clean=normalize(JSON.parse(raw));
+      this.lastSavedSnapshot=JSON.stringify(clean);
+      return clean;
     }catch(error){
       if(typeof raw==='string'&&raw.length){
         try{
@@ -36,10 +38,24 @@ export class Store {
         }
       }
       console.error('FOCUS FLOW loaded safe defaults after a data validation error',error);
-      return defaults();
+      const safe=defaults();
+      this.lastSavedSnapshot=JSON.stringify(safe);
+      return safe;
     }
   }
-  save(){try{globalThis.localStorage?.setItem(KEY,JSON.stringify(this.data));return true;}catch(error){console.error('FOCUS FLOW could not save local data',error);throw new Error('ডিভাইসে জায়গা বা storage permission পরীক্ষা করুন। ডেটা সংরক্ষণ করা যায়নি।');}}
+  save(){
+    try{
+      const serialized=JSON.stringify(this.data);
+      globalThis.localStorage?.setItem(KEY,serialized);
+      this.lastSavedSnapshot=serialized;
+      return true;
+    }catch(error){
+      // Restore the last known-good snapshot so failed writes never leave phantom in-memory changes.
+      try{if(this.lastSavedSnapshot)this.data=normalize(JSON.parse(this.lastSavedSnapshot));}catch(restoreError){console.error('FOCUS FLOW could not restore its last saved snapshot',restoreError);}
+      console.error('FOCUS FLOW could not save local data',error);
+      throw new Error('ডিভাইসে জায়গা বা storage permission পরীক্ষা করুন। ডেটা সংরক্ষণ করা যায়নি।');
+    }
+  }
   addSubject(name){name=text(name,80);if(!name)throw new Error('Subject name is required');if(this.data.subjects.some(s=>s.name.toLowerCase()===name.toLowerCase()))throw new Error('Subject already exists');const colors=['#8b7cff','#38d6b0','#ffbd59','#ff6b83','#5ea8ff'];this.data.subjects.push({id:makeId(),name,color:colors[this.data.subjects.length%colors.length],goalMinutes:120});this.save();}
   editSubject(id,name){name=text(name,80);if(!name)throw new Error('Subject name is required');if(this.data.subjects.some(s=>s.id!==id&&s.name.toLowerCase()===name.toLowerCase()))throw new Error('Subject already exists');const s=this.data.subjects.find(x=>x.id===id);if(!s)throw new Error('Subject not found');s.name=name;this.save();}
   deleteSubject(id){if(!this.data.subjects.some(s=>s.id===id))return;this.data.subjects=this.data.subjects.filter(s=>s.id!==id);this.data.plans=(this.data.plans||[]).filter(p=>p.subjectId!==id);this.save();}
