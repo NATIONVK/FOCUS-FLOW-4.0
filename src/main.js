@@ -14,6 +14,7 @@ let taskFilter = 'all';
 let plannerDay = new Date().getDay();
 let dashboardCustomize = false;
 let dashboardChartType = store.data.settings.dashboardChartType || 'bar';
+let timerScreenActive=false;
 
 function paintTimer() {
   const clock=$('#clock'); if(!clock)return;
@@ -30,6 +31,19 @@ function paintTimer() {
   scene?.setAttribute('data-focus-level',String(level+1));
   scene?.setAttribute('data-second-step',String(Math.floor((elapsed%60)/5)));
 }
+
+function updateStorageStatus(){
+  const status=$('.topbar .status');
+  if(status){status.classList.toggle('storage-offline',!store.storageAvailable);status.innerHTML='<i></i> '+(store.storageAvailable?'Local data secured':'Storage unavailable');}
+  let warning=$('#storageWarning');
+  if(!store.storageAvailable){
+    if(!warning){warning=document.createElement('div');warning.id='storageWarning';warning.className='storage-warning';warning.setAttribute('role','alert');$('.topbar')?.after(warning);}
+    warning.innerHTML='<div><b>ডেটা নিরাপদে Save হচ্ছে না</b><span>'+esc(store.storageError||'এই ডিভাইসের Browser Storage পাওয়া যাচ্ছে না।')+' · App বন্ধ করলে নতুন পরিবর্তন হারাতে পারে।</span></div><button type="button" class="secondary" id="storageExportBackup">Export backup</button>';
+    $('#storageExportBackup')?.addEventListener('click',exportBackup);
+  }else if(warning)warning.remove();
+}
+store.onStorageStatusChange=updateStorageStatus;
+
 function fmt(seconds) {
   const n=Math.max(0,Math.floor(seconds));
   return [Math.floor(n/3600),Math.floor(n%3600/60),n%60].map(x=>String(x).padStart(2,'0')).join(':');
@@ -54,12 +68,13 @@ function render() {
     <aside class="sidebar"><div class="brand"><img class="brand-logo" src="./icon.svg" alt="FOCUS FLOW logo"><div>FOCUS <b>FLOW</b><small>YOUR SPACE TO GROW</small></div></div>
       <nav>${nav()}</nav><div class="side-foot"><i class="online-dot"></i> OFFLINE FIRST<br><small>NATIONVK · FOCUS FLOW 5.0</small></div></aside><nav class="mobile-nav">${mobileNav()}</nav>
     <main class="main">
-      <header class="topbar"><div><span class="eyebrow">YOUR PERSONAL STUDY OS</span><h1>${page==='overview'?'Overview':page==='dashboard'?'Dashboard':page==='pdf-maker'?'PDF Maker':page[0].toUpperCase()+page.slice(1)}</h1></div><div class="status"><i></i> Local data secured</div></header>
+      <header class="topbar"><div><span class="eyebrow">YOUR PERSONAL STUDY OS</span><h1>${page==='overview'?'Overview':page==='dashboard'?'Dashboard':page==='pdf-maker'?'PDF Maker':page[0].toUpperCase()+page.slice(1)}</h1></div><div class="status ${store.storageAvailable?'':'storage-offline'}"><i></i> ${store.storageAvailable?'Local data secured':'Storage unavailable'}</div></header>
       ${page==='overview'?overview(t,subjects):page==='dashboard'?dashboardPage(t,subjects):page==='subjects'?subjectPage(subjects):page==='tasks'?taskPage():page==='planner'?plannerPage():page==='notes'?notesPage():page==='history'?historyPage():page==='statistics'?statisticsPage():page==='pdf-maker'?renderPDFPage():settingsPage()}
     </main>
   </div>`;
   if(page==='overview') applyDashboardLayout();
   bind();
+  updateStorageStatus();
 }
 const DASH_WIDGETS=[['hero','Welcome'],['kpis','Quick stats'],['week','Weekly focus & plan'],['month','Monthly progress'],['insights','Smart insights'],['lower','Subjects & tasks'],['recent','Recent sessions']];
 function applyDashboardLayout(){
@@ -301,16 +316,45 @@ function bind(){
   $('#toggleTheme')?.addEventListener('click',()=>{store.data.settings.light=!store.data.settings.light;document.body.classList.toggle('light',store.data.settings.light);store.save()});
   if(page==='pdf-maker') bindPDFPage(render);
 }
+async function exitTimerView(){
+  if(!timer.active||!timerScreenActive)return;
+  const leave=await askConfirm('Timer থেকে বের হবে? Timer বন্ধ হবে না—পেছনে চলতে থাকবে এবং পরে আবার Resume করতে পারবে।');
+  if(!leave)return;
+  timerScreenActive=false;
+  if(history.state?.focusFlowTimer)history.back();
+  page='overview';render();
+  toast('Timer চলছে। Overview থেকে আবার Focus Screen খুলতে পারবে।','success');
+}
+async function finishFocusSession(){
+  if(!timer.active)return;
+  const confirmed=await askConfirm('এই Focus Session Finish করে Study History-তে Save করবে?');
+  if(!confirmed)return;
+  try{
+    const duration=timer.finish();
+    timerScreenActive=false;
+    if(history.state?.focusFlowTimer)history.replaceState({},'',location.pathname+location.search);
+    page='history';render();
+    toast(duration?('Session saved · '+fmt(duration)):'Session finished','success');
+  }catch(error){toast(error.message||'Session save করা যায়নি।','error');}
+}
 function showTimer(){
-  if(!timer.active) timer.start(selectedSubject);
-  $('#app').innerHTML=`<div class="focus-screen"><div class="space-particles" aria-hidden="true"></div><div class="focus-nebula" aria-hidden="true"></div><div class="focus-orbit orbit-a" aria-hidden="true"></div><div class="focus-orbit orbit-b" aria-hidden="true"></div><div class="blackhole-scene ${timer.paused?'is-paused':''}" id="blackholeScene"><div class="bh-starfield" aria-hidden="true"></div><div class="bh-lensing" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-a" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-b" aria-hidden="true"></div><div class="bh-light-beams" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-energy-waves" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-disk bh-disk-outer" aria-hidden="true"></div><div class="bh-disk bh-disk-inner" aria-hidden="true"></div><div class="bh-corona" aria-hidden="true"></div><button class="focus-core" id="timerToggle" aria-label="Pause or resume focus timer"><strong id="clock" aria-live="off">00:00:00</strong></button><span class="bh-particle bh-particle-a" aria-hidden="true"></span><span class="bh-particle bh-particle-b" aria-hidden="true"></span><span class="bh-particle bh-particle-c" aria-hidden="true"></span></div></div>`;
+  if(!timer.active){
+    try{timer.start(selectedSubject);}catch(error){toast(error.message||'Timer শুরু করা যায়নি।','error');return;}
+  }
+  timerScreenActive=true;
+  if(!history.state?.focusFlowTimer)history.pushState({focusFlowTimer:true},'','#focus');
+  $('#app').innerHTML=`<div class="focus-screen"><button type="button" class="exit-focus" id="exitFocus" aria-label="Exit focus screen" title="Exit focus screen">×</button><div class="space-particles" aria-hidden="true"></div><div class="focus-nebula" aria-hidden="true"></div><div class="focus-orbit orbit-a" aria-hidden="true"></div><div class="focus-orbit orbit-b" aria-hidden="true"></div><div class="blackhole-scene ${timer.paused?'is-paused':''}" id="blackholeScene"><div class="bh-starfield" aria-hidden="true"></div><div class="bh-lensing" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-a" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-b" aria-hidden="true"></div><div class="bh-light-beams" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-energy-waves" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-disk bh-disk-outer" aria-hidden="true"></div><div class="bh-disk bh-disk-inner" aria-hidden="true"></div><div class="bh-corona" aria-hidden="true"></div><button class="focus-core" id="timerToggle" aria-label="Pause or resume focus timer"><strong id="clock" aria-live="off">00:00:00</strong></button><span class="bh-particle bh-particle-a" aria-hidden="true"></span><span class="bh-particle bh-particle-b" aria-hidden="true"></span><span class="bh-particle bh-particle-c" aria-hidden="true"></span></div><div class="focus-session-controls"><span class="focus-session-label">${esc(store.subjectName(timer.subjectId))} · ${timer.paused?'Paused':'Focusing'}</span><button type="button" class="finish-session-btn" id="finishFocus">✓ Finish Session</button></div></div>`;
   paintTimer();
-  const tick=setInterval(()=>{if(!$('#clock')){clearInterval(tick);return}paintTimer()},250);
-  $('#timerToggle').addEventListener('click',()=>{timer.toggle();});
-
+  const tick=setInterval(()=>{if(!$('#clock')){clearInterval(tick);return}paintTimer();const label=$('.focus-session-label');if(label)label.textContent=store.subjectName(timer.subjectId)+' · '+(timer.paused?'Paused':'Focusing');},250);
+  $('#timerToggle').addEventListener('click',()=>{try{timer.toggle();}catch(error){toast(error.message,'error');}});
+  $('#exitFocus').addEventListener('click',exitTimerView);
+  $('#finishFocus').addEventListener('click',finishFocusSession);
 }
 function exportBackup(){const blob=new Blob([JSON.stringify(store.data,null,2)],{type:'application/json'});const a=document.createElement('a');const url=URL.createObjectURL(blob);a.href=url;a.download='focus-flow-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Backup export started','success')}
 function importBackup(e){const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{store.import(JSON.parse(r.result));render();toast('Backup restored successfully','success')}catch{toast('Invalid backup file. Choose a valid Focus Flow backup.','error')}};r.readAsText(f)}
+window.addEventListener('popstate',async()=>{if(!timerScreenActive||!timer.active)return;const leave=await askConfirm('Focus Screen থেকে বের হবে? Timer ব্যাকগ্রাউন্ডে চলতে থাকবে; Finish হবে না।');if(leave){timerScreenActive=false;page='overview';render();toast('Timer continues in background','success');}else{history.pushState({focusFlowTimer:true},'','#focus');}});
+window.addEventListener('pagehide',()=>{if(timer.active){try{timer.persist();}catch(error){console.error('Could not persist timer during page hide',error);}}});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&timer.active){try{timer.persist();}catch(error){toast('Timer backup failed: '+error.message,'error');}}});
 store.data.settings.light&&(document.body.classList.add('light'));
 if(timer.active){selectedSubject=timer.subjectId||selectedSubject;showTimer();}else{render();}
 if(store.recoveryAvailable) toast('A damaged local-data snapshot was preserved for recovery. Check device storage before continuing.','error');
