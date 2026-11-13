@@ -132,3 +132,6 @@ body.light .dash-hero{background:radial-gradient(ellipse at 85% 15%,#7764c51c,tr
   .dash-chart-col small{font-size:8px}
 }
 @media(prefers-reduced-motion:reduce){.dash-chart-track i{transition:none}}
+
+/* Dashboard: highlight days that reached the daily focus target */
+.dash-chart-track.goal-met i{background:linear-gradient(180deg,#f6d477,#d69b36);box-shadow:0 0 14px #e9b94a44}
