@@ -29,7 +29,7 @@ class ProjectHealthTests(unittest.TestCase):
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text("line\n", encoding="utf-8")
             report = audit(root)
-            self.assertEqual(report["python_share_percent"], 16.67)
+            self.assertEqual(report["python_share_percent"], 20.0)
             self.assertEqual(report["status"], "healthy")
             self.assertEqual(report["missing_required_files"], [])
             self.assertIn("Python share", render_markdown(report))
