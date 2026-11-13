@@ -68,3 +68,26 @@ test('timer finish works when crypto.randomUUID is unavailable',()=>{
     Object.defineProperty(globalThis,'crypto',{configurable:true,value:oldCrypto});
   }
 });
+
+test('invalid active timer snapshots are cleared instead of restored',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={setItem:(k,v)=>map.set(k,v),getItem:k=>map.get(k)||null,removeItem:k=>map.delete(k)};
+  try{
+    map.set('focus-flow-active-session',JSON.stringify({subjectId:'x',startedAt:1000,segmentStartedAt:0,accumulated:-5,paused:false}));
+    const timer=new FocusTimer(memory());
+    assert.equal(timer.active,false);
+    assert.equal(map.has('focus-flow-active-session'),false);
+  }finally{globalThis.localStorage=old}
+});
+test('valid running timer snapshots restore elapsed-time state',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={setItem:(k,v)=>map.set(k,v),getItem:k=>map.get(k)||null,removeItem:k=>map.delete(k)};
+  try{
+    const now=Date.now();
+    map.set('focus-flow-active-session',JSON.stringify({subjectId:'x',startedAt:now-5000,segmentStartedAt:now-3000,accumulated:2,paused:false}));
+    const timer=new FocusTimer(memory());
+    assert.equal(timer.active,true);
+    assert.equal(timer.paused,false);
+    assert.ok(timer.elapsed()>=4);
+  }finally{globalThis.localStorage=old}
+});
