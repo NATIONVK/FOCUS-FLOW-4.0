@@ -92,3 +92,19 @@ test('valid running timer snapshots restore elapsed-time state',()=>{
     assert.ok(timer.elapsed()>=4);
   }finally{globalThis.localStorage=old}
 });
+
+test('monthly calendar returns elapsed local days and daily focus totals',()=>{
+  const now=new Date(2026,10,13,12,0,0);
+  const first=new Date(2026,10,1,9,0,0);
+  const last=new Date(2026,10,13,18,0,0);
+  const days=Analytics.monthlyDays([{startedAt:first.toISOString(),duration:1800},{startedAt:last.toISOString(),duration:3600}],2026,10,now);
+  assert.equal(days.length,13);
+  assert.equal(days[0].key,'2026-11-01');
+  assert.equal(days[0].seconds,1800);
+  assert.equal(days[12].seconds,3600);
+});
+test('monthly consistency score uses elapsed days and configured daily goal',()=>{
+  const now=new Date(2026,10,3,12,0,0);
+  const sessions=[{startedAt:new Date(2026,10,1,8).toISOString(),duration:3600},{startedAt:new Date(2026,10,2,8).toISOString(),duration:1800}];
+  assert.deepEqual(Analytics.consistency(sessions,60,now),{score:33,met:1,elapsed:3});
+});
