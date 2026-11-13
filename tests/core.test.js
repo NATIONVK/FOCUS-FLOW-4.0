@@ -131,3 +131,43 @@ test('legacy settings receive a safe default dashboard layout',()=>{
     assert.deepEqual(store.data.settings.dashboardLayout,{order:[],hidden:[]});
   }finally{globalThis.localStorage=old}
 });
+
+
+test('failed timer save rolls back the appended session so retry cannot duplicate it',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={setItem:(k,v)=>map.set(k,v),getItem:k=>map.get(k)||null,removeItem:k=>map.delete(k)};
+  try{
+    const s=memory();let shouldFail=true;
+    s.save=()=>{if(shouldFail)throw new Error('storage full')};
+    const timer=new FocusTimer(s);timer.start('x');timer.segmentStartedAt=Date.now()-2500;
+    assert.throws(()=>timer.finish(),/storage full/);
+    assert.equal(s.data.sessions.length,0);
+    assert.equal(timer.active,true);
+    shouldFail=false;
+    assert.ok(timer.finish()>=1);
+    assert.equal(s.data.sessions.length,1);
+  }finally{globalThis.localStorage=old}
+});
+
+test('subtasks persist, update parent completion and survive backup import',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};
+  try{
+    const store=new Store();store.addTask('Prepare chapter');
+    const task=store.data.tasks[0];
+    store.addSubtask(task.id,'Read definitions');
+    store.addSubtask(task.id,'Solve examples');
+    const [first,second]=task.subtasks;
+    store.toggleSubtask(task.id,first.id,true);
+    assert.equal(task.done,false);
+    store.toggleSubtask(task.id,second.id,true);
+    assert.equal(task.done,true);
+    const restored=new Store();
+    assert.equal(restored.data.tasks[0].subtasks.length,2);
+    assert.equal(restored.data.tasks[0].done,true);
+    restored.toggleSubtask(task.id,first.id,false);
+    assert.equal(restored.data.tasks[0].done,false);
+    restored.deleteSubtask(task.id,second.id);
+    assert.equal(restored.data.tasks[0].subtasks.length,1);
+  }finally{globalThis.localStorage=old}
+});
