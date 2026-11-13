@@ -14,7 +14,8 @@ function normalize(data){
   const tasks=(data.tasks??[]).map(t=>({id:text(t?.id,100)||makeId(),title:text(t?.title,300),done:!!t?.done,priority:['low','medium','high'].includes(t?.priority)?t.priority:'medium',dueDate:typeof t?.dueDate==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.dueDate)?t.dueDate:''})).filter(t=>t.title);
   const notes=(data.notes??[]).map(n=>({id:text(n?.id,100)||makeId(),title:text(n?.title,160),body:typeof n?.body==='string'?n.body.slice(0,20000):'',updatedAt:Number.isFinite(Number(n?.updatedAt))?Number(n.updatedAt):Date.now()})).filter(n=>n.title);
   const settings=data.settings&&typeof data.settings==='object'&&!Array.isArray(data.settings)?data.settings:{};
-  return {version:4,subjects:subjects.length?subjects:d.subjects,sessions,tasks,plans,notes,settings:{...d.settings,light:!!settings.light,dailyGoalMinutes:Number.isFinite(Number(settings.dailyGoalMinutes))?Math.max(1,Math.min(1440,Number(settings.dailyGoalMinutes))):120}};
+  const allowedWidgets=['hero','kpis','week','month','insights','lower','recent'];const layout=settings.dashboardLayout&&typeof settings.dashboardLayout==='object'?settings.dashboardLayout:{};const dashboardLayout={order:Array.isArray(layout.order)?layout.order.filter((x,i,a)=>allowedWidgets.includes(x)&&a.indexOf(x)===i):[],hidden:Array.isArray(layout.hidden)?layout.hidden.filter((x,i,a)=>allowedWidgets.includes(x)&&a.indexOf(x)===i):[]};
+  return {version:4,subjects:subjects.length?subjects:d.subjects,sessions,tasks,plans,notes,settings:{...d.settings,light:!!settings.light,dailyGoalMinutes:Number.isFinite(Number(settings.dailyGoalMinutes))?Math.max(1,Math.min(1440,Number(settings.dailyGoalMinutes))):120,dashboardLayout}};
 }
 export class Store {
   constructor(){this.recoveryAvailable=false;this.data=this.load();}
@@ -54,6 +55,7 @@ export class Store {
   deleteNote(id){this.data.notes=this.data.notes.filter(x=>x.id!==id);this.save();}
   deleteSession(id){this.data.sessions=this.data.sessions.filter(x=>x.id!==id);this.save();}
   subjectName(id){return this.data.subjects.find(s=>s.id===id)?.name||'Deleted subject';}
+  setDashboardLayout(layout={}){const allowed=['hero','kpis','week','month','insights','lower','recent'];const clean=list=>Array.isArray(list)?[...new Set(list.filter(x=>allowed.includes(x)))]:[];this.data.settings.dashboardLayout={order:clean(layout.order),hidden:clean(layout.hidden)};this.save();}
   setDailyGoal(minutes){const value=Number(minutes);if(!Number.isFinite(value)||value<1||value>1440)throw new Error('Daily goal must be between 1 and 1440 minutes');this.data.settings.dailyGoalMinutes=Math.round(value);this.save();}
   import(data){const clean=normalize(data);this.data=clean;this.save();}
 }
