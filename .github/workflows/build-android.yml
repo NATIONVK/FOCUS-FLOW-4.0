@@ -62,8 +62,8 @@ jobs:
           from pathlib import Path
           import re
           manifest = Path("android/app/src/main/AndroidManifest.xml").read_text(encoding="utf-8")
-          assert re.search(r'<application\\b[^>]*android:icon="@mipmap/ic_launcher"', manifest), "Launcher icon is not assigned to the application"
-          assert re.search(r'<application\\b[^>]*android:roundIcon="@mipmap/ic_launcher_round"', manifest), "Round launcher icon is not assigned"
+          assert re.search(r'<application\b[^>]*android:icon="@mipmap/ic_launcher"', manifest), "Launcher icon is not assigned to the application"
+          assert re.search(r'<application\b[^>]*android:roundIcon="@mipmap/ic_launcher_round"', manifest), "Round launcher icon is not assigned"
           res = Path("android/app/src/main/res")
           assert (res / "mipmap-anydpi-v26/ic_launcher.xml").is_file(), "Adaptive launcher icon missing"
           assert (res / "mipmap-anydpi-v26/ic_launcher_round.xml").is_file(), "Round adaptive launcher icon missing"
