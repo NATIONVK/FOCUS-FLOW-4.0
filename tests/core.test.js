@@ -108,3 +108,26 @@ test('monthly consistency score uses elapsed days and configured daily goal',()=
   const sessions=[{startedAt:new Date(2026,10,1,8).toISOString(),duration:3600},{startedAt:new Date(2026,10,2,8).toISOString(),duration:1800}];
   assert.deepEqual(Analytics.consistency(sessions,60,now),{score:33,met:1,elapsed:3});
 });
+
+test('dashboard widget layout persists valid order and hidden widgets',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};
+  try{
+    const store=new Store();
+    store.setDashboardLayout({order:['month','hero','month','unknown','kpis'],hidden:['recent','bad','recent']});
+    assert.deepEqual(store.data.settings.dashboardLayout,{order:['month','hero','kpis'],hidden:['recent']});
+    const reloaded=new Store();
+    assert.deepEqual(reloaded.data.settings.dashboardLayout,{order:['month','hero','kpis'],hidden:['recent']});
+  }finally{globalThis.localStorage=old}
+});
+test('legacy settings receive a safe default dashboard layout',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};
+  try{
+    const store=new Store();
+    assert.deepEqual(store.data.settings.dashboardLayout,{order:[],hidden:[]});
+    const legacy={...store.data,settings:{dailyGoalMinutes:90}};
+    store.import(legacy);
+    assert.deepEqual(store.data.settings.dashboardLayout,{order:[],hidden:[]});
+  }finally{globalThis.localStorage=old}
+});
