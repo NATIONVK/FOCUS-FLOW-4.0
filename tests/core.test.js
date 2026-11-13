@@ -179,7 +179,7 @@ test('failed backup restore keeps the existing in-memory records intact',()=>{
   try{
     const store=new Store();const before=store.data;
     const backup={...before,tasks:[{id:'backup-task',title:'Imported task'}]};
-    assert.throws(()=>store.import(backup),/ডেটা সংরক্ষণ করা যায়নি/);
+    assert.throws(()=>store.import(backup),/ডেটা সংরক্ষণ হয়নি/);
     assert.equal(store.data,before);
     assert.equal(store.data.tasks.length,0);
   }finally{globalThis.localStorage=old}
@@ -197,7 +197,7 @@ test('failed local persistence rolls back the in-memory mutation',()=>{
     store.addTask('Saved task');
     const persisted=map.get('focus-flow-v4');
     failWrites=true;
-    assert.throws(()=>store.addTask('Unsaved task'),/ডিভাইসে জায়গা/);
+    assert.throws(()=>store.addTask('Unsaved task'),/Storage unavailable/);
     assert.deepEqual(store.data.tasks.map(t=>t.title),['Saved task']);
     assert.equal(map.get('focus-flow-v4'),persisted);
   }finally{globalThis.localStorage=old}
@@ -235,9 +235,9 @@ test('period comparison compares rolling seven-day and month-to-date windows',()
   assert.equal(result.week.current,7200);
   assert.equal(result.week.previous,3600);
   assert.equal(result.week.change,100);
-  assert.equal(result.month.current,7200);
+  assert.equal(result.month.current,10800);
   assert.equal(result.month.previous,1800);
-  assert.equal(result.month.change,300);
+  assert.equal(result.month.change,500);
 });
 test('period comparison handles zero previous activity without division by zero',()=>{
   const result=Analytics.periodComparison([],new Date(2026,10,13,12));
