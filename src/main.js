@@ -66,6 +66,11 @@ function overview(t,subjects) {
   const weekTotal=week.reduce((n,d)=>n+d.seconds,0);
   const goalDays=week.filter(d=>d.seconds>=goal).length;
   const activeDays=week.filter(d=>d.seconds>0).length;
+  const timeBuckets=[{label:'Morning',range:'05:00–11:59',test:h=>h>=5&&h<12,seconds:0},{label:'Afternoon',range:'12:00–16:59',test:h=>h>=12&&h<17,seconds:0},{label:'Evening',range:'17:00–21:59',test:h=>h>=17&&h<22,seconds:0},{label:'Night',range:'22:00–04:59',test:h=>h>=22||h<5,seconds:0}];
+  sessions.forEach(s=>{const hour=new Date(s.startedAt).getHours();const bucket=timeBuckets.find(x=>x.test(hour));if(bucket)bucket.seconds+=Math.max(0,Number(s.duration)||0);});
+  const bestPeriod=[...timeBuckets].sort((a,b)=>b.seconds-a.seconds)[0];
+  const hasTimePattern=bestPeriod?.seconds>0;
+  const subjectShare=topSubject&&t.all?Math.round(topSubject.seconds/t.all*100):0;
   const bestDay=week.reduce((a,b)=>b.seconds>a.seconds?b:a,week[0]||{label:'—',seconds:0});
   const recent=[...sessions].sort((a,b)=>new Date(b.startedAt)-new Date(a.startedAt)).slice(0,3);
   const taskPriorityRank={high:0,medium:1,low:2};
@@ -94,6 +99,15 @@ function overview(t,subjects) {
     <article class="panel dash-plan-panel"><div class="panel-head"><div><span class="eyebrow">TODAY'S ROADMAP</span><h3>Study plan</h3></div><button class="text-btn" data-page="planner">Manage ↗</button></div>
       ${todayPlans.length?`<div class="dash-plan-progress"><div><b>${fmt(actualPlanned)}</b><span> / ${fmt(plannedMinutes*60)} planned</span><strong>${planProgress}%</strong></div><div class="progress-track" role="progressbar" aria-label="Today study plan progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${planProgress}"><i style="width:${planProgress}%"></i></div></div><div class="dash-plan-list">${todayPlans.slice(0,4).map(p=>{const s=subjects.find(x=>x.id===p.subjectId);return `<div class="dash-plan-item"><i style="background:${esc(s?.color||'#8b7cff')}"></i><span>${esc(store.subjectName(p.subjectId))}</span><b>${p.minutes}m</b><button data-start-plan="${p.id}" aria-label="Start ${esc(store.subjectName(p.subjectId))}">Start</button></div>`}).join('')}</div>`:'<div class="dash-empty"><span>◷</span><b>No study blocks planned</b><small>Give your day a simple structure.</small><button class="primary" data-page="planner">Create today’s plan</button></div>'}
     </article>
+  </section>
+  <section class="panel dash-insights-panel">
+    <div class="panel-head"><div><span class="eyebrow">YOUR STUDY PATTERNS</span><h3>Smart productivity insights</h3></div><span class="dash-period">BASED ON YOUR SESSIONS</span></div>
+    <div class="dash-insights-grid">
+      <div class="dash-insight-card"><span class="dash-insight-icon">◷</span><small>YOUR PEAK PERIOD</small><strong>${hasTimePattern?bestPeriod.label:'Not enough data'}</strong><span>${hasTimePattern?bestPeriod.range+' · '+(bestPeriod.seconds/3600).toFixed(1)+'h recorded':'Complete sessions to discover your strongest time'}</span></div>
+      <div class="dash-insight-card"><span class="dash-insight-icon">✦</span><small>TOP SUBJECT</small><strong>${topSubject&&topSubject.seconds?esc(topSubject.subject.name):'No sessions yet'}</strong><span>${topSubject&&topSubject.seconds?subjectShare+'% of all recorded focus time':'Start a session to build your subject profile'}</span></div>
+      <div class="dash-insight-card"><span class="dash-insight-icon">▥</span><small>AVERAGE ON ACTIVE DAYS</small><strong>${activeDays?(weekTotal/activeDays/3600).toFixed(1)+'h':'—'}</strong><span>${activeDays?activeDays+' active days in the last 7':'No focus time recorded this week'}</span></div>
+    </div>
+    <p class="dash-insight-note">Insights use your saved session start times and durations on this device. They describe your recorded history, not a prediction.</p>
   </section>
   <section class="dash-lower-grid">
     <article class="panel"><div class="panel-head"><div><span class="eyebrow">YOUR LEARNING AREAS</span><h3>Subject breakdown</h3></div><button class="text-btn" data-page="subjects">All subjects ↗</button></div>
