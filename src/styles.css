@@ -325,3 +325,9 @@ body.light .subtask-row{color:#4d5670}
  .task-main .task-actions{width:100%;justify-content:flex-start}
  .subtask-list{margin-left:8px}
 }
+
+
+/* Keep nested task controls independently tappable on mobile */
+.subtask-row>label{display:flex;align-items:center;gap:9px;flex:1;min-width:0;min-height:36px;cursor:pointer}
+.subtask-row>label>span{overflow-wrap:anywhere}
+.subtask-delete{flex:0 0 40px;min-width:40px;min-height:40px;display:inline-grid;place-items:center}
