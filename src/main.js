@@ -37,7 +37,7 @@ function render() {
   $('#app').innerHTML=`
   <div class="shell">
     <aside class="sidebar"><div class="brand"><img class="brand-logo" src="./icon.svg" alt="FOCUS FLOW logo"><div>FOCUS <b>FLOW</b><small>YOUR SPACE TO GROW</small></div></div>
-      <nav>${nav()}</nav><div class="side-foot"><i class="online-dot"></i> OFFLINE FIRST<br><small>NATIONVK · FOCUS FLOW 4.0</small></div></aside><nav class="mobile-nav">${mobileNav()}</nav>
+      <nav>${nav()}</nav><div class="side-foot"><i class="online-dot"></i> OFFLINE FIRST<br><small>NATIONVK · FOCUS FLOW 5.0</small></div></aside><nav class="mobile-nav">${mobileNav()}</nav>
     <main class="main">
       <header class="topbar"><div><span class="eyebrow">YOUR PERSONAL STUDY OS</span><h1>${page==='overview'?'Overview':page==='pdf-maker'?'PDF Maker':page[0].toUpperCase()+page.slice(1)}</h1></div><div class="status"><i></i> Local data secured</div></header>
       ${page==='overview'?overview(t,subjects):page==='subjects'?subjectPage(subjects):page==='tasks'?taskPage():page==='planner'?plannerPage():page==='notes'?notesPage():page==='history'?historyPage():page==='statistics'?statisticsPage():page==='pdf-maker'?renderPDFPage():settingsPage()}
