@@ -66,12 +66,13 @@ export class FocusTimer {
     if(!this.active) return null;
     const duration=this.elapsed();
     const session=duration>=1?{id:this.sessionId||`session-${this.startedAt}-${this.subjectId}`,subjectId:this.subjectId,startedAt:new Date(this.startedAt).toISOString(),endedAt:new Date().toISOString(),duration:Math.floor(duration)}:null;
-    if(session&&!this.store.data.sessions.some(item=>item.id===session.id)) this.store.data.sessions.push(session);
+    const sessionAlreadySaved=!!session&&this.store.data.sessions.some(item=>item.id===session.id);
+    if(session&&!sessionAlreadySaved) this.store.data.sessions.push(session);
     try {
       this.store.save();
     } catch(error) {
-      // Roll back the in-memory append so retrying Finish cannot duplicate a session.
-      if(session) this.store.data.sessions=this.store.data.sessions.filter(item=>item.id!==session.id);
+      // Roll back only this attempt's append; never remove a previously saved session.
+      if(session&&!sessionAlreadySaved) this.store.data.sessions=this.store.data.sessions.filter(item=>item.id!==session.id);
       throw error;
     }
     try { const storage=globalThis.localStorage;if(!storage)throw new Error('Storage unavailable');storage.removeItem(ACTIVE);if(storage.getItem(ACTIVE)!==null)throw new Error('Active timer snapshot could not be cleared'); }
