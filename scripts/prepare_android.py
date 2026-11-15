@@ -10,7 +10,10 @@ import argparse
 import json
 import re
 
-from icon_assets import write_android_icon_resources
+try:
+    from .icon_assets import write_android_icon_resources
+except ImportError:
+    from icon_assets import write_android_icon_resources
 from pathlib import Path
 
 PERMISSIONS = (
