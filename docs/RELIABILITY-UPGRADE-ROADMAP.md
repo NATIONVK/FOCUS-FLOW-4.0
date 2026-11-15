@@ -112,3 +112,15 @@ Before calling a release ready:
 - CI can validate JS/Python tests, Vite build, Gradle compile and APK artifact creation.
 - Vivo Y29 / Android 15 must still be tested manually for timer process-kill recovery, notification permission denied/granted states, app swipe-away, battery saver, PDF backup export/import, and large PDF/photo memory behavior.
 - No battery-optimization exemption is requested; the service does not run a periodic wake-up loop.
+
+
+## Delivered — Focus Flow 5.2.0 stability hardening
+- PDF backup export now checks declared Blob size and cumulative remaining capacity before materializing each file as an ArrayBuffer. This avoids loading a known-oversized PDF into memory before rejecting it.
+- PDF backup export rejects missing/duplicate document IDs before producing a backup that would later fail restore validation, and verifies the declared Blob size against the bytes actually read.
+- Added regression coverage for pre-allocation size rejection, duplicate/missing IDs, invalid base64, oversized backup files and empty-library backups.
+- Corrected general app backup metadata to report 5.2.0 and advanced the offline shell cache to v9.
+- Existing focus UI, timer behavior, PDF reader limits and data schema remain unchanged.
+
+## 5.2 verification boundary
+- GitHub Actions verifies source tests, Python build-tool tests, production web build, Android manifest preparation and APK compilation.
+- Actual Vivo Y29 / Android 15 behavior remains a manual physical-device test. CI is not evidence of device-specific background process survival, OEM battery policy, photo picker behavior, or real-world RAM use.
