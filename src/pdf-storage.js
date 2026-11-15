@@ -52,15 +52,20 @@ export function browserDownload(blob,name){
  setTimeout(()=>URL.revokeObjectURL(url),15000);
 }
 export async function savePdfOutput(blob,name,{askLocation=true,source='created'}={}){
- let saved=null;try{saved=await savePdfToLibrary(blob,name,source)}catch(error){console.warn('Could not save PDF into in-app library',error)}
+ let saved=null,libraryError=null,deviceSaved=false,downloadStarted=false;
+ try{saved=await savePdfToLibrary(blob,name,source)}catch(error){libraryError=error;console.warn('Could not save PDF into in-app library',error)}
  if(askLocation){
   try{
    const {isAndroidGalleryAvailable,saveDevicePdf}=await import('./native-gallery.js');
-   if(isAndroidGalleryAvailable())await saveDevicePdf(blob,name);
-   else browserDownload(blob,name);
+   if(isAndroidGalleryAvailable())deviceSaved=await saveDevicePdf(blob,name);
+   else{browserDownload(blob,name);downloadStarted=true;}
   }catch(error){
-   if(error?.code!=='CANCELLED')console.warn('System Save As unavailable; PDF remains in the in-app library',error);
+   if(error?.code!=='CANCELLED'&& !saved)throw new Error('PDF Library-তে save হয়নি এবং ফোনে export-ও করা যায়নি: '+(error?.message||'Unknown error'));
+   if(error?.code!=='CANCELLED')console.warn('System Save As failed; verified in-app PDF copy remains available',error);
   }
  }
- return saved;
+ if(!saved&&!deviceSaved&&!downloadStarted){
+  throw new Error('PDF কোথাও সংরক্ষণ হয়নি। Storage permission/space পরীক্ষা করে আবার চেষ্টা করো। '+(libraryError?.message||''));
+ }
+ return {...(saved||{id:null,name,size:blob.size,updatedAt:Date.now()}),destination:deviceSaved?(saved?'device+library':'device'):downloadStarted?(saved?'download+library':'download'):'library'};
 }
