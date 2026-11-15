@@ -98,3 +98,17 @@ Before calling a release ready:
 ## Verification status
 - Automated JS and Python tests, production web build, Android Gradle APK build, and project-health report are checked through GitHub Actions for the exact release commit.
 - No physical Android device was available to this workflow; device-specific notification, gallery, PDF and background-resume behavior remains unverified.
+
+
+## Delivered — Focus Flow 5.1.0
+- Added portable PDF Library JSON backup export and validated merge-restore. Restore checks format/version, document count, unique backup IDs, base64 data, PDF header, exact byte sizes and 40 MB total source size. Existing documents are never cleared.
+- PDF Library transactions now correctly return null for missing document lookups instead of leaking an IDBRequest object.
+- Reduced PDF source file limit to 75 MB, PDF.js image decoding to 8 million pixels, page canvas memory to 6 million output pixels, and thumbnail generation to 18 pages to control Android WebView memory.
+- Android timer notification permission is requested only when starting a new focus session, not on pause/resume.
+- Native foreground timer uses persisted validated state on process recreation, synchronously commits state snapshots, sanitizes subject text and relies on the system notification chronometer instead of a polling wake lock.
+- Updated service worker shell cache to v8 and Android artifact naming to focus-flow-5.1-debug-apk.
+
+## Verification requirements for 5.1
+- CI can validate JS/Python tests, Vite build, Gradle compile and APK artifact creation.
+- Vivo Y29 / Android 15 must still be tested manually for timer process-kill recovery, notification permission denied/granted states, app swipe-away, battery saver, PDF backup export/import, and large PDF/photo memory behavior.
+- No battery-optimization exemption is requested; the service does not run a periodic wake-up loop.
