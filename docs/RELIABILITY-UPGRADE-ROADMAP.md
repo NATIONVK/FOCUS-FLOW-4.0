@@ -9,6 +9,9 @@ This roadmap prioritizes reliable everyday use over adding decorative screens. I
 - Rename a saved PDF; invalid filename characters are replaced and the .pdf extension is preserved.
 - Keep Open and Delete actions available in the local IndexedDB library.
 - Use compact mobile-first controls.
+- Identify saved PDFs by stable Library ID for reading progress and bookmarks, so renaming or same-name files do not collide.
+- Open recent PDFs directly from the Home screen.
+- Confirm destructive PDF deletion and clean up associated recent/progress/bookmark metadata.
 
 ## P0 — Reliability and data safety
 1. Add an app-wide data health screen: local storage availability, IndexedDB availability, estimated usage, last successful backup, and recovery state.
