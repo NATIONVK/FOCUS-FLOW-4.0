@@ -395,3 +395,22 @@ body.light .subtask-row{color:#4d5670}
 .blackhole-scene[data-focus-level="5"] .bh-light-beams i,
 .blackhole-scene[data-focus-level="6"] .bh-light-beams i{opacity:.82;filter:drop-shadow(0 0 11px #ffc17c)}
 @media(max-height:520px){.focus-screen .blackhole-scene{width:min(68vh,520px);height:min(68vh,520px)}.focus-screen .focus-session-controls{bottom:8px}.focus-screen .finish-session-btn{min-height:36px}}
+
+
+/* Black Hole Timer 4.0 — freeze every scene animation while paused */
+.blackhole-scene.is-paused .bh-disk,
+.blackhole-scene.is-paused .bh-particle,
+.blackhole-scene.is-paused .bh-light-beams i,
+.blackhole-scene.is-paused .bh-energy-waves i,
+.blackhole-scene.is-paused .bh-lensing-arc,
+.blackhole-scene.is-paused .bh-starfield,
+.blackhole-scene.is-paused .bh-lensing{
+  animation-play-state:paused!important;
+}
+.blackhole-scene .focus-core strong{color:var(--timer-color,#a99aff)}
+.focus-screen .focus-core:focus-visible,
+.focus-screen .exit-focus:focus-visible,
+.focus-screen .finish-session-btn:focus-visible{
+  outline:2px solid #d8c8ff;
+  outline-offset:4px;
+}
