@@ -81,3 +81,20 @@ Before calling a release ready:
 - Vivo Y29 / Android 15: install the generated APK and test background timer, notification permission, Back/Exit behavior, photo picker, PDF open/save and app restart.
 - Large multi-photo PDF creation should be exercised with 10–20 high-resolution photos and monitored for memory pressure.
 - Battery saver and OEM background restrictions can vary by device; CI cannot prove long-running background reliability.
+
+
+## Delivered — Focus Flow 5.0.0 app-wide evolution
+- Task and sub-task search added alongside existing status filters.
+- Fixed task parent/sub-task completion reconciliation during normalization and final sub-task deletion.
+- Fixed last-subject deletion persistence across app restart.
+- Strengthened backup validation for plan lists, plan references and task sub-task records.
+- Added keyboard-accessible confirmation and text dialogs: Escape handling, focus containment, accessible dialog labels and focus restoration.
+- Theme changes now reflect only persisted settings; failed writes restore the previous visual state.
+- Android multi-photo selection now rejects oversized combined data-URL batches before the full batch is retained.
+- Native foreground timer plugin now rejects start/stop failures rather than silently resolving.
+- IndexedDB PDF Library now handles blocked opens and closes connections on version changes.
+- Versioned the offline shell cache and bumped app package/backup metadata to 5.0.0.
+
+## Verification status
+- Automated JS and Python tests, production web build, Android Gradle APK build, and project-health report are checked through GitHub Actions for the exact release commit.
+- No physical Android device was available to this workflow; device-specific notification, gallery, PDF and background-resume behavior remains unverified.
