@@ -528,3 +528,48 @@ body.light .subtask-row{color:#4d5670}
   .dashboard-motion-ready .dash-month-track i,
   .dashboard-motion-ready .progress-track i{transition:none!important;transform:none}
 }
+
+/* Dashboard 5.3.1 — responsive interaction polish */
+@media (hover:hover) and (pointer:fine) {
+  .dash-kpi,
+  .dash-hero,
+  .dash-main-grid>.panel,
+  .dash-month-panel,
+  .dash-insights-panel,
+  .dash-lower-grid>.panel,
+  .dash-recent-panel {
+    transition:border-color .2s ease,box-shadow .2s ease;
+  }
+  .dash-kpi:hover,
+  .dash-main-grid>.panel:hover,
+  .dash-month-panel:hover,
+  .dash-insights-panel:hover,
+  .dash-lower-grid>.panel:hover,
+  .dash-recent-panel:hover {
+    border-color:#8b7cff66;
+    box-shadow:0 10px 28px #0002,0 0 0 1px #8b7cff12;
+  }
+}
+@media(max-width:700px) {
+  .dash-actions button,
+  .dash-plan-item button,
+  .dash-task-row button,
+  .dash-recent-row button {
+    min-height:44px;
+  }
+  .dash-chart-col,
+  .dash-chart-track {
+    -webkit-tap-highlight-color:transparent;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .dash-kpi,
+  .dash-hero,
+  .dash-main-grid>.panel,
+  .dash-month-panel,
+  .dash-insights-panel,
+  .dash-lower-grid>.panel,
+  .dash-recent-panel {
+    transition:none!important;
+  }
+}
