@@ -42,9 +42,9 @@ test('PDF page operations preserve order, rotation and extraction',async()=>{
 });
 
 import {createPdfBackupPayload,parsePdfBackupPayload,PDF_BACKUP_FORMAT} from '../src/pdf-backup.js';
-const pdfBlob=(text='%PDF-1.7\\nTest')=>new Blob([text],{type:'application/pdf'});
+const pdfBlob=(text='%PDF-1.7\nTest')=>new Blob([text],{type:'application/pdf'});
 test('PDF Library backup round-trips multiple valid PDFs',async()=>{
- const payload=await createPdfBackupPayload([{id:'doc-1',name:'notes',blob:pdfBlob(),updatedAt:123},{id:'doc-2',name:'class.pdf',blob:pdfBlob('%PDF-1.4\\nSecond'),updatedAt:456}]);
+ const payload=await createPdfBackupPayload([{id:'doc-1',name:'notes',blob:pdfBlob(),updatedAt:123},{id:'doc-2',name:'class.pdf',blob:pdfBlob('%PDF-1.4\nSecond'),updatedAt:456}]);
  const parsed=parsePdfBackupPayload(payload);
  assert.equal(payload.format,PDF_BACKUP_FORMAT);assert.equal(parsed.documents.length,2);assert.equal(parsed.documents[0].name,'notes.pdf');assert.equal(parsed.documents[1].size,15);
 });
