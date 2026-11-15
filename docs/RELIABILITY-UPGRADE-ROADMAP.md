@@ -134,3 +134,10 @@ Before calling a release ready:
 ## 5.3 verification boundary
 - GitHub Actions must pass JavaScript tests, Python tooling tests, production web build, Android manifest preparation and Gradle APK compilation for the exact PR commit.
 - Physical Vivo Y29 / Android 15 installation, process-kill/reboot timer recovery, PDF Library quota stress, and real RAM/battery profiling remain manual device checks.
+
+
+## Additional 5.3 PDF Library transaction hardening
+- IndexedDB transaction callbacks that throw now explicitly abort the transaction, preventing partially applied multi-record restore operations from being committed.
+- Database connections are closed when an open request succeeds after an earlier blocked-open rejection, avoiding a late-open connection leak.
+- Transaction completion, error and abort handlers are installed before running write callbacks, and database handles are closed on every settled path.
+- Automated CI still cannot simulate every OEM WebView/IndexedDB quota condition; device-level restore failure injection remains required.
