@@ -25,6 +25,7 @@ REQUIRED = (
     "native/android/FocusTimerPlugin.java",
     "native/android/GalleryPlugin.java",
     "scripts/prepare_android.py",
+    "tests/test_android_prepare.py",
 )
 
 
