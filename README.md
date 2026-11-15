@@ -14,6 +14,16 @@
 
 ---
 
+## Latest reliability upgrade · 4.0.1
+
+- Timer rendering now updates once per second instead of four times per second, reducing unnecessary WebView work while keeping elapsed time derived from timestamps.
+- Focus timer render-loop lifecycle is cleaned up when leaving or finishing the timer.
+- Paused Black Hole scenes freeze disk, particle, beam and wave animations.
+- Photo-to-PDF creation caps each batch at 20 pages and downsizes oversized source images before encoding to reduce memory pressure on Android.
+- PDF export now reports the actual destination and does not silently claim success when neither the in-app library nor an export destination saved the file.
+
+These changes are covered by the repository's automated workflow; physical-device behavior still needs installation testing.
+
 ## ✦ About the project
 
 **FOCUS FLOW** is an offline-first study planner and productivity companion built with HTML, CSS, and JavaScript, then packaged for Android using Capacitor. It brings focus sessions, subject tracking, tasks, weekly planning, study analytics, notes, and image-to-PDF tools into one workspace.
