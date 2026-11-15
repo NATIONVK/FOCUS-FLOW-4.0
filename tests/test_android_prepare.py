@@ -53,6 +53,7 @@ class AndroidPrepareTests(unittest.TestCase):
             self.assertTrue((root / "mipmap-anydpi-v26/ic_launcher.xml").is_file())
             self.assertTrue((root / "mipmap-anydpi-v26/ic_launcher_round.xml").is_file())
             self.assertTrue((root / "drawable-nodpi/ic_launcher_foreground.png").is_file())
+            self.assertTrue((root / "drawable/ic_stat_focus_flow.xml").is_file())
             for density in ("mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"):
                 self.assertTrue((root / f"mipmap-{density}/ic_launcher.png").is_file())
                 self.assertTrue((root / f"mipmap-{density}/ic_launcher_round.png").is_file())
