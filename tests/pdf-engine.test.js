@@ -40,3 +40,26 @@ test('PDF page operations preserve order, rotation and extraction',async()=>{
  assert.equal(extracted.getPageCount(),2);
  assert.deepEqual(extracted.getPages().map(page=>page.getSize().width),[300,200]);
 });
+
+import {createPdfBackupPayload,parsePdfBackupPayload,PDF_BACKUP_FORMAT} from '../src/pdf-backup.js';
+const pdfBlob=(text='%PDF-1.7\\nTest')=>new Blob([text],{type:'application/pdf'});
+test('PDF Library backup round-trips multiple valid PDFs',async()=>{
+ const payload=await createPdfBackupPayload([{id:'doc-1',name:'notes',blob:pdfBlob(),updatedAt:123},{id:'doc-2',name:'class.pdf',blob:pdfBlob('%PDF-1.4\\nSecond'),updatedAt:456}]);
+ const parsed=parsePdfBackupPayload(payload);
+ assert.equal(payload.format,PDF_BACKUP_FORMAT);assert.equal(parsed.documents.length,2);assert.equal(parsed.documents[0].name,'notes.pdf');assert.equal(parsed.documents[1].size,15);
+});
+test('PDF Library backup rejects altered bytes and mismatched sizes',async()=>{
+ const payload=await createPdfBackupPayload([{id:'doc-1',name:'valid.pdf',blob:pdfBlob(),updatedAt:1}]);
+ payload.documents[0].data='bm90IGEgcGRm';
+ assert.throws(()=>parsePdfBackupPayload(payload),/damaged or mismatched PDF/i);
+});
+test('PDF Library backup rejects duplicate ids and unsupported versions',async()=>{
+ const payload=await createPdfBackupPayload([{id:'doc-1',name:'a.pdf',blob:pdfBlob(),updatedAt:1}]);
+ payload.documents.push({...payload.documents[0]});
+ assert.throws(()=>parsePdfBackupPayload(payload),/duplicate document ID/i);
+ payload.version=99;assert.throws(()=>parsePdfBackupPayload(payload),/unsupported or invalid/i);
+});
+test('PDF Library backup rejects non-PDF content and excessive record counts',async()=>{
+ await assert.rejects(()=>createPdfBackupPayload([{id:'bad',name:'bad.pdf',blob:new Blob(['hello'])}]),/not a valid PDF/i);
+ assert.throws(()=>parsePdfBackupPayload({format:PDF_BACKUP_FORMAT,version:1,documents:Array(101).fill({})}),/more than 100/i);
+});
