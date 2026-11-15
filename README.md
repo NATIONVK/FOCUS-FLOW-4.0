@@ -1,22 +1,24 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/NATIONVK/FOCUS-FLOW-4.0/main/public/icon.svg" width="112" alt="FOCUS FLOW app icon" />
-  <h1>FOCUS FLOW 5.4</h1>
+  <h1>FOCUS FLOW 5.4.1</h1>
   <p><strong>Your personal study OS. Focus deeper. Learn smarter. Grow daily.</strong></p>
   <p>
     <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/quality.yml"><img src="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/quality.yml/badge.svg" alt="Quality Checks"></a>
     <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/build-android.yml"><img src="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/build-android.yml/badge.svg" alt="Android APK Build"></a>
     <img src="https://img.shields.io/badge/Platform-Android%20%7C%20Web-8b5cf6" alt="Android and Web">
     <img src="https://img.shields.io/badge/Mode-Offline--first-16a34a" alt="Offline first">
-    <img src="https://img.shields.io/badge/Version-5.4-06b6d4" alt="Version 4.0">
+    <img src="https://img.shields.io/badge/Version-5.4.1-06b6d4" alt="Version 4.0">
   </p>
   <p><em>Designed for distraction-free study, consistent habits, and measurable progress.</em></p>
 </div>
 
 ---
 
-## Latest release · 5.4.0
+## Latest release · 5.4.1
 
 - Black Hole animation speed increases after every completed focus minute, with safe speed limits.
+- Native Android timer commands are serialized so delayed start/pause/stop bridge calls cannot overwrite a newer timer state.
+- Backup metadata and the visible app version now consistently report 5.4.1.
 - The animated disk, corona, lensing rings and energy waves gradually expand; growth is capped to fit Android screens.
 - Animation settings update only once per minute to avoid unnecessary rendering work. Pause and reduced-motion behavior remain respected.
 
@@ -210,7 +212,7 @@ No license has been added yet. Unless a license is added to this repository, sta
 ---
 
 <div align="center">
-  <strong>FOCUS FLOW 5.4</strong><br>
+  <strong>FOCUS FLOW 5.4.1</strong><br>
   <sub>Build focus. Track progress. Find your flow.</sub><br><br>
   <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0">GitHub Repository</a> ·
   <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/issues">Report an issue</a> ·
