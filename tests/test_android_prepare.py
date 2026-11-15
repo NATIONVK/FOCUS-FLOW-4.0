@@ -38,7 +38,7 @@ class AndroidPrepareTests(unittest.TestCase):
             app = root / "app"
             app.mkdir()
             gradle = app / "build.gradle"
-            gradle.write_text('defaultConfig {\\n versionCode 1\\n versionName "1.0"\\n}', encoding="utf-8")
+            gradle.write_text('defaultConfig {\n versionCode 1\n versionName "1.0"\n}', encoding="utf-8")
             package = root / "package.json"
             package.write_text('{"version":"5.1.0"}', encoding="utf-8")
             update_android_version(app, package)
