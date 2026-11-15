@@ -2,6 +2,11 @@ import {createPdfBackupPayload,readPdfBackupFile} from './pdf-backup.js';
 const DB_NAME='focus-flow-pdf-library';
 const DB_VERSION=1;
 const STORE='documents';
+function storageError(error){
+ if(error?.name==='QuotaExceededError')return new Error('PDF Library-তে পর্যাপ্ত storage space নেই। কিছু অপ্রয়োজনীয় PDF মুছে আবার চেষ্টা করো।');
+ if(error?.name==='InvalidStateError'||error?.name==='AbortError')return new Error('PDF Library operation সম্পন্ন হয়নি। Storage ব্যস্ত বা বন্ধ হয়ে গেছে; আবার চেষ্টা করো।');
+ return error instanceof Error?error:new Error('PDF Library operation failed.');
+}
 function openDb(){
  return new Promise((resolve,reject)=>{
   if(!globalThis.indexedDB){reject(new Error('এই WebView-তে IndexedDB পাওয়া যাচ্ছে না'));return;}
@@ -23,7 +28,7 @@ function transaction(mode,work){
   let tx;
   try{tx=db.transaction(STORE,mode)}catch(error){db.close();reject(error);return;}
   let result,workError=null,settled=false;
-  const finish=(callback,value)=>{if(settled)return;settled=true;db.close();callback(value)};
+  const finish=(callback,value)=>{if(settled)return;settled=true;db.close();callback(callback===reject?storageError(value):value)};
   tx.oncomplete=()=>finish(resolve,result&&typeof result==='object'&&'result' in result?result.result:result);
   tx.onerror=()=>finish(reject,workError||tx.error||new Error('PDF library save failed'));
   tx.onabort=()=>finish(reject,workError||tx.error||new Error('PDF library transaction aborted'));
@@ -67,17 +72,21 @@ export async function exportPdfLibraryBackup(){
 }
 export async function restorePdfLibraryBackup(file){
  const backup=await readPdfBackupFile(file);
- const existing=await transaction('readonly',s=>s.getAll());
- const known=new Set((existing||[]).map(x=>String(x.backupId||x.id)));
- const restored=backup.documents.filter(x=>!known.has(x.backupId));
- if(!restored.length)return {restored:0,skipped:backup.documents.length,total:backup.documents.length};
+ const stats={restored:0,skipped:0,total:backup.documents.length};
  await transaction('readwrite',store=>{
-  for(const item of restored){
-   const blob=new Blob([item.bytes],{type:'application/pdf'});
-   store.put({id:'pdf-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10),backupId:item.backupId,name:item.name,blob,type:'application/pdf',size:item.size,source:'backup-restore',updatedAt:item.updatedAt});
-  }
+  const request=store.getAll();
+  request.onsuccess=()=>{
+   const known=new Set((request.result||[]).map(x=>String(x.backupId||x.id)));
+   for(const item of backup.documents){
+    if(known.has(item.backupId)){stats.skipped++;continue;}
+    const id='pdf-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
+    store.put({id,backupId:item.backupId,name:item.name,blob:new Blob([item.bytes],{type:'application/pdf'}),type:'application/pdf',size:item.size,source:'backup-restore',updatedAt:item.updatedAt});
+    known.add(item.backupId);
+    stats.restored++;
+   }
+  };
  });
- return {restored:restored.length,skipped:backup.documents.length-restored.length,total:backup.documents.length};
+ return stats;
 }
 export function browserDownload(blob,name){
  const url=URL.createObjectURL(blob),a=document.createElement('a');
