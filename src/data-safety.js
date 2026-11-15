@@ -26,7 +26,7 @@ export function inspectBackup(value){
   if(data.version!==4)throw new Error('Unsupported app data version. Expected version 4.');
   for(const key of ['subjects','sessions','tasks','plans','notes'])if(data[key]!==undefined&&!Array.isArray(data[key]))throw new Error('Invalid backup: '+key+' must be a list.');
   if(!Array.isArray(data.subjects)||!Array.isArray(data.sessions)||!Array.isArray(data.tasks??[])||!Array.isArray(data.notes??[]))throw new Error('Backup is missing required data lists.');
-  if(data.subjects.length>1000||data.sessions.length>200000||data.tasks.length>50000||data.notes.length>50000||((data.plans||[]).length>20000))throw new Error('Backup contains an unusually large number of records.');
+  if(data.subjects.length>1000||data.sessions.length>200000||(data.tasks??[]).length>50000||(data.notes??[]).length>50000||((data.plans||[]).length>20000))throw new Error('Backup contains an unusually large number of records.');
   const ids=new Set();
   for(const s of data.subjects){if(!isObject(s)||typeof s.name!=='string'||!s.name.trim())throw new Error('Backup contains an invalid subject.');if(s.id){if(ids.has(s.id))throw new Error('Duplicate subject IDs detected.');ids.add(s.id)}}
   for(const s of data.sessions){if(!isObject(s)||!Number.isFinite(Number(s.duration))||Number(s.duration)<0||!Number.isFinite(Date.parse(s.startedAt)))throw new Error('Backup contains an invalid study session.');}
