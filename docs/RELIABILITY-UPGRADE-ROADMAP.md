@@ -141,3 +141,10 @@ Before calling a release ready:
 - Database connections are closed when an open request succeeds after an earlier blocked-open rejection, avoiding a late-open connection leak.
 - Transaction completion, error and abort handlers are installed before running write callbacks, and database handles are closed on every settled path.
 - Automated CI still cannot simulate every OEM WebView/IndexedDB quota condition; device-level restore failure injection remains required.
+
+
+## Additional 5.3 restore consistency and storage errors
+- PDF backup restore now performs duplicate detection and inserts inside one IndexedDB read-write transaction. This prevents two overlapping restore attempts from both observing an absent backup ID and inserting duplicate copies.
+- A failed multi-document write remains an atomic transaction: the database either commits the queued restore writes together or aborts them together.
+- IndexedDB quota exhaustion and aborted/invalid-state operations now produce actionable user-facing errors instead of opaque browser exception names.
+- These changes require CI verification and real WebView testing, especially under low free storage and concurrent restore attempts.
