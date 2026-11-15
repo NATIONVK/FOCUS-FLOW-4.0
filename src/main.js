@@ -193,12 +193,9 @@ function overview(t,subjects) {
   const monthConsistency=Analytics.consistency(sessions,goal/60,today);
   const monthStartOffset=new Date(today.getFullYear(),today.getMonth(),1).getDay();
   const activeDays=week.filter(d=>d.seconds>0).length;
-  // This insight groups sessions by their recorded START time; it does not claim
-  // that paused session duration was continuously spent inside that clock period.
-  const timeBuckets=[{label:'Morning',range:'05:00–11:59',test:h=>h>=5&&h<12,seconds:0,count:0},{label:'Afternoon',range:'12:00–16:59',test:h=>h>=12&&h<17,seconds:0,count:0},{label:'Evening',range:'17:00–21:59',test:h=>h>=17&&h<22,seconds:0,count:0},{label:'Night',range:'22:00–04:59',test:h=>h>=22||h<5,seconds:0,count:0}];
-  sessions.forEach(s=>{const started=new Date(s.startedAt);if(!Number.isFinite(started.getTime()))return;const bucket=timeBuckets.find(x=>x.test(started.getHours()));if(bucket){bucket.seconds+=Math.max(0,Number(s.duration)||0);bucket.count++;}});
-  const bestPeriod=[...timeBuckets].sort((a,b)=>b.count-a.count||b.seconds-a.seconds)[0];
-  const hasTimePattern=bestPeriod?.count>0;
+  const startPattern=Analytics.sessionStartSummary(sessions);
+  const bestPeriod=startPattern.best;
+  const hasTimePattern=bestPeriod.count>0;
   const subjectShare=topSubject&&t.all?Math.round(topSubject.seconds/t.all*100):0;
   const bestDay=week.reduce((a,b)=>b.seconds>a.seconds?b:a,week[0]||{label:'—',seconds:0});
   const recent=[...sessions].sort((a,b)=>new Date(b.startedAt)-new Date(a.startedAt)).slice(0,3);
