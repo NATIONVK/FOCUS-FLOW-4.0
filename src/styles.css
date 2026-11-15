@@ -654,5 +654,5 @@ body.light .subtask-row{color:#4d5670}
   .blackhole-scene .bh-energy-waves i,
   .blackhole-scene .bh-lensing-arc,
   .blackhole-scene .bh-particle,
-  .blackhole-scene .bh-light-beams i { animation-duration: auto !important; }
+  .blackhole-scene .bh-light-beams i { animation: none !important; }
 }
