@@ -1,24 +1,27 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/NATIONVK/FOCUS-FLOW-4.0/main/public/icon.svg" width="112" alt="FOCUS FLOW app icon" />
-  <h1>FOCUS FLOW 5.4.1</h1>
+  <h1>FOCUS FLOW 5.4.2</h1>
   <p><strong>Your personal study OS. Focus deeper. Learn smarter. Grow daily.</strong></p>
   <p>
     <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/quality.yml"><img src="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/quality.yml/badge.svg" alt="Quality Checks"></a>
     <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/build-android.yml"><img src="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/build-android.yml/badge.svg" alt="Android APK Build"></a>
     <img src="https://img.shields.io/badge/Platform-Android%20%7C%20Web-8b5cf6" alt="Android and Web">
     <img src="https://img.shields.io/badge/Mode-Offline--first-16a34a" alt="Offline first">
-    <img src="https://img.shields.io/badge/Version-5.4.1-06b6d4" alt="Version 4.0">
+    <img src="https://img.shields.io/badge/Version-5.4.2-06b6d4" alt="Version 4.0">
   </p>
   <p><em>Designed for distraction-free study, consistent habits, and measurable progress.</em></p>
 </div>
 
 ---
 
-## Latest release · 5.4.1
+## Latest release · 5.4.2
+
+- Corrected the app's actual identity: the former clock/book artwork has been replaced by a Black Hole logo. The same source design now feeds the sidebar, favicon, PWA install assets, Android adaptive icon and legacy density-specific launcher icons.
+- Added generated icon-artwork checks so a future APK build fails if launcher images are missing instead of silently shipping the Capacitor placeholder.
 
 - Black Hole animation speed increases after every completed focus minute, with safe speed limits.
 - Native Android timer commands are serialized so delayed start/pause/stop bridge calls cannot overwrite a newer timer state.
-- Backup metadata and the visible app version now consistently report 5.4.1.
+- Backup metadata and the visible app version now consistently report 5.4.2.
 - Replaced the old clock/book placeholder artwork with one Black Hole identity across the app sidebar, browser favicon, PWA install icons, Android adaptive launcher and legacy Android density icons.
 - Android CI generates and verifies real PNG launcher assets after Capacitor sync, rather than only writing adaptive XML placeholders.
 - The animated disk, corona, lensing rings and energy waves gradually expand; growth is capped to fit Android screens.
@@ -214,7 +217,7 @@ No license has been added yet. Unless a license is added to this repository, sta
 ---
 
 <div align="center">
-  <strong>FOCUS FLOW 5.4.1</strong><br>
+  <strong>FOCUS FLOW 5.4.2</strong><br>
   <sub>Build focus. Track progress. Find your flow.</sub><br><br>
   <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0">GitHub Repository</a> ·
   <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/issues">Report an issue</a> ·
