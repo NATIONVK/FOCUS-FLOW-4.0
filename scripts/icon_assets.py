@@ -71,7 +71,7 @@ def write_android_icon_resources(res_dir: Path) -> None:
 """
     (drawable / "ic_stat_focus_flow.xml").write_text(stat_icon, encoding="utf-8")
     (values / "ic_launcher_background.xml").write_text(
-        '<resources><color name="ic_launcher_background">#070A18</color></resources>\\n',
+        '<resources><color name="ic_launcher_background">#070A18</color></resources>\n',
         encoding="utf-8",
     )
     for density, size in (("mdpi", 48), ("hdpi", 72), ("xhdpi", 96), ("xxhdpi", 144), ("xxxhdpi", 192)):
