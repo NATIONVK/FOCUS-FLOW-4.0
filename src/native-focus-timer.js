@@ -1,10 +1,10 @@
 import { registerPlugin, Capacitor } from '@capacitor/core';
 const NativeFocusTimer = registerPlugin('FocusTimer');
-export async function syncNativeFocusTimer(timer, subjectName='Focus session') {
+export async function syncNativeFocusTimer(timer, subjectName='Focus session', requestPermission=false) {
  if(Capacitor.getPlatform()!=='android') return;
  try {
   if(!timer?.active){await NativeFocusTimer.stopTimer();return;}
-  await NativeFocusTimer.requestNotificationPermission();
+  if(requestPermission)await NativeFocusTimer.requestNotificationPermission();
   await NativeFocusTimer.startTimer({subject:subjectName,elapsedMs:Math.floor(timer.elapsed()*1000),paused:timer.paused});
  } catch(e){console.warn('Focus notification unavailable',e);}
 }
