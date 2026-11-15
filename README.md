@@ -14,7 +14,16 @@
 
 ---
 
-## Latest release · 5.4.0\n\n- Black Hole Timer color transitions are smoother while elapsed time remains timestamp-derived and independent of animation frames.\n- Dashboard session-start insight now counts session starts instead of incorrectly ranking periods only by accumulated duration. Its wording explicitly describes session start patterns, not continuous time-of-day productivity.\n- Added automated tests for session-start grouping, invalid timestamps, invalid durations, and empty history.\n- Dashboard and timer animations respect reduced-motion preferences and use restrained transitions for mobile performance.\n\nPhysical-device animation smoothness and battery usage still require installation testing on the target Android device.\n\n### Previous release · 5.1.0
+## Latest release · 5.4.0
+
+- Black Hole Timer color transitions are smoother while elapsed time remains timestamp-derived and independent of animation frames.
+- Dashboard session-start insight now counts session starts instead of incorrectly ranking periods only by accumulated duration. Its wording explicitly describes session start patterns, not continuous time-of-day productivity.
+- Added automated tests for session-start grouping, invalid timestamps, invalid durations, and empty history.
+- Dashboard and timer animations respect reduced-motion preferences and use restrained transitions for mobile performance.
+
+Physical-device animation smoothness and battery usage still require installation testing on the target Android device.
+
+### Previous release · 5.1.0
 
 - Timer rendering now updates once per second instead of four times per second, reducing unnecessary WebView work while keeping elapsed time derived from timestamps.
 - Focus timer render-loop lifecycle is cleaned up when leaving or finishing the timer.
