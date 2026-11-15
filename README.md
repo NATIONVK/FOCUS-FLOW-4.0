@@ -1,20 +1,20 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/NATIONVK/FOCUS-FLOW-4.0/main/public/icon.svg" width="112" alt="FOCUS FLOW app icon" />
-  <h1>FOCUS FLOW 5.0</h1>
+  <h1>FOCUS FLOW 5.1</h1>
   <p><strong>Your personal study OS. Focus deeper. Learn smarter. Grow daily.</strong></p>
   <p>
     <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/quality.yml"><img src="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/quality.yml/badge.svg" alt="Quality Checks"></a>
     <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/build-android.yml"><img src="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/build-android.yml/badge.svg" alt="Android APK Build"></a>
     <img src="https://img.shields.io/badge/Platform-Android%20%7C%20Web-8b5cf6" alt="Android and Web">
     <img src="https://img.shields.io/badge/Mode-Offline--first-16a34a" alt="Offline first">
-    <img src="https://img.shields.io/badge/Version-5.0-06b6d4" alt="Version 4.0">
+    <img src="https://img.shields.io/badge/Version-5.1-06b6d4" alt="Version 4.0">
   </p>
   <p><em>Designed for distraction-free study, consistent habits, and measurable progress.</em></p>
 </div>
 
 ---
 
-## Latest release · 5.0.0
+## Latest release · 5.1.0
 
 - Timer rendering now updates once per second instead of four times per second, reducing unnecessary WebView work while keeping elapsed time derived from timestamps.
 - Focus timer render-loop lifecycle is cleaned up when leaving or finishing the timer.
@@ -25,6 +25,14 @@
 These changes are covered by the repository's automated workflow; physical-device behavior still needs installation testing.
 
 ### Focus Flow 5.0 — app-wide evolution
+
+### Focus Flow 5.1 — PDF portability and Android resilience
+
+- PDF Library now exports a portable JSON backup containing saved PDFs, with file signature, size, count and total-size validation on restore.
+- Restore merges documents into the current library, skips already restored copies, and never clears existing PDFs.
+- PDF rendering is limited to 100 MB source documents, 12 million output pixels per page, 16 million source-image pixels and 18 thumbnails to reduce memory spikes on Android phones.
+- Android timer permission is requested on explicit session start, not every pause/resume. The foreground service restores validated snapshots after process recreation and uses a system chronometer instead of a frequent wake-up loop.
+- PDF backup controls include mobile focus-visible styling and responsive layouts.
 
 - Task search now searches both task titles and sub-task titles without losing the current filter.
 - Task completion is normalized consistently across parent tasks and their sub-tasks; deleting the final sub-task no longer silently clears a completed parent task.
