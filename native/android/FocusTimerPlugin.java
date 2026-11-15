@@ -22,7 +22,7 @@ public class FocusTimerPlugin extends Plugin {
  @PluginMethod public void stopTimer(PluginCall call) {
   try {
    getContext().stopService(new Intent(getContext(),FocusTimerService.class));
-   getContext().getSharedPreferences("focus_timer",0).edit().clear().apply();
+   getContext().getSharedPreferences("focus_timer",0).edit().clear().commit();
    call.resolve();
   } catch(Exception error){call.reject("Unable to stop the focus notification service: "+error.getMessage(),error);}
  }
