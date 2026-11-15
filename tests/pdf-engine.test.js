@@ -111,3 +111,26 @@ test('PDF Library restore rejects cumulative decoded size before allocating the 
   assert.equal(decodeCalls,1,'the second document must be rejected before Base64 decoding');
  }finally{globalThis.atob=originalAtob;}
 });
+
+import {inspectPdfLibraryRecords} from '../src/pdf-integrity.js';
+test('PDF Library integrity scan checks headers, sizes and duplicate backup IDs without changing records',async()=>{
+ const valid=new Blob(['%PDF-1.7\\nValid document'],{type:'application/pdf'});
+ const invalid=new Blob(['not a PDF'],{type:'application/pdf'});
+ const records=[
+  {id:'one',backupId:'backup-one',name:'one.pdf',blob:valid,size:valid.size},
+  {id:'two',backupId:'backup-two',name:'two.pdf',blob:invalid,size:invalid.size},
+  {id:'three',backupId:'backup-three',name:'three.pdf',blob:valid,size:valid.size+1},
+  {id:'four',backupId:'backup-one',name:'four.pdf',blob:valid,size:valid.size},
+  {id:'five',name:'missing.pdf',size:0}
+ ];
+ const before=records.map(x=>({...x}));
+ const report=await inspectPdfLibraryRecords(records);
+ assert.equal(report.total,5);
+ assert.equal(report.healthy,1);
+ assert.equal(report.damaged,4);
+ assert.match(report.issues[0].problems.join(' '),/header is missing or damaged/i);
+ assert.match(report.issues[1].problems.join(' '),/size does not match/i);
+ assert.match(report.issues[2].problems.join(' '),/Duplicate backup ID/i);
+ assert.match(report.issues[3].problems.join(' '),/missing or unreadable/i);
+ assert.deepEqual(records,before,'integrity scan must be read-only');
+});
