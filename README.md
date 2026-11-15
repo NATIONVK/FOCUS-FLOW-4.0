@@ -36,11 +36,11 @@ The app is designed to keep your study records on your device by default. You ca
 
 ### PDF Studio implementation notes
 
-PDF processing runs locally in the app. The current web/Capacitor implementation provides PDF.js rendering and pdf-lib page/document operations. Text overlay is additive and does not rewrite existing PDF text objects. Password encryption/decryption, Bangla/English OCR, automatic edge detection and perspective correction, digital-signature verification, PDF repair, and DOCX conversion are not yet implemented; they are not advertised as available tools. Android-specific OCR requires a native ML Kit/Tesseract bridge and language model packaging before it can be considered offline-ready.
+PDF processing runs locally in the app. The Android build uses the Storage Access Framework for multi-photo selection, PDF open, and Save As; generated/imported documents are also kept in an IndexedDB-backed in-app PDF Library so they can be reopened from the Files tab. The current web/Capacitor implementation provides PDF.js rendering and pdf-lib page/document operations. Text overlay is additive and does not rewrite existing PDF text objects. Password encryption/decryption, Bangla/English OCR, automatic edge detection and perspective correction, digital-signature verification, PDF repair, and DOCX conversion are not yet implemented; they are not advertised as available tools. Android-specific OCR requires a native ML Kit/Tesseract bridge and language model packaging before it can be considered offline-ready.
 
 ## 📱 Android app
 
-The Android app is packaged with **Capacitor 7**. The repository includes native Android bridges for the background focus timer and device photo gallery.
+The Android app is packaged with **Capacitor 7**. The repository includes native Android bridges for the background focus timer, device photo gallery, multi-photo document picker, PDF open, and PDF Save As.
 
 ### Build an APK with GitHub Actions
 
@@ -131,7 +131,7 @@ cd android
 - Study records are stored locally on the device by default.
 - No cloud sync or account system is required for the core study workflow.
 - Export a backup before clearing app storage or uninstalling the app.
-- Gallery access is requested when the PDF Maker needs it; Android may offer full or selected-photo access depending on the OS version and user choice.
+- Photo selection for PDF creation uses the Android system document picker and supports multi-select without granting broad gallery access. Created and imported PDFs are stored in the app's local IndexedDB library; Android Save As can also copy the PDF to a folder you choose.
 
 ## 🧭 Development status
 
