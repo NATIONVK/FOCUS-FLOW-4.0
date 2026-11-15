@@ -414,3 +414,14 @@ body.light .subtask-row{color:#4d5670}
   outline:2px solid #d8c8ff;
   outline-offset:4px;
 }
+
+
+/* Focus Flow 5.0 — keyboard accessibility and task search */
+.task-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.task-toolbar input[type="search"]{flex:1 1 180px;min-width:0;min-height:40px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text)}
+.task-toolbar select{min-height:40px}
+.task-card[hidden]{display:none!important}
+:where(button,input,select,textarea,a,[tabindex]):focus-visible{outline:2px solid var(--accent,#9b8cff);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
