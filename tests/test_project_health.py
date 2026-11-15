@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.project_health import audit, render_markdown, source_inventory
+from scripts.project_health import REQUIRED, audit, render_markdown, source_inventory
 
 
 class ProjectHealthTests(unittest.TestCase):
@@ -22,14 +22,12 @@ class ProjectHealthTests(unittest.TestCase):
     def test_audit_reports_python_share_and_missing_files(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            for relative in ("src/main.js", "src/store.js", "src/timer.js",
-                            "src/analytics.js", "native/android/FocusTimerService.java",
-                            "scripts/prepare_android.py"):
+            for relative in REQUIRED:
                 path = root / relative
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text("line\n", encoding="utf-8")
             report = audit(root)
-            self.assertEqual(report["python_share_percent"], 20.0)
+            self.assertEqual(report["python_share_percent"], round(100 / len(REQUIRED), 2))
             self.assertEqual(report["status"], "healthy")
             self.assertEqual(report["missing_required_files"], [])
             self.assertIn("Python share", render_markdown(report))
