@@ -67,3 +67,17 @@ Before calling a release ready:
 - OCR, password security, digital-signature verification, PDF repair, DOCX conversion, and full editing of existing PDF text are not available unless their engines are integrated and tested.
 - The PDF reader is not yet a continuous-scroll virtualized reader.
 - A successful source-code commit is not proof of an Android APK build or physical-device verification.
+
+
+## Delivered in the 4.0.1 whole-app reliability pass
+- Reduced the focus timer's UI render frequency to one update per second; elapsed time remains wall-clock based and is not dependent on interval accuracy.
+- Stop timer rendering when the timer screen exits or the session finishes.
+- Freeze the complete Black Hole scene animation while paused.
+- Limit photo-to-PDF batches to 20 images and resize large source images to a 2400 px maximum edge before JPEG encoding to reduce peak canvas memory.
+- Make PDF save destinations explicit. A PDF save failure is surfaced unless an in-app library copy, Android Save As copy, or browser download has actually been created.
+- Show the actual PDF export destination in the PDF Studio status message.
+
+## Still requires physical Android verification
+- Vivo Y29 / Android 15: install the generated APK and test background timer, notification permission, Back/Exit behavior, photo picker, PDF open/save and app restart.
+- Large multi-photo PDF creation should be exercised with 10–20 high-resolution photos and monitored for memory pressure.
+- Battery saver and OEM background restrictions can vary by device; CI cannot prove long-running background reliability.
