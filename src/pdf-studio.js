@@ -1,6 +1,7 @@
 import { renderPDFPage, bindPDFPage } from './pdf-maker.js';
 import { savePdfOutput, savePdfToLibrary, getPdfFromLibrary, listPdfLibrary, deletePdfFromLibrary } from './pdf-storage.js';
 import { pickDevicePdf, isAndroidGalleryAvailable } from './native-gallery.js';
+import { renderPdfLibrary } from './pdf-library-ui.js';
 import './pdf-studio.css';
 
 const $ = (s, root=document) => root.querySelector(s);
@@ -19,7 +20,7 @@ async function exportPdf(bytes,name,source='edited'){const blob=bytes instanceof
 function dataUrlToBytes(dataUrl){const raw=dataUrl.slice(dataUrl.indexOf(',')+1),binary=atob(raw),out=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)out[i]=binary.charCodeAt(i);return out}
 async function openSavedPdf(id){try{const record=await getPdfFromLibrary(id);if(!record?.blob)throw new Error('Saved PDF not found');await openFile(new File([record.blob],record.name,{type:'application/pdf'}),id)}catch(e){status('Saved PDF could not be opened: '+e.message,'error')}}
 async function removeSavedPdf(id){await deletePdfFromLibrary(id);try{localStorage.setItem(recentKey,JSON.stringify(readRecent().filter(x=>x.id!==id)))}catch{}await loadSavedLibrary()}
-async function loadSavedLibrary(){const root=$('#pdfSavedLibrary');if(!root)return;try{const docs=await listPdfLibrary();root.innerHTML=docs.length?docs.map(d=>'<div class="pdf-recent-row"><span>▤</span><span><b>'+esc(d.name)+'</b><small>'+new Date(d.updatedAt).toLocaleString()+' · '+(d.size/1024/1024).toFixed(1)+' MB</small></span><button class="pdf-link" data-open-saved="'+esc(d.id)+'">Open</button><button class="pdf-link" data-delete-saved="'+esc(d.id)+'">Delete</button></div>').join(''):'<div class="pdf-empty-state">No saved PDFs yet. Create or import a PDF first.</div>'}catch(e){root.textContent='PDF library unavailable: '+e.message}}
+async function loadSavedLibrary(){const root=$('#pdfSavedLibrary');if(!root)return;try{const docs=await listPdfLibrary();renderPdfLibrary(root,docs,{onOpen:openSavedPdf,onDelete:removeSavedPdf,onRefresh:loadSavedLibrary})}catch(e){root.textContent='PDF library unavailable: '+e.message}}
 function status(message,type='info'){const el=$('#pdfStatus');if(el){el.textContent=message;el.dataset.type=type}}
 function shell(){return `<section class="pdf-studio">
 <header class="pdf-studio-head"><div><span class="eyebrow">DOCUMENT WORKSPACE</span><h2>PDF MASTER STUDIO</h2><p>Read · Edit · Create · Organize — offline on your device</p></div><button type="button" class="pdf-open-btn" id="pdfOpenButton">＋ Open PDF</button><input id="pdfOpenInput" class="pdf-native-file-input" type="file" accept="application/pdf,.pdf,application/x-pdf"></header>
