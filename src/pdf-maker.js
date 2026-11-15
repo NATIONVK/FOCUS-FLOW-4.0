@@ -40,7 +40,7 @@ export function bindPDFPage(){
  paint();
  const input=$('#pdfFiles');
  $('#browseFiles')?.addEventListener('click',()=>input?.click());
- $('#pickMultiplePhotos')?.addEventListener('click',async()=>{try{const items=await pickDeviceImages();if(!items.length)return;const known=new Set(selected.map(x=>x.name+'|'+x.url?.slice(0,80)));for(const item of items){if(item.dataUrl&&!known.has((item.name||'Photo')+'|'+item.dataUrl.slice(0,80)))selected.push({name:item.name||'Phone photo',url:item.dataUrl});}paint();if(status)status.textContent=items.length+'টি ছবি নির্বাচন করা হয়েছে';}catch(err){if(err?.code!=='CANCELLED'){console.error(err);alert('একসাথে ছবি নির্বাচন করা যায়নি। নিচের Files picker ব্যবহার করো।');}}});
+ $('#pickMultiplePhotos')?.addEventListener('click',async()=>{try{const items=await pickDeviceImages();if(!items.length)return;const known=new Set(selected.map(x=>x.name+'|'+x.url?.slice(0,80)));for(const item of items){if(item.dataUrl&&!known.has((item.name||'Photo')+'|'+item.dataUrl.slice(0,80)))selected.push({name:item.name||'Phone photo',url:item.dataUrl});}paint();$('#galleryStatus').textContent=items.length+'টি ছবি নির্বাচন করা হয়েছে';}catch(err){if(err?.code!=='CANCELLED'){console.error(err);alert('একসাথে ছবি নির্বাচন করা যায়নি। নিচের Files picker ব্যবহার করো।');}}});
  $('#refreshGallery')?.addEventListener('click',()=>loadDeviceGallery(true));
  $('#gallerySearch')?.addEventListener('input',applyGalleryFilter);
  input?.addEventListener('change',()=>{const files=[...input.files||[]].filter(f=>f.type.startsWith('image/'));selected.push(...files.map(file=>({file,name:file.name,url:URL.createObjectURL(file)})));input.value='';paint();});
