@@ -49,19 +49,34 @@ def write_web_icon_resources(public_dir: Path) -> None:
 
 def write_android_icon_resources(res_dir: Path) -> None:
     from PIL import Image
-    adaptive=res_dir/"mipmap-anydpi-v26"; values=res_dir/"values"; foreground=res_dir/"drawable-nodpi"; drawable=res_dir/"drawable"
-    for folder in (adaptive,values,foreground,drawable): folder.mkdir(parents=True,exist_ok=True)
-    _foreground(512).save(foreground/"ic_launcher_foreground.png",format="PNG",optimize=True)
-    xml='''<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    adaptive = res_dir / "mipmap-anydpi-v26"
+    values = res_dir / "values"
+    foreground = res_dir / "drawable-nodpi"
+    drawable = res_dir / "drawable"
+    for folder in (adaptive, values, foreground, drawable):
+        folder.mkdir(parents=True, exist_ok=True)
+    _foreground(512).save(foreground / "ic_launcher_foreground.png", format="PNG", optimize=True)
+    adaptive_xml = """<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/ic_launcher_background"/>
     <foreground android:drawable="@drawable/ic_launcher_foreground"/>
 </adaptive-icon>
-'''
-    for name in ("ic_launcher.xml","ic_launcher_round.xml"):
-        (adaptive/name).write_text(xml,encoding="utf-8")
-    (drawable/"ic_stat_focus_flow.xml").write_text('''<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">\n    <path android:fillColor="#00000000" android:strokeColor="#FFFFFFFF" android:strokeWidth="1.8" android:pathData="M2,12a10,4 0,1 0,20 0a10,4 0,1 0,-20 0"/>\n    <path android:fillColor="#00000000" android:strokeColor="#FFFFFFFF" android:strokeWidth="1.8" android:pathData="M7,12a5,5 0,1 0,10 0a5,5 0,1 0,-10 0"/>\n    <path android:fillColor="#FFFFFFFF" android:pathData="M17,5l4,-2l-1,3l2,0l-4,3l1,-3z"/>\n</vector>\n''',encoding="utf-8")\n    (values/"ic_launcher_background.xml").write_text('<resources><color name="ic_launcher_background">#070A18</color></resources>\n',encoding="utf-8")
-    for density,size in (("mdpi",48),("hdpi",72),("xhdpi",96),("xxhdpi",144),("xxxhdpi",192)):
-        folder=res_dir/f"mipmap-{density}";folder.mkdir(parents=True,exist_ok=True)
-        icon=_square_icon(size)
-        icon.save(folder/"ic_launcher.png",format="PNG",optimize=True)
-        icon.save(folder/"ic_launcher_round.png",format="PNG",optimize=True)
+"""
+    for name in ("ic_launcher.xml", "ic_launcher_round.xml"):
+        (adaptive / name).write_text(adaptive_xml, encoding="utf-8")
+    stat_icon = """<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#00000000" android:strokeColor="#FFFFFFFF" android:strokeWidth="1.8" android:pathData="M2,12a10,4 0,1 0,20 0a10,4 0,1 0,-20 0"/>
+    <path android:fillColor="#00000000" android:strokeColor="#FFFFFFFF" android:strokeWidth="1.8" android:pathData="M7,12a5,5 0,1 0,10 0a5,5 0,1 0,-10 0"/>
+    <path android:fillColor="#FFFFFFFF" android:pathData="M17,5l4,-2l-1,3l2,0l-4,3l1,-3z"/>
+</vector>
+"""
+    (drawable / "ic_stat_focus_flow.xml").write_text(stat_icon, encoding="utf-8")
+    (values / "ic_launcher_background.xml").write_text(
+        '<resources><color name="ic_launcher_background">#070A18</color></resources>\\n',
+        encoding="utf-8",
+    )
+    for density, size in (("mdpi", 48), ("hdpi", 72), ("xhdpi", 96), ("xxhdpi", 144), ("xxxhdpi", 192)):
+        folder = res_dir / f"mipmap-{density}"
+        folder.mkdir(parents=True, exist_ok=True)
+        icon = _square_icon(size)
+        icon.save(folder / "ic_launcher.png", format="PNG", optimize=True)
+        icon.save(folder / "ic_launcher_round.png", format="PNG", optimize=True)
