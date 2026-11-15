@@ -7,7 +7,7 @@ export function createBackup(data){
   if(!isObject(data)||data.version!==4)throw new Error('Current app data is not a supported version.');
   const payload=JSON.parse(JSON.stringify(data));
   const canonical=JSON.stringify(payload);
-  return {format:FORMAT,schemaVersion:SCHEMA_VERSION,createdAt:new Date().toISOString(),appVersion:'5.4.1',integrity:{algorithm:'fnv1a-32',checksum:fnv1a(canonical)},data:payload};
+  return {format:FORMAT,schemaVersion:SCHEMA_VERSION,createdAt:new Date().toISOString(),appVersion:'5.4.2',integrity:{algorithm:'fnv1a-32',checksum:fnv1a(canonical)},data:payload};
 }
 export function inspectBackup(value){
   if(!isObject(value))throw new Error('Backup file must contain a JSON object.');
