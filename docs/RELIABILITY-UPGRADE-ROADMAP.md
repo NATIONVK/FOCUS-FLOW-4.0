@@ -155,3 +155,9 @@ Before calling a release ready:
 - The Files tab reports healthy and damaged document counts and a short diagnostic summary; users decide what to delete or re-import.
 - Integrity scan reads only the first 1 KB of each PDF for header validation rather than loading complete documents into memory.
 - Automated regression coverage verifies healthy, damaged, missing-blob, size-mismatch, duplicate-ID and read-only behavior.
+
+## Timer snapshot recovery hardening
+- Restored active-session snapshots now reject timestamps implausibly far in the future, segment start times earlier than the original session start, unbounded accumulated durations, oversized subject IDs, and oversized session IDs.
+- Invalid snapshots are discarded instead of producing a frozen or nonsensical timer display.
+- Added regression coverage for malformed/future-dated timer snapshots. Valid legacy snapshots without a session ID remain supported.
+- Android service still uses its persisted elapsed-time baseline and START_STICKY restart behavior; reboot/force-stop recovery and physical-device validation are not claimed by this change.
