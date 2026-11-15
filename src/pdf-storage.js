@@ -5,21 +5,33 @@ const STORE='documents';
 function openDb(){
  return new Promise((resolve,reject)=>{
   if(!globalThis.indexedDB){reject(new Error('এই WebView-তে IndexedDB পাওয়া যাচ্ছে না'));return;}
+  let settled=false;
   const request=indexedDB.open(DB_NAME,DB_VERSION);
   request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains(STORE))db.createObjectStore(STORE,{keyPath:'id'});};
-  request.onsuccess=()=>{request.result.onversionchange=()=>request.result.close();resolve(request.result)};
-  request.onerror=()=>reject(request.error||new Error('PDF library খুলতে সমস্যা হয়েছে'));
-  request.onblocked=()=>reject(new Error('PDF Library অন্য একটি tab-এ খোলা আছে। অন্য tab বন্ধ করে আবার চেষ্টা করো।'));
+  request.onsuccess=()=>{
+   const db=request.result;
+   db.onversionchange=()=>db.close();
+   if(settled){db.close();return;}
+   settled=true;resolve(db);
+  };
+  request.onerror=()=>{if(settled)return;settled=true;reject(request.error||new Error('PDF library খুলতে সমস্যা হয়েছে'));};
+  request.onblocked=()=>{if(settled)return;settled=true;reject(new Error('PDF Library অন্য একটি tab-এ খোলা আছে। অন্য tab বন্ধ করে আবার চেষ্টা করো।'));};
  });
 }
 function transaction(mode,work){
  return openDb().then(db=>new Promise((resolve,reject)=>{
-  const tx=db.transaction(STORE,mode),store=tx.objectStore(STORE);
-  let result;
-  try{result=work(store)}catch(e){reject(e);db.close();return;}
-  tx.oncomplete=()=>{db.close();resolve(result&&typeof result==='object'&&'result' in result?result.result:result)};
-  tx.onerror=()=>{db.close();reject(tx.error||new Error('PDF library save failed'))};
-  tx.onabort=()=>{db.close();reject(tx.error||new Error('PDF library transaction aborted'))};
+  let tx;
+  try{tx=db.transaction(STORE,mode)}catch(error){db.close();reject(error);return;}
+  let result,workError=null,settled=false;
+  const finish=(callback,value)=>{if(settled)return;settled=true;db.close();callback(value)};
+  tx.oncomplete=()=>finish(resolve,result&&typeof result==='object'&&'result' in result?result.result:result);
+  tx.onerror=()=>finish(reject,workError||tx.error||new Error('PDF library save failed'));
+  tx.onabort=()=>finish(reject,workError||tx.error||new Error('PDF library transaction aborted'));
+  try{result=work(tx.objectStore(STORE))}
+  catch(error){
+   workError=error;
+   try{tx.abort()}catch{finish(reject,error)}
+  }
  }));
 }
 export async function savePdfToLibrary(blob,name,source='created'){
