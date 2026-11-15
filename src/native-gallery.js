@@ -22,3 +22,13 @@ export async function saveDevicePdf(blob, name) {
   await Gallery.savePdf({name,base64:btoa(binary)});
   return true;
 }
+
+export async function saveDeviceFile(blob,name,mimeType='application/json') {
+  if(!isAndroidGalleryAvailable())return false;
+  if(blob.size>30*1024*1024)throw new Error('এই backup ৩০ MB-এর বেশি। ছোট PDF batch দিয়ে backup তৈরি করো।');
+  const bytes=new Uint8Array(await blob.arrayBuffer());let binary='';const chunk=0x8000;
+  for(let i=0;i<bytes.length;i+=chunk)binary+=String.fromCharCode(...bytes.subarray(i,Math.min(i+chunk,bytes.length)));
+  const safeName=String(name||'focus-flow-backup.json').replace(/[\\/:*?"<>|]/g,'-').slice(0,180);
+  await Gallery.saveFile({name:safeName,mimeType,base64:btoa(binary)});
+  return true;
+}
