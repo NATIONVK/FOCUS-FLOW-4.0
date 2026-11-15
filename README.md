@@ -1,20 +1,20 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/NATIONVK/FOCUS-FLOW-4.0/main/public/icon.svg" width="112" alt="FOCUS FLOW app icon" />
-  <h1>FOCUS FLOW 5.1</h1>
+  <h1>FOCUS FLOW 5.4</h1>
   <p><strong>Your personal study OS. Focus deeper. Learn smarter. Grow daily.</strong></p>
   <p>
     <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/quality.yml"><img src="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/quality.yml/badge.svg" alt="Quality Checks"></a>
     <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/build-android.yml"><img src="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/build-android.yml/badge.svg" alt="Android APK Build"></a>
     <img src="https://img.shields.io/badge/Platform-Android%20%7C%20Web-8b5cf6" alt="Android and Web">
     <img src="https://img.shields.io/badge/Mode-Offline--first-16a34a" alt="Offline first">
-    <img src="https://img.shields.io/badge/Version-5.1-06b6d4" alt="Version 4.0">
+    <img src="https://img.shields.io/badge/Version-5.4-06b6d4" alt="Version 4.0">
   </p>
   <p><em>Designed for distraction-free study, consistent habits, and measurable progress.</em></p>
 </div>
 
 ---
 
-## Latest release · 5.1.0
+## Latest release · 5.4.0\n\n- Black Hole Timer color transitions are smoother while elapsed time remains timestamp-derived and independent of animation frames.\n- Dashboard session-start insight now counts session starts instead of incorrectly ranking periods only by accumulated duration. Its wording explicitly describes session start patterns, not continuous time-of-day productivity.\n- Added automated tests for session-start grouping, invalid timestamps, invalid durations, and empty history.\n- Dashboard and timer animations respect reduced-motion preferences and use restrained transitions for mobile performance.\n\nPhysical-device animation smoothness and battery usage still require installation testing on the target Android device.\n\n### Previous release · 5.1.0
 
 - Timer rendering now updates once per second instead of four times per second, reducing unnecessary WebView work while keeping elapsed time derived from timestamps.
 - Focus timer render-loop lifecycle is cleaned up when leaving or finishing the timer.
@@ -197,7 +197,7 @@ No license has been added yet. Unless a license is added to this repository, sta
 ---
 
 <div align="center">
-  <strong>FOCUS FLOW 5.1</strong><br>
+  <strong>FOCUS FLOW 5.4</strong><br>
   <sub>Build focus. Track progress. Find your flow.</sub><br><br>
   <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0">GitHub Repository</a> ·
   <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/issues">Report an issue</a> ·
