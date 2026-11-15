@@ -13,13 +13,14 @@ export class FocusTimer {
       const raw=globalThis.localStorage?.getItem(ACTIVE);
       if(!raw)return;
       const s=JSON.parse(raw);
+      const now=Date.now();
       const valid=s&&typeof s==='object'&&!Array.isArray(s)
-        &&typeof s.subjectId==='string'&&s.subjectId.trim().length>0
-        &&Number.isFinite(s.startedAt)&&s.startedAt>0
-        &&Number.isFinite(s.segmentStartedAt)&&s.segmentStartedAt>0
-        &&Number.isFinite(s.accumulated)&&s.accumulated>=0
+        &&typeof s.subjectId==='string'&&s.subjectId.trim().length>0&&s.subjectId.length<=256
+        &&Number.isFinite(s.startedAt)&&s.startedAt>0&&s.startedAt<=now+300000
+        &&Number.isFinite(s.segmentStartedAt)&&s.segmentStartedAt>=s.startedAt&&s.segmentStartedAt<=now+300000
+        &&Number.isFinite(s.accumulated)&&s.accumulated>=0&&s.accumulated<=Number.MAX_SAFE_INTEGER/1000
         &&typeof s.paused==='boolean'
-        &&(s.sessionId===undefined||typeof s.sessionId==='string');
+        &&(s.sessionId===undefined||(typeof s.sessionId==='string'&&s.sessionId.length<=200));
       if(!valid){
         globalThis.localStorage?.removeItem(ACTIVE);
         console.warn('Discarded an invalid active focus session snapshot');

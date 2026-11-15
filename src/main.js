@@ -113,7 +113,7 @@ function render() {
   $('#app').innerHTML=`
   <div class="shell">
     <aside class="sidebar"><div class="brand"><img class="brand-logo" src="./icon.svg" alt="FOCUS FLOW logo"><div>FOCUS <b>FLOW</b><small>YOUR SPACE TO GROW</small></div></div>
-      <nav>${nav()}</nav><div class="side-foot"><i class="online-dot"></i> OFFLINE FIRST<br><small>NATIONVK · FOCUS FLOW 5.1</small></div></aside><nav class="mobile-nav">${mobileNav()}</nav>
+      <nav>${nav()}</nav><div class="side-foot"><i class="online-dot"></i> OFFLINE FIRST<br><small>NATIONVK · FOCUS FLOW 5.3.0</small></div></aside><nav class="mobile-nav">${mobileNav()}</nav>
     <main class="main">
       <header class="topbar"><div><span class="eyebrow">YOUR PERSONAL STUDY OS</span><h1>${page==='overview'?'Overview':page==='dashboard'?'Dashboard':page==='pdf-maker'?'PDF Studio':page[0].toUpperCase()+page.slice(1)}</h1></div><div class="status ${store.storageAvailable?'':'storage-offline'}"><i></i> ${store.storageAvailable?'Local data secured':'Storage unavailable'}</div></header>
       ${page==='overview'?overview(t,subjects):page==='dashboard'?dashboardPage(t,subjects):page==='subjects'?subjectPage(subjects):page==='tasks'?taskPage():page==='planner'?plannerPage():page==='notes'?notesPage():page==='history'?historyPage():page==='statistics'?statisticsPage():page==='pdf-maker'?renderPDFStudioPage():settingsPage()}
@@ -122,6 +122,22 @@ function render() {
   if(page==='overview') applyDashboardLayout();
   bind();
   updateStorageStatus();
+  if(page==='overview') requestAnimationFrame(animateDashboardMotion);
+}
+function animateDashboardMotion(){
+  const root=$('.main');if(!root||page!=='overview')return;
+  const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  root.classList.add('dashboard-motion-ready');
+  if(reduceMotion)return;
+  root.querySelectorAll('.dash-chart-track i').forEach((bar,index)=>{
+    bar.style.animationDelay=(index*55)+'ms';
+  });
+  root.querySelectorAll('.dash-month-track i,.progress-track i').forEach((bar)=>{
+    bar.classList.add('dashboard-progress-animate');
+  });
+  root.querySelectorAll('.dash-hero,.dash-kpis,.dash-main-grid,.dash-month-panel,.dash-insights-panel,.dash-lower-grid,.dash-recent-panel').forEach((section,index)=>{
+    section.style.animationDelay=(Math.min(index,6)*65)+'ms';
+  });
 }
 const DASH_WIDGETS=[['hero','Welcome'],['kpis','Quick stats'],['week','Weekly focus & plan'],['month','Monthly progress'],['insights','Smart insights'],['lower','Subjects & tasks'],['recent','Recent sessions']];
 function applyDashboardLayout(){

@@ -124,3 +124,40 @@ Before calling a release ready:
 ## 5.2 verification boundary
 - GitHub Actions verifies source tests, Python build-tool tests, production web build, Android manifest preparation and APK compilation.
 - Actual Vivo Y29 / Android 15 behavior remains a manual physical-device test. CI is not evidence of device-specific background process survival, OEM battery policy, photo picker behavior, or real-world RAM use.
+
+
+## Delivered — Focus Flow 5.3.0 reliability hardening
+- PDF Library restore now estimates each Base64 record's decoded byte size and rejects cumulative overflow before allocating the next document's decoded byte buffer.
+- Added a regression test proving a later PDF is rejected before Base64 decoding when the cumulative restore budget is exhausted.
+- Bumped app package and backup metadata to 5.3.0, advanced the offline shell cache to v10, and renamed the Android debug artifact for 5.3.
+
+## 5.3 verification boundary
+- GitHub Actions must pass JavaScript tests, Python tooling tests, production web build, Android manifest preparation and Gradle APK compilation for the exact PR commit.
+- Physical Vivo Y29 / Android 15 installation, process-kill/reboot timer recovery, PDF Library quota stress, and real RAM/battery profiling remain manual device checks.
+
+
+## Additional 5.3 PDF Library transaction hardening
+- IndexedDB transaction callbacks that throw now explicitly abort the transaction, preventing partially applied multi-record restore operations from being committed.
+- Database connections are closed when an open request succeeds after an earlier blocked-open rejection, avoiding a late-open connection leak.
+- Transaction completion, error and abort handlers are installed before running write callbacks, and database handles are closed on every settled path.
+- Automated CI still cannot simulate every OEM WebView/IndexedDB quota condition; device-level restore failure injection remains required.
+
+
+## Additional 5.3 restore consistency and storage errors
+- PDF backup restore now performs duplicate detection and inserts inside one IndexedDB read-write transaction. This prevents two overlapping restore attempts from both observing an absent backup ID and inserting duplicate copies.
+- A failed multi-document write remains an atomic transaction: the database either commits the queued restore writes together or aborts them together.
+- IndexedDB quota exhaustion and aborted/invalid-state operations now produce actionable user-facing errors instead of opaque browser exception names.
+- These changes require CI verification and real WebView testing, especially under low free storage and concurrent restore attempts.
+
+## Additional 5.3 PDF Library integrity audit
+- Added a read-only PDF Library verification action that checks each saved record's ID/name, Blob readability, declared-versus-actual byte size, and PDF header.
+- Detects duplicate backup IDs without deleting or modifying records.
+- The Files tab reports healthy and damaged document counts and a short diagnostic summary; users decide what to delete or re-import.
+- Integrity scan reads only the first 1 KB of each PDF for header validation rather than loading complete documents into memory.
+- Automated regression coverage verifies healthy, damaged, missing-blob, size-mismatch, duplicate-ID and read-only behavior.
+
+## Timer snapshot recovery hardening
+- Restored active-session snapshots now reject timestamps implausibly far in the future, segment start times earlier than the original session start, unbounded accumulated durations, oversized subject IDs, and oversized session IDs.
+- Invalid snapshots are discarded instead of producing a frozen or nonsensical timer display.
+- Added regression coverage for malformed/future-dated timer snapshots. Valid legacy snapshots without a session ID remain supported.
+- Android service still uses its persisted elapsed-time baseline and START_STICKY restart behavior; reboot/force-stop recovery and physical-device validation are not claimed by this change.
