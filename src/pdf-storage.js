@@ -1,3 +1,4 @@
+import {createPdfBackupPayload,readPdfBackupFile} from './pdf-backup.js';
 const DB_NAME='focus-flow-pdf-library';
 const DB_VERSION=1;
 const STORE='documents';
@@ -46,6 +47,25 @@ export async function renamePdfInLibrary(id,name){
  record.name=name;record.updatedAt=Date.now();
  await transaction('readwrite',s=>s.put(record));
  return {id:record.id,name:record.name,size:record.size,updatedAt:record.updatedAt};
+}
+export async function exportPdfLibraryBackup(){
+ const records=await transaction('readonly',s=>s.getAll());
+ const payload=await createPdfBackupPayload(records||[]);
+ return new Blob([JSON.stringify(payload)],{type:'application/json'});
+}
+export async function restorePdfLibraryBackup(file){
+ const backup=await readPdfBackupFile(file);
+ const existing=await transaction('readonly',s=>s.getAll());
+ const known=new Set((existing||[]).map(x=>String(x.backupId||x.id)));
+ const restored=backup.documents.filter(x=>!known.has(x.backupId));
+ if(!restored.length)return {restored:0,skipped:backup.documents.length,total:backup.documents.length};
+ await transaction('readwrite',store=>{
+  for(const item of restored){
+   const blob=new Blob([item.bytes],{type:'application/pdf'});
+   store.put({id:'pdf-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10),backupId:item.backupId,name:item.name,blob,type:'application/pdf',size:item.size,source:'backup-restore',updatedAt:item.updatedAt});
+  }
+ });
+ return {restored:restored.length,skipped:backup.documents.length-restored.length,total:backup.documents.length};
 }
 export function browserDownload(blob,name){
  const url=URL.createObjectURL(blob),a=document.createElement('a');
