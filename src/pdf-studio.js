@@ -5,7 +5,7 @@ import './pdf-studio.css';
 
 const $ = (s, root=document) => root.querySelector(s);
 const esc = (v='') => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let pdfjs, PDFDocument, currentBytes=null, currentName='', currentDoc=null, pageNo=1, zoom=1, renderTask=null, activeTab='home', bookmarks=new Set(), drawMode=false, drawing=false, lastPoint=null;
+let pdfjs, PDFDocument, currentBytes=null, currentName='', currentDoc=null, pageNo=1, zoom=1, renderTask=null, renderSequence=0, activeTab='home', bookmarks=new Set(), drawMode=false, drawing=false, lastPoint=null;
 const recentKey='focus-flow-pdf-recent-v1', bookmarkKey='focus-flow-pdf-bookmarks-v1', progressKey='focus-flow-pdf-progress-v1';
 const readRecent=()=>{try{return JSON.parse(localStorage.getItem(recentKey)||'[]')}catch{return []}};
 const saveRecent=item=>{const list=readRecent().filter(x=>x.name!==item.name);list.unshift(item);localStorage.setItem(recentKey,JSON.stringify(list.slice(0,30)))};
@@ -41,7 +41,31 @@ function files(){const rec=readRecent();return `<div class="pdf-studio-panel"><d
 function paintWorkspace(){const root=$('#pdfWorkspace');if(!root)return;root.innerHTML=activeTab==='home'?home():activeTab==='reader'?reader():activeTab==='editor'?editor():activeTab==='create'?create():activeTab==='organize'?organize():activeTab==='tools'?tools():files();document.querySelectorAll('[data-pdf-tab]').forEach(b=>b.classList.toggle('active',b.dataset.pdfTab===activeTab));bindWorkspace();if(activeTab==='reader'&&currentDoc){renderPage();thumbnails();}if(activeTab==='tools'&&currentDoc)paintMetadata();if(activeTab==='create')bindPDFPage();if(activeTab==='files')loadSavedLibrary()}
 function setTab(tab){activeTab=tab;paintWorkspace()}
 async function openFile(file,libraryId=null){if(!file)return;if(file.size>250*1024*1024){status('This file is over the 250 MB safety limit for this device.','error');return}try{status('Opening PDF…');await engines();currentBytes=await bytesFrom(file);currentName=file.name;currentDoc=await pdfjs.getDocument({data:currentBytes.slice()}).promise;pageNo=1;zoom=1;try{const p=JSON.parse(localStorage.getItem(progressKey)||'{}')[file.name];if(p){pageNo=Math.min(currentDoc.numPages,Math.max(1,Number(p.page)||1));zoom=Math.min(3,Math.max(.45,Number(p.zoom)||1))}}catch{}drawMode=false;loadBookmarks();let saved=libraryId?{id:libraryId}:null;if(!saved){try{saved=await savePdfToLibrary(file,file.name,'opened')}catch(storageError){console.warn('PDF opened but could not be copied to the in-app library',storageError)}}if(saved)saveRecent({id:saved.id,name:file.name,openedAt:new Date().toISOString(),size:file.size});setTab('reader');status('Opened '+file.name+' · '+currentDoc.numPages+' pages'+(saved?'':' · Library copy unavailable'),'success')}catch(e){console.error(e);status('Could not open this PDF. It may be damaged, unsupported or password protected.','error')}}
-async function renderPage(){if(!currentDoc)return;const canvas=$('#pdfCanvas'),ink=$('#pdfInkCanvas');if(!canvas)return;if(renderTask){try{renderTask.cancel()}catch{}}try{const page=await currentDoc.getPage(pageNo);const viewport=page.getViewport({scale:zoom});const ratio=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.ceil(viewport.width*ratio);canvas.height=Math.ceil(viewport.height*ratio);canvas.style.width=viewport.width+'px';canvas.style.height=viewport.height+'px';ink.width=canvas.width;ink.height=canvas.height;ink.style.width=canvas.style.width;ink.style.height=canvas.style.height;const ctx=canvas.getContext('2d',{alpha:false});renderTask=page.render({canvasContext:ctx,viewport, transform:ratio!==1?[ratio,0,0,ratio,0,0]:null});await renderTask.promise;$('#pdfPageInput').value=pageNo;$('#pdfPageInput').max=currentDoc.numPages;$('#pdfPageTotal').textContent='/ '+currentDoc.numPages;$('#pdfPageCount').textContent=currentDoc.numPages+' pages';$('#pdfZoomLabel').textContent=Math.round(zoom*100)+'%';saveProgress();$('#pdfBookmark').textContent=bookmarks.has(currentName+':'+pageNo)?'★':'☆';$('#pdfDraw').classList.toggle('active',drawMode);status('Page '+pageNo+' of '+currentDoc.numPages)}catch(e){if(e?.name!=='RenderingCancelledException')status('Page render failed: '+e.message,'error')}}
+async function renderPage(){
+ if(!currentDoc)return;
+ const sequence=++renderSequence,canvas=$('#pdfCanvas'),ink=$('#pdfInkCanvas');
+ if(!canvas||!ink)return;
+ if(renderTask){try{renderTask.cancel();await renderTask.promise}catch{}renderTask=null;}
+ if(sequence!==renderSequence)return;
+ try{
+  const requestedPage=pageNo,requestedZoom=zoom,page=await currentDoc.getPage(requestedPage);
+  if(sequence!==renderSequence)return;
+  const viewport=page.getViewport({scale:requestedZoom}),ratio=Math.min(window.devicePixelRatio||1,2);
+  canvas.width=Math.ceil(viewport.width*ratio);canvas.height=Math.ceil(viewport.height*ratio);
+  canvas.style.width=viewport.width+'px';canvas.style.height=viewport.height+'px';
+  ink.width=canvas.width;ink.height=canvas.height;ink.style.width=canvas.style.width;ink.style.height=canvas.style.height;
+  const ctx=canvas.getContext('2d',{alpha:false});
+  const task=page.render({canvasContext:ctx,viewport,transform:ratio!==1?[ratio,0,0,ratio,0,0]:null});
+  renderTask=task;await task.promise;
+  if(sequence!==renderSequence)return;
+  renderTask=null;
+  $('#pdfPageInput').value=requestedPage;$('#pdfPageInput').max=currentDoc.numPages;
+  $('#pdfPageTotal').textContent='/ '+currentDoc.numPages;$('#pdfPageCount').textContent=currentDoc.numPages+' pages';
+  $('#pdfZoomLabel').textContent=Math.round(requestedZoom*100)+'%';saveProgress();
+  $('#pdfBookmark').textContent=bookmarks.has(currentName+':'+requestedPage)?'★':'☆';
+  $('#pdfDraw').classList.toggle('active',drawMode);status('Page '+requestedPage+' of '+currentDoc.numPages);
+ }catch(e){if(e?.name!=='RenderingCancelledException'&&sequence===renderSequence)status('Page render failed: '+e.message,'error');}
+}
 async function thumbnails(){const root=$('#pdfThumbnails');if(!root||!currentDoc)return;root.innerHTML='';const limit=Math.min(currentDoc.numPages,36);for(let n=1;n<=limit;n++){const btn=document.createElement('button');btn.className='pdf-thumb'+(n===pageNo?' active':'');btn.dataset.page=n;btn.setAttribute('aria-label','Open page '+n);const cv=document.createElement('canvas');const label=document.createElement('small');label.textContent='Page '+n;btn.append(cv,label);root.append(btn);try{const pg=await currentDoc.getPage(n),vp=pg.getViewport({scale:0.18});cv.width=Math.ceil(vp.width);cv.height=Math.ceil(vp.height);await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise}catch{}btn.onclick=()=>{pageNo=n;renderPage();root.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===btn))}}if(currentDoc.numPages>limit){const note=document.createElement('small');note.textContent='Showing first '+limit+' pages';root.append(note)}}
 async function searchText(){if(!currentDoc)return status('Open a PDF first.','error');const q=$('#pdfSearchInput')?.value.trim().toLowerCase();if(!q)return;status('Searching…');let matches=[];for(let n=1;n<=currentDoc.numPages;n++){const p=await currentDoc.getPage(n),t=await p.getTextContent();const text=t.items.map(x=>x.str).join(' ');if(text.toLowerCase().includes(q))matches.push(n)}const result=$('#pdfSearchResult');if(result){result.innerHTML=matches.length?'Found on pages: '+matches.slice(0,30).map(n=>'<button type="button" class="pdf-search-hit" data-search-page="'+n+'">'+n+'</button>').join(' '):'No matches found. Scanned PDFs need OCR.';result.querySelectorAll('[data-search-page]').forEach(b=>b.addEventListener('click',()=>{pageNo=Number(b.dataset.searchPage);renderPage()}))}status('Search complete · '+matches.length+' matching pages')}
 async function withPdf(fn){if(!currentBytes)return status('Open a PDF first.','error');try{await engines();const doc=await PDFDocument.load(currentBytes,{ignoreEncryption:false});const bytes=await fn(doc);if(bytes)await exportPdf(bytes,currentName.replace(/\.pdf$/i,'')+'-edited.pdf','edited');status('Edited copy saved. Original file was not changed.','success')}catch(e){console.error(e);status('Operation failed: '+(e.message||'Unsupported or protected PDF'),'error')}}
