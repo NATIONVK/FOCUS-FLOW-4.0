@@ -207,6 +207,24 @@ public class GalleryPlugin extends Plugin {
       JSObject response=new JSObject();response.put("uri",uri.toString());response.put("bytesWritten",bytes.length);call.resolve(response);
     }catch(Exception e){call.reject("Could not save PDF: "+e.getMessage(),e);}
   }
+  @PluginMethod public void saveFile(PluginCall call) {
+    String mime=call.getString("mimeType","application/octet-stream");
+    String name=call.getString("name","focus-flow-backup.json");
+    Intent intent=new Intent(Intent.ACTION_CREATE_DOCUMENT);intent.addCategory(Intent.CATEGORY_OPENABLE);intent.setType(mime);
+    intent.putExtra(Intent.EXTRA_TITLE,name);intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION|Intent.FLAG_GRANT_READ_URI_PERMISSION);
+    startActivityForResult(call,intent,"fileSaveChosen");
+  }
+  @ActivityCallback private void fileSaveChosen(PluginCall call,ActivityResult result) {
+    if(call==null)return;
+    if(result.getResultCode()!=Activity.RESULT_OK||result.getData()==null||result.getData().getData()==null){call.reject("File save cancelled","CANCELLED");return;}
+    try {
+      String data=call.getString("base64");if(data==null||data.isEmpty())throw new Exception("File data missing");
+      byte[] bytes=Base64.decode(data,Base64.DEFAULT);if(bytes.length>30L*1024*1024)throw new Exception("File exceeds the 30 MB Android save limit");
+      Uri uri=result.getData().getData();
+      try(OutputStream out=getContext().getContentResolver().openOutputStream(uri,"w")){if(out==null)throw new Exception("Cannot create destination");out.write(bytes);out.flush();}
+      JSObject response=new JSObject();response.put("uri",uri.toString());response.put("bytesWritten",bytes.length);call.resolve(response);
+    }catch(Exception e){call.reject("Could not save file: "+e.getMessage(),e);}
+  }
   private String displayName(Uri uri) {
     try(Cursor c=getContext().getContentResolver().query(uri,null,null,null,null)){if(c!=null&&c.moveToFirst()){int k=c.getColumnIndex(OpenableColumns.DISPLAY_NAME);if(k>=0)return c.getString(k);}}catch(Exception ignored){}
     return "document.pdf";
