@@ -341,3 +341,24 @@ test('task due dates survive normalization and app reload',()=>{
     assert.equal(store.data.tasks[0].dueDate,'2026-12-01');
   }finally{globalThis.localStorage=old}
 });
+
+test('timer rejects future-dated or structurally inconsistent snapshots',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={setItem:(k,v)=>map.set(k,v),getItem:k=>map.get(k)||null,removeItem:k=>map.delete(k)};
+  try{
+    const now=Date.now();
+    const invalid=[
+      {subjectId:'x',startedAt:now+600000,segmentStartedAt:now+600000,accumulated:0,paused:false},
+      {subjectId:'x',startedAt:now-1000,segmentStartedAt:now-2000,accumulated:0,paused:false},
+      {subjectId:'x',startedAt:now-1000,segmentStartedAt:now-500,accumulated:Number.MAX_VALUE,paused:false},
+      {subjectId:'x'.repeat(257),startedAt:now-1000,segmentStartedAt:now-500,accumulated:0,paused:false},
+      {subjectId:'x',startedAt:now-1000,segmentStartedAt:now-500,accumulated:0,paused:false,sessionId:'s'.repeat(201)}
+    ];
+    for(const snapshot of invalid){
+      map.set('focus-flow-active-session',JSON.stringify(snapshot));
+      const timer=new FocusTimer(memory());
+      assert.equal(timer.active,false);
+      assert.equal(map.has('focus-flow-active-session'),false);
+    }
+  }finally{globalThis.localStorage=old;}
+});
