@@ -164,12 +164,12 @@ cd android
 - Study records are stored locally on the device by default.
 - No cloud sync or account system is required for the core study workflow.
 - Export a verified versioned backup before clearing app storage or uninstalling the app. Restore previews record counts, checks the backup integrity checksum, and confirms before replacing current study records. Legacy version-4 JSON backups remain supported.
-- Settings includes localStorage/IndexedDB availability, estimated browser storage usage, and persistent-storage protection status. PDF Library documents are stored separately and are not included in the study-data backup.
+- Settings includes localStorage/IndexedDB availability, estimated browser storage usage, and persistent-storage protection status. PDF Library documents are stored separately; use PDF Studio → Files → Export Library Backup to back them up. Restore merges documents and skips duplicates.
 - Photo selection for PDF creation uses the Android system document picker and supports multi-select without granting broad gallery access. Created and imported PDFs are stored in the app's local IndexedDB library; Android Save As can also copy the PDF to a folder you choose.
 
 ## 🧭 Development status
 
-FOCUS FLOW 4.0 is actively evolving. The repository includes automated core tests and an Android APK workflow. Native behavior—especially background execution, notifications, and gallery permissions—should be validated on physical devices across supported Android versions.
+FOCUS FLOW 5.1 is actively evolving. The repository includes automated core tests and an Android APK workflow. Native behavior—especially background execution, notifications, and gallery permissions—should be validated on physical devices across supported Android versions.
 
 ### Planned improvements
 
@@ -197,7 +197,7 @@ No license has been added yet. Unless a license is added to this repository, sta
 ---
 
 <div align="center">
-  <strong>FOCUS FLOW 4.0</strong><br>
+  <strong>FOCUS FLOW 5.1</strong><br>
   <sub>Build focus. Track progress. Find your flow.</sub><br><br>
   <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0">GitHub Repository</a> ·
   <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/issues">Report an issue</a> ·
