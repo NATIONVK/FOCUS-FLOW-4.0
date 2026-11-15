@@ -36,6 +36,16 @@ export async function listPdfLibrary(){
 export async function deletePdfFromLibrary(id){
  return transaction('readwrite',s=>s.delete(id));
 }
+export async function renamePdfInLibrary(id,name){
+ name=String(name||'').trim().replace(/[\\/:*?\"<>|]/g,'-').slice(0,180);
+ if(!name)throw new Error('A PDF file name is required');
+ if(!/\\.pdf$/i.test(name))name+='.pdf';
+ const record=await getPdfFromLibrary(id);
+ if(!record)throw new Error('Saved PDF not found');
+ record.name=name;record.updatedAt=Date.now();
+ await transaction('readwrite',s=>s.put(record));
+ return {id:record.id,name:record.name,size:record.size,updatedAt:record.updatedAt};
+}
 export function browserDownload(blob,name){
  const url=URL.createObjectURL(blob),a=document.createElement('a');
  a.href=url;a.download=name;a.rel='noopener';document.body.appendChild(a);a.click();a.remove();
