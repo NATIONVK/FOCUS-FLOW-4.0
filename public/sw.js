@@ -1,4 +1,4 @@
-const CACHE = 'focus-flow-shell-v7';
+const CACHE = 'focus-flow-shell-v8';
 const SHELL = ['./', './index.html'];
 
 self.addEventListener('install', event => {
