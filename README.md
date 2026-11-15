@@ -19,6 +19,8 @@
 - Black Hole animation speed increases after every completed focus minute, with safe speed limits.
 - Native Android timer commands are serialized so delayed start/pause/stop bridge calls cannot overwrite a newer timer state.
 - Backup metadata and the visible app version now consistently report 5.4.1.
+- Replaced the old clock/book placeholder artwork with one Black Hole identity across the app sidebar, browser favicon, PWA install icons, Android adaptive launcher and legacy Android density icons.
+- Android CI generates and verifies real PNG launcher assets after Capacitor sync, rather than only writing adaptive XML placeholders.
 - The animated disk, corona, lensing rings and energy waves gradually expand; growth is capped to fit Android screens.
 - Animation settings update only once per minute to avoid unnecessary rendering work. Pause and reduced-motion behavior remain respected.
 
