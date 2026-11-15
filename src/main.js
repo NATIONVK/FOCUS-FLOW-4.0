@@ -63,7 +63,7 @@ function nav() {
   return ['overview','dashboard','subjects','tasks','planner','notes','history','statistics','pdf-maker','settings'].map(p=>`<button class="nav-item ${page===p?'active':''}" data-page="${p}">${p==='pdf-maker'?'PDF Studio':p[0].toUpperCase()+p.slice(1)}</button>`).join('');
 }
 function toast(message,type='info'){let el=document.querySelector('#appToast');if(!el){el=document.createElement('div');el.id='appToast';el.className='app-toast';document.body.appendChild(el);}el.textContent=message;el.dataset.type=type;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2600);}
-function wireDialog(dialog,wrap,close,initialFocus){
+function wireDialog(dialog,close,initialFocus){
   const previous=document.activeElement;
   dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');
   dialog.addEventListener('keydown',event=>{
@@ -75,7 +75,8 @@ function wireDialog(dialog,wrap,close,initialFocus){
     if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
     else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
   });
-  return value=>{wrap.remove();if(previous?.isConnected)previous.focus();return value};
+  initialFocus?.focus();
+  return ()=>{if(previous?.isConnected)previous.focus();};
 }
 function askText(title,placeholder,initial='',maxLength=300,multiline=false){return new Promise(resolve=>{
   const wrap=document.createElement('div');wrap.className='dialog-backdrop';
@@ -86,10 +87,11 @@ function askText(title,placeholder,initial='',maxLength=300,multiline=false){ret
   const cancel=document.createElement('button');cancel.type='button';cancel.className='secondary';cancel.textContent='Cancel';
   const save=document.createElement('button');save.type='submit';save.className='primary';save.textContent='Save';
   actions.append(cancel,save);dialog.append(heading,input,actions);wrap.append(dialog);document.body.append(wrap);
-  let closed=false;const finish=wireDialog(dialog,wrap,value=>{if(closed)return;closed=true;wrap.remove();resolve(value);},input);
+  let closed=false,restoreFocus=()=>{};
+  const finish=value=>{if(closed)return;closed=true;wrap.remove();restoreFocus();resolve(value)};
+  restoreFocus=wireDialog(dialog,finish,input);
   cancel.onclick=()=>finish(null);wrap.onclick=e=>{if(e.target===wrap)finish(null)};
   dialog.onsubmit=e=>{e.preventDefault();finish(input.value.trim())};
-  input.focus();
 });}
 function askConfirm(message){return new Promise(resolve=>{
   const wrap=document.createElement('div');wrap.className='dialog-backdrop';
@@ -100,9 +102,10 @@ function askConfirm(message){return new Promise(resolve=>{
   const no=document.createElement('button');no.type='button';no.className='secondary';no.textContent='Cancel';
   const yes=document.createElement('button');yes.type='button';yes.className='primary';yes.textContent='Continue';
   actions.append(no,yes);dialog.append(h,p,actions);wrap.append(dialog);document.body.append(wrap);
-  let closed=false;const finish=wireDialog(dialog,wrap,value=>{if(closed)return;closed=true;wrap.remove();resolve(value);},no);
+  let closed=false,restoreFocus=()=>{};
+  const finish=value=>{if(closed)return;closed=true;wrap.remove();restoreFocus();resolve(value)};
+  restoreFocus=wireDialog(dialog,finish,no);
   no.onclick=()=>finish(false);yes.onclick=()=>finish(true);wrap.onclick=e=>{if(e.target===wrap)finish(false)};
-  no.focus();
 });}
 function mobileNav(){const primary=['overview','subjects','tasks','pdf-maker'];const extra=['dashboard','planner','notes','history','statistics','settings'];const labels={overview:'Home',dashboard:'Dashboard',subjects:'Subjects',tasks:'Tasks','pdf-maker':'PDF Studio'};return primary.map(p=>'<button class="mobile-tab '+(page===p?'active':'')+'" data-page="'+p+'"><span>'+(labels[p]==='Home'?'⌂':labels[p]==='Subjects'?'◈':labels[p]==='Tasks'?'✓':labels[p]==='Dashboard'?'▥':'▤')+'</span><small>'+labels[p]+'</small></button>').join('')+'<button class="mobile-tab '+(extra.includes(page)?'active':'')+'" id="moreNavToggle"><span>•••</span><small>More</small></button><div class="mobile-more" id="mobileMore" hidden>'+extra.map(p=>'<button data-page="'+p+'">'+p[0].toUpperCase()+p.slice(1)+'</button>').join('')+'</div>';}
 function render() {
