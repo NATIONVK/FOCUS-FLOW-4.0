@@ -74,6 +74,7 @@ jobs:
           assert (res / "mipmap-anydpi-v26/ic_launcher.xml").is_file(), "Adaptive launcher icon missing"
           assert (res / "mipmap-anydpi-v26/ic_launcher_round.xml").is_file(), "Round adaptive launcher icon missing"
           assert (res / "drawable-nodpi/ic_launcher_foreground.png").is_file(), "Black Hole launcher foreground artwork missing"
+          assert (res / "drawable/ic_stat_focus_flow.xml").is_file(), "Black Hole notification icon missing"
           for density in ("mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"):
               assert (res / f"mipmap-{density}/ic_launcher.png").is_file(), f"Legacy launcher icon missing for {density}"
           assert 'android.permission.FOREGROUND_SERVICE' in manifest, "Foreground service permission missing"
