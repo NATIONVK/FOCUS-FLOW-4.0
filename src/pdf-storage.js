@@ -17,7 +17,7 @@ function transaction(mode,work){
   const tx=db.transaction(STORE,mode),store=tx.objectStore(STORE);
   let result;
   try{result=work(store)}catch(e){reject(e);db.close();return;}
-  tx.oncomplete=()=>{db.close();resolve(result?.result??result)};
+  tx.oncomplete=()=>{db.close();resolve(result&&typeof result==='object'&&'result' in result?result.result:result)};
   tx.onerror=()=>{db.close();reject(tx.error||new Error('PDF library save failed'))};
   tx.onabort=()=>{db.close();reject(tx.error||new Error('PDF library transaction aborted'))};
  }));
