@@ -8,13 +8,21 @@ function base64ToBytes(value){if(!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[
 function hasPdfHeader(bytes){const limit=Math.min(bytes.length,1024);for(let i=0;i<limit-4;i++)if(bytes[i]===37&&bytes[i+1]===80&&bytes[i+2]===68&&bytes[i+3]===70&&bytes[i+4]===45)return true;return false}
 export async function createPdfBackupPayload(records){
  if(!Array.isArray(records)||records.length>MAX_PDF_BACKUP_DOCUMENTS)throw new Error('PDF backup supports up to 100 documents.');
- let total=0;const documents=[];
+ let total=0;const documents=[];const ids=new Set();
  for(const record of records){
   if(!record?.blob||typeof record.blob.arrayBuffer!=='function')throw new Error('A saved PDF could not be read for backup.');
-  const bytes=new Uint8Array(await record.blob.arrayBuffer());total+=bytes.byteLength;
-  if(total>MAX_PDF_BACKUP_BYTES)throw new Error('PDF Library backup exceeds the 20 MB limit. Export smaller groups of documents.');
+  const backupId=String(record.backupId||record.id||'');
+  if(!backupId||backupId.length>200||ids.has(backupId))throw new Error('PDF Library contains a missing or duplicate document ID.');
+  ids.add(backupId);
+  const declaredSize=Number(record.blob.size);
+  if(Number.isFinite(declaredSize)&&declaredSize>=0&&declaredSize>MAX_PDF_BACKUP_BYTES-total)
+   throw new Error('PDF Library backup exceeds the 20 MB limit. Export smaller groups of documents.');
+  const bytes=new Uint8Array(await record.blob.arrayBuffer());
+  if(bytes.byteLength>MAX_PDF_BACKUP_BYTES-total)throw new Error('PDF Library backup exceeds the 20 MB limit. Export smaller groups of documents.');
+  if(Number.isFinite(declaredSize)&&declaredSize>=0&&declaredSize!==bytes.byteLength)throw new Error('A saved PDF size changed while creating the backup.');
+  total+=bytes.byteLength;
   if(!hasPdfHeader(bytes))throw new Error('A saved document is not a valid PDF: '+safeName(record.name));
-  documents.push({backupId:String(record.backupId||record.id||''),name:safeName(record.name),size:bytes.byteLength,updatedAt:Number(record.updatedAt)||Date.now(),data:bytesToBase64(bytes)});
+  documents.push({backupId,name:safeName(record.name),size:bytes.byteLength,updatedAt:Number(record.updatedAt)||Date.now(),data:bytesToBase64(bytes)});
  }
  return {format:PDF_BACKUP_FORMAT,version:PDF_BACKUP_VERSION,createdAt:new Date().toISOString(),documents};
 }

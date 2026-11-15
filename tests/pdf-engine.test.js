@@ -63,3 +63,37 @@ test('PDF Library backup rejects non-PDF content and excessive record counts',as
  await assert.rejects(()=>createPdfBackupPayload([{id:'bad',name:'bad.pdf',blob:new Blob(['hello'])}]),/not a valid PDF/i);
  assert.throws(()=>parsePdfBackupPayload({format:PDF_BACKUP_FORMAT,version:1,documents:Array(101).fill({})}),/more than 100/i);
 });
+
+
+test('PDF Library backup checks declared size before reading a large blob',async()=>{
+ let read=false;
+ const oversized={size:20*1024*1024+1,arrayBuffer:async()=>{read=true;return new ArrayBuffer(0)}};
+ await assert.rejects(()=>createPdfBackupPayload([{id:'large',name:'large.pdf',blob:oversized}]),/20 MB limit/i);
+ assert.equal(read,false,'oversized PDF bytes must not be materialized in memory');
+});
+test('PDF Library backup export rejects duplicate or missing document IDs',async()=>{
+ await assert.rejects(()=>createPdfBackupPayload([
+  {id:'same',name:'one.pdf',blob:pdfBlob()},
+  {id:'same',name:'two.pdf',blob:pdfBlob()}
+ ]),/duplicate document ID/i);
+ await assert.rejects(()=>createPdfBackupPayload([{name:'missing-id.pdf',blob:pdfBlob()}]),/missing or duplicate document ID/i);
+});
+test('PDF Library backup rejects invalid base64 before accepting a PDF record',async()=>{
+ const payload=await createPdfBackupPayload([{id:'doc-1',name:'valid.pdf',blob:pdfBlob()}]);
+ payload.documents[0].data='%%%not-base64%%%';
+ assert.throws(()=>parsePdfBackupPayload(payload),/invalid encoded data/i);
+});
+test('PDF Library restore rejects an oversized JSON file before reading it',async()=>{
+ let read=false;
+ const file={size:30*1024*1024+1,text:async()=>{read=true;return '{}'}};
+ const {readPdfBackupFile}=await import('../src/pdf-backup.js');
+ await assert.rejects(()=>readPdfBackupFile(file),/too large/i);
+ assert.equal(read,false,'oversized backup text must not be loaded into memory');
+});
+test('PDF Library backup supports an empty library and keeps a stable versioned envelope',async()=>{
+ const payload=await createPdfBackupPayload([]);
+ const parsed=parsePdfBackupPayload(payload);
+ assert.equal(payload.version,1);
+ assert.equal(parsed.documents.length,0);
+ assert.equal(parsed.totalBytes,0);
+});
