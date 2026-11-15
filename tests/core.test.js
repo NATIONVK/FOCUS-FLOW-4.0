@@ -288,3 +288,43 @@ test('timer finish retry after active snapshot cleanup failure does not duplicat
     assert.equal(s.data.sessions.length,1);
   }finally{globalThis.localStorage=old;}
 });
+
+
+test('deleting the final subtask preserves the parent task completion state',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};
+  try{
+    const store=new Store();store.addTask('Completed task');const task=store.data.tasks[0];
+    store.addSubtask(task.id,'Only step');store.toggleSubtask(task.id,task.subtasks[0].id,true);
+    assert.equal(task.done,true);
+    store.deleteSubtask(task.id,task.subtasks[0].id);
+    assert.equal(task.done,true);
+    assert.equal(task.subtasks.length,0);
+  }finally{globalThis.localStorage=old}
+});
+
+test('deleting the final subject remains deleted after reload',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};
+  try{
+    const store=new Store();const id=store.data.subjects[0].id;
+    store.deleteSubject(id);
+    assert.equal(store.data.subjects.length,0);
+    assert.equal(new Store().data.subjects.length,0);
+  }finally{globalThis.localStorage=old}
+});
+
+test('task normalization reconciles parent and subtask completion flags',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};
+  try{
+    const store=new Store();const data={...store.data,tasks:[
+      {id:'parent-done',title:'Parent done',done:true,subtasks:[{id:'s1',title:'Step',done:false}]},
+      {id:'steps-done',title:'Steps done',done:false,subtasks:[{id:'s2',title:'Step',done:true}]}
+    ]};
+    store.import(data);
+    assert.equal(store.data.tasks[0].done,true);
+    assert.equal(store.data.tasks[0].subtasks[0].done,true);
+    assert.equal(store.data.tasks[1].done,true);
+  }finally{globalThis.localStorage=old}
+});
