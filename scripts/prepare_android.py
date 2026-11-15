@@ -46,8 +46,10 @@ def prepare_manifest(path: Path) -> None:
     source = path.read_text(encoding="utf-8")
     if "<application" not in source or "</application>" not in source:
         raise ValueError(f"Android application element not found in {path}")
-    if "android.permission.POST_NOTIFICATIONS" not in source:
-        source = source.replace("<application", "\n".join(PERMISSIONS) + "\n    <application", 1)
+    for permission in PERMISSIONS:
+        match = re.search(r'android:name="([^"]+)"', permission)
+        if match and f'android:name="{match.group(1)}"' not in source:
+            source = source.replace("<application", permission + "\n    <application", 1)
     if "FocusTimerService" not in source:
         source = source.replace("</application>", SERVICE + "\n    </application>", 1)
     source = re.sub(r'\s+android:(?:roundIcon|icon)="[^"]*"', "", source)
