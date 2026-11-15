@@ -60,3 +60,5 @@ export async function getStorageHealth(){
   try{if(navigator.storage?.persisted)result.persisted=await navigator.storage.persisted()}catch{}
   return result;
 }
+
+export async function requestPersistentStorage(){try{if(!globalThis.navigator?.storage?.persist)return false;return await navigator.storage.persist()}catch{return false}}
