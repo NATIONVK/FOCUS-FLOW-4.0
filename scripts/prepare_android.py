@@ -104,7 +104,7 @@ def main() -> None:
     args = parser.parse_args()
     prepare_manifest(args.manifest)
     write_icon_resources(args.res_dir)
-    update_android_version(args.manifest.parent.parent, Path(__file__).resolve().parents[1] / "package.json")
+    update_android_version(args.manifest.parent.parent.parent, Path(__file__).resolve().parents[1] / "package.json")
     print("Android manifest, timer service, permissions and launcher icons prepared.")
 
 
