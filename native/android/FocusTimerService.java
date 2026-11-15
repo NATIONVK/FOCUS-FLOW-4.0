@@ -23,7 +23,7 @@ public class FocusTimerService extends Service {
  private long elapsed(){long delta=paused?0:Math.max(0,System.currentTimeMillis()-baseEpoch);if(Long.MAX_VALUE-elapsedBase<delta)return Long.MAX_VALUE;return elapsedBase+delta;}
  private Notification buildNotification(){
   long ms=elapsed(),sec=ms/1000;
-  NotificationCompat.Builder builder=new NotificationCompat.Builder(this,CHANNEL).setSmallIcon(android.R.drawable.ic_media_play)
+  NotificationCompat.Builder builder=new NotificationCompat.Builder(this,CHANNEL).setSmallIcon(R.drawable.ic_stat_focus_flow)
    .setContentTitle("FOCUS FLOW").setContentText(subject+" · "+(paused?"Paused · ":"Studying · ")+String.format(java.util.Locale.getDefault(),"%02d:%02d:%02d",sec/3600,(sec%3600)/60,sec%60))
    .setOngoing(true).setOnlyAlertOnce(true).setPriority(NotificationCompat.PRIORITY_LOW).setCategory(NotificationCompat.CATEGORY_WORKOUT);
   Intent launch=getPackageManager().getLaunchIntentForPackage(getPackageName());
