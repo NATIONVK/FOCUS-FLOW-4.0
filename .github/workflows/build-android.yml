@@ -68,7 +68,11 @@ jobs:
           assert (res / "mipmap-anydpi-v26/ic_launcher.xml").is_file(), "Adaptive launcher icon missing"
           assert (res / "mipmap-anydpi-v26/ic_launcher_round.xml").is_file(), "Round adaptive launcher icon missing"
           assert (res / "drawable/ic_launcher_foreground.xml").is_file(), "Launcher foreground artwork missing"
-          print("Verified: FOCUS FLOW launcher logo is assigned after Capacitor sync.")
+          assert 'android.permission.FOREGROUND_SERVICE' in manifest, "Foreground service permission missing"
+          assert 'android.permission.FOREGROUND_SERVICE_SPECIAL_USE' in manifest, "Android 14 special-use foreground permission missing"
+          assert re.search(r'<service\b[^>]*android:name="\.FocusTimerService"[^>]*android:foregroundServiceType="specialUse"', manifest), "Focus timer special-use service declaration missing"
+          assert 'android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE' in manifest, "Foreground service subtype declaration missing"
+          print("Verified: launcher logo and Android foreground timer service declarations are present.")
           PY
       - name: Build debug APK
         working-directory: android
