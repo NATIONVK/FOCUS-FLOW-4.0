@@ -16,6 +16,10 @@
 
 ## Latest release · 5.4.0
 
+- Black Hole animation speed increases after every completed focus minute, with safe speed limits.
+- The animated disk, corona, lensing rings and energy waves gradually expand; growth is capped to fit Android screens.
+- Animation settings update only once per minute to avoid unnecessary rendering work. Pause and reduced-motion behavior remain respected.
+
 - Black Hole Timer color transitions are smoother while elapsed time remains timestamp-derived and independent of animation frames.
 - Dashboard session-start insight now counts session starts instead of incorrectly ranking periods only by accumulated duration. Its wording explicitly describes session start patterns, not continuous time-of-day productivity.
 - Added automated tests for session-start grouping, invalid timestamps, invalid durations, and empty history.
