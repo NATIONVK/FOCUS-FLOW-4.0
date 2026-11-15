@@ -7,13 +7,6 @@ const esc = (v='') => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;
 function sizeBytes(n){return n<1024*1024?(n/1024).toFixed(0)+' KB':(n/1024/1024).toFixed(1)+' MB'}
 const MAX_PDF_IMAGES=20;
 function releaseImage(item){if(item?.file&&item.url?.startsWith('blob:'))URL.revokeObjectURL(item.url)}
-function addSelected(items,statusNode){
- const remaining=Math.max(0,MAX_PDF_IMAGES-selected.length);
- const accepted=items.slice(0,remaining);
- selected.push(...accepted);
- if(items.length>accepted.length&&statusNode)statusNode.textContent='সর্বোচ্চ '+MAX_PDF_IMAGES+'টি ছবি এক PDF-এ যোগ করা যাবে। অতিরিক্ত '+(items.length-accepted.length)+'টি ছবি যোগ হয়নি।';
- return accepted.length;
-}
 function paint(){
  const list=$('#pdfImageList');if(!list)return;
  list.innerHTML=selected.map((x,i)=>`<article class="pdf-image-card" draggable="true" data-index="${i}"><img src="${x.url}" alt="Page ${i+1} preview"><div class="pdf-image-meta"><b>Page ${String(i+1).padStart(2,'0')}</b><small>${esc(x.name||x.file?.name||'Photo')} · ${x.file?sizeBytes(x.file.size):'Gallery image'}</small><div class="pdf-order"><button class="secondary" data-up="${i}" ${i===0?'disabled':''}>↑</button><button class="secondary" data-down="${i}" ${i===selected.length-1?'disabled':''}>↓</button><button class="text-btn" data-remove="${i}">Remove</button></div></div></article>`).join('')||'<div class="pdf-empty">ছবি নির্বাচন করলে এখানে পৃষ্ঠাগুলো দেখা যাবে।</div>';
