@@ -365,7 +365,7 @@ function bind(){
   $('#refreshStorageHealth')?.addEventListener('click',refreshStorageHealth);
   $('#requestPersistentStorage')?.addEventListener('click',async()=>{const granted=await requestPersistentStorage();toast(granted?'Persistent storage protection enabled.':'Persistent storage protection was not granted or is unsupported.','info');refreshStorageHealth()});
   if(page==='settings')refreshStorageHealth();
-  $('#toggleTheme')?.addEventListener('click',()=>{store.data.settings.light=!store.data.settings.light;document.body.classList.toggle('light',store.data.settings.light);store.save()});
+  $('#toggleTheme')?.addEventListener('click',()=>{store.data.settings.light=!store.data.settings.light;try{store.save();document.body.classList.toggle('light',store.data.settings.light);toast('Appearance preference saved','success')}catch(error){document.body.classList.toggle('light',store.data.settings.light);toast(error.message||'Appearance could not be saved','error')}});
   if(page==='pdf-maker') bindPDFStudioPage();
 }
 async function exitTimerView(){
