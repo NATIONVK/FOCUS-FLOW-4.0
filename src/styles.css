@@ -425,3 +425,62 @@ body.light .subtask-row{color:#4d5670}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+
+/* Animated analytics dashboard — lightweight, data-driven and motion-accessible */
+.dashboard-motion-ready .dashboard-hero,
+.dashboard-motion-ready .dashboard-chart-panel,
+.dashboard-motion-ready .dashboard-task-panel,
+.dashboard-motion-ready .dash-insights-panel{
+  animation:dashboardCardEnter .48s cubic-bezier(.2,.75,.25,1) both;
+}
+.dashboard-motion-ready .dashboard-chart-panel{animation-delay:70ms}
+.dashboard-motion-ready .dashboard-task-panel{animation-delay:130ms}
+.dashboard-motion-ready .dash-insights-panel{animation-delay:190ms}
+.dashboard-motion-ready .dash-kpi{
+  animation:dashboardCardEnter .42s cubic-bezier(.2,.75,.25,1) both;
+}
+.dashboard-motion-ready .dash-kpi:nth-child(2){animation-delay:45ms}
+.dashboard-motion-ready .dash-kpi:nth-child(3){animation-delay:90ms}
+.dashboard-motion-ready .dash-kpi:nth-child(4){animation-delay:135ms}
+.dashboard-motion-ready .dashboard-bar-col i{
+  transform-origin:bottom;
+  transition:height .65s cubic-bezier(.2,.75,.25,1);
+}
+.dashboard-motion-ready .dashboard-svg .chart-line{
+  stroke-dasharray:900;
+  stroke-dashoffset:900;
+  animation:dashboardLineDraw 1.1s ease forwards;
+}
+.dashboard-motion-ready .dashboard-svg .chart-point{
+  opacity:0;
+  animation:dashboardPointIn .3s ease forwards;
+}
+.dashboard-motion-ready .dashboard-svg .chart-point:nth-of-type(2){animation-delay:100ms}
+.dashboard-motion-ready .dashboard-svg .chart-point:nth-of-type(3){animation-delay:180ms}
+.dashboard-motion-ready .dashboard-svg .chart-point:nth-of-type(4){animation-delay:260ms}
+.dashboard-motion-ready .dash-pie{
+  animation:dashboardPieIn .7s cubic-bezier(.2,.75,.25,1) both;
+}
+.dashboard-motion-ready .task-progress i{
+  transition:width .8s cubic-bezier(.2,.75,.25,1);
+}
+@keyframes dashboardCardEnter{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes dashboardLineDraw{to{stroke-dashoffset:0}}
+@keyframes dashboardPointIn{to{opacity:1}}
+@keyframes dashboardPieIn{from{opacity:.5;transform:scale(.82) rotate(-18deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+@media(prefers-reduced-motion:reduce){
+  .dashboard-motion-ready .dashboard-hero,
+  .dashboard-motion-ready .dashboard-chart-panel,
+  .dashboard-motion-ready .dashboard-task-panel,
+  .dashboard-motion-ready .dash-insights-panel,
+  .dashboard-motion-ready .dash-kpi,
+  .dashboard-motion-ready .dashboard-svg .chart-line,
+  .dashboard-motion-ready .dashboard-svg .chart-point,
+  .dashboard-motion-ready .dash-pie{animation:none!important;opacity:1;transform:none}
+  .dashboard-motion-ready .dashboard-bar-col i,
+  .dashboard-motion-ready .task-progress i{transition:none!important}
+}
