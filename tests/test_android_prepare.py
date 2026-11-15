@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.prepare_android import PERMISSIONS, prepare_manifest, write_icon_resources
+from scripts.prepare_android import PERMISSIONS, prepare_manifest, update_android_version, write_icon_resources
 
 
 class AndroidPrepareTests(unittest.TestCase):
@@ -30,6 +30,21 @@ class AndroidPrepareTests(unittest.TestCase):
             content = manifest.read_text(encoding="utf-8")
             self.assertEqual(content.count('android.permission.POST_NOTIFICATIONS'), 1)
             self.assertIn('android.permission.FOREGROUND_SERVICE_SPECIAL_USE', content)
+
+
+    def test_android_version_tracks_package_version(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            app = root / "app"
+            app.mkdir()
+            gradle = app / "build.gradle"
+            gradle.write_text('defaultConfig {\\n versionCode 1\\n versionName "1.0"\\n}', encoding="utf-8")
+            package = root / "package.json"
+            package.write_text('{"version":"5.1.0"}', encoding="utf-8")
+            update_android_version(app, package)
+            content = gradle.read_text(encoding="utf-8")
+            self.assertIn("versionCode 50100", content)
+            self.assertIn('versionName "5.1.0"', content)
 
     def test_adaptive_launcher_resources_are_written(self):
         with tempfile.TemporaryDirectory() as temp:
