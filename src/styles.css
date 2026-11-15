@@ -601,3 +601,58 @@ body.light .subtask-row{color:#4d5670}
     transition: none !important;
   }
 }
+
+
+/* 5.4.1 — Black Hole grows and accelerates with every focused minute.
+   All growth is capped so the scene stays inside small Android viewports. */
+.blackhole-scene {
+  --bh-area-scale: 1;
+  --bh-spin-outer: 12s;
+  --bh-spin-inner: 6s;
+  --bh-arc-speed: 9s;
+  --bh-particle-speed: 8s;
+  --bh-beam-speed: 18s;
+}
+.blackhole-scene .bh-disk-outer {
+  width: calc(88% * var(--bh-area-scale));
+  height: calc(43% * var(--bh-area-scale));
+  animation-duration: var(--bh-spin-outer);
+}
+.blackhole-scene .bh-disk-inner {
+  width: calc(67% * var(--bh-area-scale));
+  height: calc(30% * var(--bh-area-scale));
+  animation-duration: var(--bh-spin-inner);
+}
+.blackhole-scene .bh-corona,
+.blackhole-scene .bh-lensing {
+  width: calc(48% * var(--bh-area-scale));
+  height: calc(48% * var(--bh-area-scale));
+}
+.blackhole-scene .bh-lensing { width: calc(60% * var(--bh-area-scale)); height: calc(60% * var(--bh-area-scale)); }
+.blackhole-scene .bh-energy-waves i {
+  width: calc(52% * var(--bh-area-scale));
+  height: calc(52% * var(--bh-area-scale));
+  animation-duration: var(--bh-wave-speed);
+}
+.blackhole-scene .bh-energy-waves i:nth-child(2) { animation-duration: calc(var(--bh-wave-speed) * 1.12); }
+.blackhole-scene .bh-energy-waves i:nth-child(3) { animation-duration: calc(var(--bh-wave-speed) * 1.24); }
+.blackhole-scene .bh-lensing-arc { animation-duration: var(--bh-arc-speed); }
+.blackhole-scene .bh-lensing-arc-b { animation-duration: calc(var(--bh-arc-speed) * 1.33); }
+.blackhole-scene .bh-particle { animation-duration: var(--bh-particle-speed); }
+.blackhole-scene .bh-particle-b { animation-duration: calc(var(--bh-particle-speed) * 1.38); }
+.blackhole-scene .bh-particle-c { animation-duration: calc(var(--bh-particle-speed) * 1.75); }
+.blackhole-scene .bh-light-beams i { animation-duration: var(--bh-beam-speed); }
+.blackhole-scene .bh-light-beams i:nth-child(2) { animation-duration: calc(var(--bh-beam-speed) * 1.33); }
+.blackhole-scene .bh-light-beams i:nth-child(3) { animation-duration: calc(var(--bh-beam-speed) * 1.66); }
+@media(max-width:700px) {
+  .blackhole-scene { width: min(100vw,640px); height: min(100vw,640px); max-height: 80vh; }
+  .blackhole-scene .bh-disk-outer { filter: blur(4px); }
+}
+@media(prefers-reduced-motion:reduce) {
+  .blackhole-scene .bh-disk-outer,
+  .blackhole-scene .bh-disk-inner,
+  .blackhole-scene .bh-energy-waves i,
+  .blackhole-scene .bh-lensing-arc,
+  .blackhole-scene .bh-particle,
+  .blackhole-scene .bh-light-beams i { animation-duration: auto !important; }
+}
