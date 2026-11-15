@@ -1,4 +1,5 @@
 import {createPdfBackupPayload,readPdfBackupFile} from './pdf-backup.js';
+import {inspectPdfLibraryRecords} from './pdf-integrity.js';
 const DB_NAME='focus-flow-pdf-library';
 const DB_VERSION=1;
 const STORE='documents';
@@ -64,6 +65,10 @@ export async function renamePdfInLibrary(id,name){
  record.name=name;record.updatedAt=Date.now();
  await transaction('readwrite',s=>s.put(record));
  return {id:record.id,name:record.name,size:record.size,updatedAt:record.updatedAt};
+}
+export async function verifyPdfLibrary(){
+ const records=await transaction('readonly',s=>s.getAll());
+ return inspectPdfLibraryRecords(records||[]);
 }
 export async function exportPdfLibraryBackup(){
  const records=await transaction('readonly',s=>s.getAll());
