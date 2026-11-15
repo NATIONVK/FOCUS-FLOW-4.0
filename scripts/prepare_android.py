@@ -66,7 +66,7 @@ def prepare_manifest(path: Path) -> None:
 def update_android_version(app_dir: Path, package_file: Path) -> None:
     package = json.loads(package_file.read_text(encoding="utf-8"))
     version = str(package.get("version", ""))
-    match = re.fullmatch(r"(\\d+)\\.(\\d+)\\.(\\d+)", version)
+    match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", version)
     if not match:
         raise ValueError(f"Unsupported app version: {version!r}")
     major, minor, patch = map(int, match.groups())
@@ -75,8 +75,8 @@ def update_android_version(app_dir: Path, package_file: Path) -> None:
     if not gradle.is_file():
         raise FileNotFoundError(f"Android app Gradle file not found: {gradle}")
     source = gradle.read_text(encoding="utf-8")
-    source, code_count = re.subn(r"(?m)^(\\s*versionCode\\s+)\\d+", rf"\\g<1>{version_code}", source, count=1)
-    source, name_count = re.subn(r'''(?m)^(\\s*versionName\\s+)[\\"'][^\\"']+[\\"']''', lambda m: m.group(1) + f'"{version}"', source, count=1)
+    source, code_count = re.subn(r"(?m)^(\s*versionCode\s+)\d+", rf"\g<1>{version_code}", source, count=1)
+    source, name_count = re.subn(r'''(?m)^(\s*versionName\s+)["'][^"']+["']''', lambda m: m.group(1) + f'"{version}"', source, count=1)
     if code_count != 1 or name_count != 1:
         raise ValueError("Could not safely update Android versionCode/versionName in build.gradle")
     gradle.write_text(source, encoding="utf-8")
