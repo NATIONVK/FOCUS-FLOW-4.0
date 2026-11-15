@@ -359,3 +359,17 @@ body.light .subtask-row{color:#4d5670}
 .finish-session-btn:active,.exit-focus:active{transform:scale(.97)}
 @media(max-height:560px){.focus-core{width:min(55vh,250px);height:min(55vh,250px)}.focus-session-controls{gap:6px}.finish-session-btn{min-height:42px}}
 @media(max-width:480px){.storage-warning{align-items:flex-start;flex-direction:column}.storage-warning button{width:100%}}
+
+/* Data Safety 2.0 — storage health and validated backup UI */
+.data-health-panel,.backup-summary{margin:16px 0;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel,rgba(255,255,255,.025))}
+.data-health-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.data-health-heading b,.backup-summary b{font-size:13px}
+.data-health-details{display:grid;gap:9px}
+.data-health-details>div{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px}
+.data-health-details>div span,.backup-summary small{color:var(--muted)}
+.data-health-details>div b{font-size:11px;text-align:right}
+.health-good{color:#37c98a}.health-bad{color:#ff6b83}
+.backup-summary{display:grid;gap:7px}
+.backup-summary span{font-size:12px;line-height:1.6}
+.backup-summary small{font-size:10px;line-height:1.5}
+.data-health-heading button{min-height:34px}
