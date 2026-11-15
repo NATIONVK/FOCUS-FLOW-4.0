@@ -40,6 +40,7 @@ class PrepareAndroidTests(unittest.TestCase):
             self.assertTrue((root / "mipmap-anydpi-v26/ic_launcher.xml").is_file())
             self.assertTrue((root / "mipmap-anydpi-v26/ic_launcher_round.xml").is_file())
             self.assertTrue((root / "values/ic_launcher_background.xml").is_file())
+            self.assertTrue((root / "drawable/ic_stat_focus_flow.xml").is_file())
 
 
 if __name__ == "__main__":
