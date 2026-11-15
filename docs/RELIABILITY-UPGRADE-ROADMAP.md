@@ -101,7 +101,7 @@ Before calling a release ready:
 
 
 ## Delivered — Focus Flow 5.1.0
-- Added portable PDF Library JSON backup export and validated merge-restore. Restore checks format/version, document count, unique backup IDs, base64 data, PDF header, exact byte sizes and 40 MB total source size. Existing documents are never cleared.
+- Added portable PDF Library JSON backup export and validated merge-restore, using Android's system Save As picker for backup files. Restore checks format/version, document count, unique backup IDs, base64 data, PDF header, exact byte sizes and 20 MB total source size. Existing documents are never cleared.
 - PDF Library transactions now correctly return null for missing document lookups instead of leaking an IDBRequest object.
 - Reduced PDF source file limit to 75 MB, PDF.js image decoding to 8 million pixels, page canvas memory to 6 million output pixels, and thumbnail generation to 18 pages to control Android WebView memory.
 - Android timer notification permission is requested only when starting a new focus session, not on pause/resume.
