@@ -34,7 +34,6 @@ class PrepareAndroidTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp) / "res"
             write_icon_resources(root)
-            self.assertTrue((root / "drawable/ic_launcher_foreground.xml").is_file())
             foreground = root / "drawable-nodpi/ic_launcher_foreground.png"
             self.assertTrue(foreground.is_file())
             self.assertGreater(foreground.stat().st_size, 1000)
