@@ -484,3 +484,47 @@ body.light .subtask-row{color:#4d5670}
   .dashboard-motion-ready .dashboard-bar-col i,
   .dashboard-motion-ready .task-progress i{transition:none!important}
 }
+
+
+/* Correct selectors for the live Overview dashboard */
+.dashboard-motion-ready .dash-hero,
+.dashboard-motion-ready .dash-kpis,
+.dashboard-motion-ready .dash-main-grid,
+.dashboard-motion-ready .dash-month-panel,
+.dashboard-motion-ready .dash-insights-panel,
+.dashboard-motion-ready .dash-lower-grid,
+.dashboard-motion-ready .dash-recent-panel{
+  animation:dashboardCardEnter .48s cubic-bezier(.2,.75,.25,1) both;
+}
+.dashboard-motion-ready .dash-kpi{
+  animation:dashboardCardEnter .42s cubic-bezier(.2,.75,.25,1) both;
+}
+.dashboard-motion-ready .dash-chart-track i{
+  transform:scaleY(0);
+  transform-origin:bottom;
+  animation:dashboardBarGrow .72s cubic-bezier(.2,.75,.25,1) forwards;
+}
+.dashboard-motion-ready .dash-month-track i,
+.dashboard-motion-ready .progress-track i{
+  transform:scaleX(0);
+  transform-origin:left;
+  transition:transform .8s cubic-bezier(.2,.75,.25,1);
+}
+.dashboard-motion-ready .dash-month-track i.dashboard-progress-animate,
+.dashboard-motion-ready .progress-track i.dashboard-progress-animate{
+  transform:scaleX(1);
+}
+@keyframes dashboardBarGrow{to{transform:scaleY(1)}}
+@media(prefers-reduced-motion:reduce){
+  .dashboard-motion-ready .dash-hero,
+  .dashboard-motion-ready .dash-kpis,
+  .dashboard-motion-ready .dash-kpi,
+  .dashboard-motion-ready .dash-main-grid,
+  .dashboard-motion-ready .dash-month-panel,
+  .dashboard-motion-ready .dash-insights-panel,
+  .dashboard-motion-ready .dash-lower-grid,
+  .dashboard-motion-ready .dash-recent-panel,
+  .dashboard-motion-ready .dash-chart-track i{animation:none!important;opacity:1;transform:none}
+  .dashboard-motion-ready .dash-month-track i,
+  .dashboard-motion-ready .progress-track i{transition:none!important;transform:none}
+}
