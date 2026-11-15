@@ -122,6 +122,24 @@ function render() {
   if(page==='overview') applyDashboardLayout();
   bind();
   updateStorageStatus();
+  if(page==='dashboard') requestAnimationFrame(animateDashboardMotion);
+}
+function animateDashboardMotion(){
+  const root=$('.main');if(!root||page!=='dashboard')return;
+  const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  root.classList.add('dashboard-motion-ready');
+  if(reduceMotion)return;
+  root.querySelectorAll('.dashboard-bar-col i').forEach((bar,index)=>{
+    const height=bar.style.height;
+    bar.style.height='0%';
+    bar.style.animationDelay=(index*55)+'ms';
+    requestAnimationFrame(()=>{bar.style.height=height;bar.classList.add('dashboard-bar-animate');});
+  });
+  root.querySelectorAll('.task-progress i').forEach((bar)=>{
+    const width=bar.style.width;
+    bar.style.width='0%';
+    requestAnimationFrame(()=>{bar.style.width=width;});
+  });
 }
 const DASH_WIDGETS=[['hero','Welcome'],['kpis','Quick stats'],['week','Weekly focus & plan'],['month','Monthly progress'],['insights','Smart insights'],['lower','Subjects & tasks'],['recent','Recent sessions']];
 function applyDashboardLayout(){
