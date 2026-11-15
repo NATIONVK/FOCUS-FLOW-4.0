@@ -42,7 +42,7 @@ export function browserDownload(blob,name){
  setTimeout(()=>URL.revokeObjectURL(url),15000);
 }
 export async function savePdfOutput(blob,name,{askLocation=true,source='created'}={}){
- const saved=await savePdfToLibrary(blob,name,source);
+ let saved=null;try{saved=await savePdfToLibrary(blob,name,source)}catch(error){console.warn('Could not save PDF into in-app library',error)}
  if(askLocation){
   try{
    const {isAndroidGalleryAvailable,saveDevicePdf}=await import('./native-gallery.js');
