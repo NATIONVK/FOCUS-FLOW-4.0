@@ -13,6 +13,15 @@ This roadmap prioritizes reliable everyday use over adding decorative screens. I
 - Open recent PDFs directly from the Home screen.
 - Confirm destructive PDF deletion and clean up associated recent/progress/bookmark metadata.
 
+### Implemented in Data Safety 2.0
+- Versioned JSON backup envelope with an integrity checksum and export read-back verification.
+- Restore preview with subject/session/task/plan/note counts, record sanity checks, duplicate subject-ID detection, and a confirmation step.
+- Backward compatibility for legacy version-4 JSON backups.
+- Settings storage health panel for localStorage, IndexedDB, estimated browser storage usage, and persistent-storage protection state.
+- User-triggered request for persistent browser storage protection.
+- Regression tests covering valid backups, modified payloads, legacy backups, unsupported versions, malformed collections, and duplicate subject IDs.
+- Explicitly excludes the separate IndexedDB PDF Library from the study-data backup; PDF-library backup remains future work.
+
 ## P0 — Reliability and data safety
 1. Add an app-wide data health screen: local storage availability, IndexedDB availability, estimated usage, last successful backup, and recovery state.
 2. Add a validated backup restore preview showing counts for subjects, sessions, tasks, notes, and plans before replacing current data.
