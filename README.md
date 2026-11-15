@@ -30,7 +30,7 @@ These changes are covered by the repository's automated workflow; physical-devic
 
 - PDF Library now exports a portable JSON backup containing saved PDFs, with file signature, size, count and total-size validation on restore.
 - Restore merges documents into the current library, skips already restored copies, and never clears existing PDFs.
-- PDF rendering is limited to 100 MB source documents, 12 million output pixels per page, 16 million source-image pixels and 18 thumbnails to reduce memory spikes on Android phones.
+- PDF rendering is limited to 75 MB source documents, 6 million output pixels per page, 8 million source-image pixels and 18 thumbnails to reduce memory spikes on Android phones.
 - Android timer permission is requested on explicit session start, not every pause/resume. The foreground service restores validated snapshots after process recreation and uses a system chronometer instead of a frequent wake-up loop.
 - PDF backup controls include mobile focus-visible styling and responsive layouts.
 
