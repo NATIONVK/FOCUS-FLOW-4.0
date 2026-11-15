@@ -573,3 +573,41 @@ body.light .subtask-row{color:#4d5670}
     transition:none!important;
   }
 }
+
+
+/* FOCUS FLOW 5.4 — calmer, clearer timer transitions and data-led dashboard motion */
+.focus-screen .focus-core strong,
+.focus-screen .time-seconds,
+.focus-screen .bh-corona,
+.focus-screen .bh-disk-outer,
+.focus-screen .bh-disk-inner {
+  transition: color .55s ease, text-shadow .55s ease, box-shadow .8s ease,
+    filter .8s ease, opacity .8s ease;
+}
+.focus-screen .focus-core strong { font-variant-numeric: tabular-nums; }
+.focus-screen .time-seconds { color: var(--seconds-color, #fff); }
+.focus-screen .blackhole-scene { contain: layout style; }
+.dashboard-motion-ready .dash-chart-track i,
+.dashboard-motion-ready .dash-month-track i,
+.dashboard-motion-ready .progress-track i {
+  will-change: transform;
+}
+.dashboard-motion-ready .dash-chart-track i {
+  animation-fill-mode: both;
+}
+.dash-chart[role="img"],
+.dashboard-svg[role="img"] { user-select: none; }
+@media (prefers-reduced-motion: reduce) {
+  .focus-screen .focus-core strong,
+  .focus-screen .time-seconds,
+  .focus-screen .bh-corona,
+  .focus-screen .bh-disk-outer,
+  .focus-screen .bh-disk-inner {
+    transition: none !important;
+  }
+  .dashboard-motion-ready .dash-chart-track i,
+  .dashboard-motion-ready .dash-month-track i,
+  .dashboard-motion-ready .progress-track i {
+    will-change: auto;
+  }
+}
