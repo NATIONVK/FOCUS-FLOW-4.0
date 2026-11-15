@@ -14,7 +14,14 @@ REQUIRED = (
     "src/store.js",
     "src/timer.js",
     "src/analytics.js",
+    "src/data-safety.js",
+    "src/pdf-maker.js",
+    "src/pdf-storage.js",
+    "tests/core.test.js",
+    "tests/data-safety.test.js",
     "native/android/FocusTimerService.java",
+    "native/android/FocusTimerPlugin.java",
+    "native/android/GalleryPlugin.java",
     "scripts/prepare_android.py",
 )
 
