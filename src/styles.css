@@ -373,3 +373,25 @@ body.light .subtask-row{color:#4d5670}
 .backup-summary span{font-size:12px;line-height:1.6}
 .backup-summary small{font-size:10px;line-height:1.5}
 .data-health-heading button{min-height:34px}
+
+
+/* Black Hole Timer 3.0 — distraction-free controls and responsive scene */
+.focus-screen{isolation:isolate;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.focus-screen .exit-focus{width:38px;height:38px;min-height:38px;display:grid;place-items:center;font-size:25px;line-height:1;backdrop-filter:blur(12px);background:#08091088;border-color:#ffffff40}
+.focus-screen .focus-session-controls{position:absolute;left:0;right:0;bottom:max(18px,env(safe-area-inset-bottom));z-index:5;display:flex;justify-content:center;pointer-events:none}
+.focus-screen .finish-session-btn{pointer-events:auto;min-height:42px;padding:0 18px;border:1px solid #ffffff35;border-radius:999px;background:#090b16a8;color:#e9e5ff;font:600 11px Manrope,system-ui,sans-serif;letter-spacing:.5px;backdrop-filter:blur(14px);box-shadow:0 8px 30px #0005;opacity:.78;transition:opacity .2s,background .2s,border-color .2s}
+.focus-screen .finish-session-btn:active{opacity:1;background:#34264f;border-color:#c7aaff}
+.focus-screen .focus-core{cursor:pointer;touch-action:manipulation}
+.focus-screen .focus-core strong{color:var(--timer-color,#a99aff);transition:color .35s,text-shadow .35s}
+.focus-screen .focus-core strong .time-seconds{color:var(--seconds-color,#fff0bd)}
+.blackhole-scene.is-paused .focus-core strong{opacity:.72}
+.blackhole-scene[data-focus-level="4"] .bh-corona,
+.blackhole-scene[data-focus-level="5"] .bh-corona,
+.blackhole-scene[data-focus-level="6"] .bh-corona{box-shadow:0 0 48px #ffb66f99,0 0 130px #f07bc477}
+.blackhole-scene[data-focus-level="4"] .bh-disk-outer,
+.blackhole-scene[data-focus-level="5"] .bh-disk-outer,
+.blackhole-scene[data-focus-level="6"] .bh-disk-outer{filter:blur(2px) drop-shadow(0 0 38px #ffb46d);opacity:1}
+.blackhole-scene[data-focus-level="4"] .bh-light-beams i,
+.blackhole-scene[data-focus-level="5"] .bh-light-beams i,
+.blackhole-scene[data-focus-level="6"] .bh-light-beams i{opacity:.82;filter:drop-shadow(0 0 11px #ffc17c)}
+@media(max-height:520px){.focus-screen .blackhole-scene{width:min(68vh,520px);height:min(68vh,520px)}.focus-screen .focus-session-controls{bottom:8px}.focus-screen .finish-session-btn{min-height:36px}}
