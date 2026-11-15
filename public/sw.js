@@ -1,5 +1,5 @@
-const CACHE = 'focus-flow-shell-v11';
-const SHELL = ['./', './index.html'];
+const CACHE = 'focus-flow-shell-v12';
+const SHELL = ['./', './index.html', './icon.svg', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './favicon-32.png'];
 
 self.addEventListener('install', event => {
   event.waitUntil(
