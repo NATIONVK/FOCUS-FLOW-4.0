@@ -63,8 +63,47 @@ function nav() {
   return ['overview','dashboard','subjects','tasks','planner','notes','history','statistics','pdf-maker','settings'].map(p=>`<button class="nav-item ${page===p?'active':''}" data-page="${p}">${p==='pdf-maker'?'PDF Studio':p[0].toUpperCase()+p.slice(1)}</button>`).join('');
 }
 function toast(message,type='info'){let el=document.querySelector('#appToast');if(!el){el=document.createElement('div');el.id='appToast';el.className='app-toast';document.body.appendChild(el);}el.textContent=message;el.dataset.type=type;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2600);}
-function askText(title,placeholder,initial='',maxLength=300,multiline=false){return new Promise(resolve=>{const wrap=document.createElement('div');wrap.className='dialog-backdrop';const dialog=document.createElement('form');dialog.className='app-dialog';const heading=document.createElement('h3');heading.textContent=title;const input=document.createElement(multiline?'textarea':'input');input.className='dialog-input';input.placeholder=placeholder||'';input.value=initial||'';input.maxLength=maxLength;if(multiline)input.rows=7;input.setAttribute('aria-label',title);const actions=document.createElement('div');actions.className='dialog-actions';const cancel=document.createElement('button');cancel.type='button';cancel.className='secondary';cancel.textContent='Cancel';const save=document.createElement('button');save.type='submit';save.className='primary';save.textContent='Save';actions.append(cancel,save);dialog.append(heading,input,actions);wrap.append(dialog);document.body.append(wrap);input.focus();const close=v=>{wrap.remove();resolve(v)};cancel.onclick=()=>close(null);wrap.onclick=e=>{if(e.target===wrap)close(null)};dialog.onsubmit=e=>{e.preventDefault();close(input.value.trim())};});}
-function askConfirm(message){return new Promise(resolve=>{const wrap=document.createElement('div');wrap.className='dialog-backdrop';const dialog=document.createElement('div');dialog.className='app-dialog';const h=document.createElement('h3');h.textContent='Are you sure?';const p=document.createElement('p');p.textContent=message;const actions=document.createElement('div');actions.className='dialog-actions';const no=document.createElement('button');no.className='secondary';no.textContent='Cancel';const yes=document.createElement('button');yes.className='primary';yes.textContent='Continue';actions.append(no,yes);dialog.append(h,p,actions);wrap.append(dialog);document.body.append(wrap);const close=v=>{wrap.remove();resolve(v)};no.onclick=()=>close(false);yes.onclick=()=>close(true);wrap.onclick=e=>{if(e.target===wrap)close(false)};});}
+function wireDialog(dialog,wrap,close,initialFocus){
+  const previous=document.activeElement;
+  dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');
+  dialog.addEventListener('keydown',event=>{
+    if(event.key==='Escape'){event.preventDefault();close(null);return;}
+    if(event.key!=='Tab')return;
+    const items=[...dialog.querySelectorAll('button,input,textarea,select,[tabindex]:not([tabindex="-1"])')].filter(el=>!el.disabled&&el.offsetParent!==null);
+    if(!items.length){event.preventDefault();return;}
+    const first=items[0],last=items[items.length-1];
+    if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+    else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+  });
+  return value=>{wrap.remove();if(previous?.isConnected)previous.focus();return value};
+}
+function askText(title,placeholder,initial='',maxLength=300,multiline=false){return new Promise(resolve=>{
+  const wrap=document.createElement('div');wrap.className='dialog-backdrop';
+  const dialog=document.createElement('form');dialog.className='app-dialog';
+  const heading=document.createElement('h3');heading.id='app-dialog-title';heading.textContent=title;dialog.setAttribute('aria-labelledby',heading.id);
+  const input=document.createElement(multiline?'textarea':'input');input.className='dialog-input';input.placeholder=placeholder||'';input.value=initial||'';input.maxLength=maxLength;if(multiline)input.rows=7;input.setAttribute('aria-label',title);
+  const actions=document.createElement('div');actions.className='dialog-actions';
+  const cancel=document.createElement('button');cancel.type='button';cancel.className='secondary';cancel.textContent='Cancel';
+  const save=document.createElement('button');save.type='submit';save.className='primary';save.textContent='Save';
+  actions.append(cancel,save);dialog.append(heading,input,actions);wrap.append(dialog);document.body.append(wrap);
+  let closed=false;const finish=wireDialog(dialog,wrap,value=>{if(closed)return;closed=true;wrap.remove();resolve(value);},input);
+  cancel.onclick=()=>finish(null);wrap.onclick=e=>{if(e.target===wrap)finish(null)};
+  dialog.onsubmit=e=>{e.preventDefault();finish(input.value.trim())};
+  input.focus();
+});}
+function askConfirm(message){return new Promise(resolve=>{
+  const wrap=document.createElement('div');wrap.className='dialog-backdrop';
+  const dialog=document.createElement('div');dialog.className='app-dialog';
+  const h=document.createElement('h3');h.id='app-dialog-title';h.textContent='Are you sure?';dialog.setAttribute('aria-labelledby',h.id);
+  const p=document.createElement('p');p.textContent=message;
+  const actions=document.createElement('div');actions.className='dialog-actions';
+  const no=document.createElement('button');no.type='button';no.className='secondary';no.textContent='Cancel';
+  const yes=document.createElement('button');yes.type='button';yes.className='primary';yes.textContent='Continue';
+  actions.append(no,yes);dialog.append(h,p,actions);wrap.append(dialog);document.body.append(wrap);
+  let closed=false;const finish=wireDialog(dialog,wrap,value=>{if(closed)return;closed=true;wrap.remove();resolve(value);},no);
+  no.onclick=()=>finish(false);yes.onclick=()=>finish(true);wrap.onclick=e=>{if(e.target===wrap)finish(false)};
+  no.focus();
+});}
 function mobileNav(){const primary=['overview','subjects','tasks','pdf-maker'];const extra=['dashboard','planner','notes','history','statistics','settings'];const labels={overview:'Home',dashboard:'Dashboard',subjects:'Subjects',tasks:'Tasks','pdf-maker':'PDF Studio'};return primary.map(p=>'<button class="mobile-tab '+(page===p?'active':'')+'" data-page="'+p+'"><span>'+(labels[p]==='Home'?'⌂':labels[p]==='Subjects'?'◈':labels[p]==='Tasks'?'✓':labels[p]==='Dashboard'?'▥':'▤')+'</span><small>'+labels[p]+'</small></button>').join('')+'<button class="mobile-tab '+(extra.includes(page)?'active':'')+'" id="moreNavToggle"><span>•••</span><small>More</small></button><div class="mobile-more" id="mobileMore" hidden>'+extra.map(p=>'<button data-page="'+p+'">'+p[0].toUpperCase()+p.slice(1)+'</button>').join('')+'</div>';}
 function render() {
   const t=totals(), subjects=store.data.subjects;
