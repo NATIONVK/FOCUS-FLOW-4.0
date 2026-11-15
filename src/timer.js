@@ -51,7 +51,7 @@ export class FocusTimer {
     this.subjectId=subjectId; this.startedAt=Date.now(); this.segmentStartedAt=this.startedAt;
     this.accumulated=0; this.paused=false; this.sessionId=globalThis.crypto?.randomUUID?.()||`session-${this.startedAt}-${Math.random().toString(36).slice(2)}`;this.active=true;
     try{this.persist();}catch(error){this.active=false;this.subjectId=null;this.startedAt=0;this.segmentStartedAt=0;this.accumulated=0;this.sessionId=null;throw error;}
-    this.onChange(); syncNativeFocusTimer(this,this.store.subjectName(this.subjectId));
+    this.onChange(); syncNativeFocusTimer(this,this.store.subjectName(this.subjectId),true);
     return true;
   }
   toggle() {
