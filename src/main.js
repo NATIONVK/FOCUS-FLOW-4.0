@@ -122,23 +122,21 @@ function render() {
   if(page==='overview') applyDashboardLayout();
   bind();
   updateStorageStatus();
-  if(page==='dashboard') requestAnimationFrame(animateDashboardMotion);
+  if(page==='overview') requestAnimationFrame(animateDashboardMotion);
 }
 function animateDashboardMotion(){
-  const root=$('.main');if(!root||page!=='dashboard')return;
+  const root=$('.main');if(!root||page!=='overview')return;
   const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   root.classList.add('dashboard-motion-ready');
   if(reduceMotion)return;
-  root.querySelectorAll('.dashboard-bar-col i').forEach((bar,index)=>{
-    const height=bar.style.height;
-    bar.style.height='0%';
+  root.querySelectorAll('.dash-chart-track i').forEach((bar,index)=>{
     bar.style.animationDelay=(index*55)+'ms';
-    requestAnimationFrame(()=>{bar.style.height=height;bar.classList.add('dashboard-bar-animate');});
   });
-  root.querySelectorAll('.task-progress i').forEach((bar)=>{
-    const width=bar.style.width;
-    bar.style.width='0%';
-    requestAnimationFrame(()=>{bar.style.width=width;});
+  root.querySelectorAll('.dash-month-track i,.progress-track i').forEach((bar)=>{
+    bar.classList.add('dashboard-progress-animate');
+  });
+  root.querySelectorAll('.dash-hero,.dash-kpis,.dash-main-grid,.dash-month-panel,.dash-insights-panel,.dash-lower-grid,.dash-recent-panel').forEach((section,index)=>{
+    section.style.animationDelay=(Math.min(index,6)*65)+'ms';
   });
 }
 const DASH_WIDGETS=[['hero','Welcome'],['kpis','Quick stats'],['week','Weekly focus & plan'],['month','Monthly progress'],['insights','Smart insights'],['lower','Subjects & tasks'],['recent','Recent sessions']];
