@@ -33,3 +33,16 @@ test('rejects duplicate subject identifiers',()=>{
  const data=sample();data.subjects.push({...data.subjects[0],name:'Mathematics'});
  assert.throws(()=>inspectBackup(data),/duplicate subject ids/i);
 });
+
+
+test('rejects non-list study plans and malformed task subtasks',()=>{
+  const invalidPlans=sample();invalidPlans.plans={weekday:1};
+  assert.throws(()=>inspectBackup(invalidPlans),/plans must be a list/i);
+  const invalidSubtasks=sample();invalidSubtasks.tasks[0].subtasks=[{title:'   '}];
+  assert.throws(()=>inspectBackup(invalidSubtasks),/invalid sub-task/i);
+});
+
+test('rejects study plans that point to missing subjects',()=>{
+  const data=sample();data.plans[0].subjectId='missing';
+  assert.throws(()=>inspectBackup(data),/invalid study plan/i);
+});
