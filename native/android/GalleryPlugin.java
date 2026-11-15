@@ -177,7 +177,7 @@ public class GalleryPlugin extends Plugin {
     if(result.getResultCode()!=Activity.RESULT_OK||result.getData()==null){call.reject("Photo selection cancelled","CANCELLED");return;}
     try {
       Intent d=result.getData(); JSArray items=new JSArray();
-      if(d.getClipData()!=null){if(d.getClipData().getItemCount()>40)throw new Exception("Select up to 40 photos at a time to protect device memory");for(int n=0;n<d.getClipData().getItemCount();n++)items.put(imageItem(d.getClipData().getItemAt(n).getUri()));}
+      if(d.getClipData()!=null){if(d.getClipData().getItemCount()>20)throw new Exception("Select up to 20 photos at a time to protect device memory");for(int n=0;n<d.getClipData().getItemCount();n++)items.put(imageItem(d.getClipData().getItemAt(n).getUri()));}
       else if(d.getData()!=null)items.put(imageItem(d.getData()));
       if(items.length()==0)throw new Exception("No photos selected");
       JSObject out=new JSObject();out.put("items",items);call.resolve(out);
