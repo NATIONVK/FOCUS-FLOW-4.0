@@ -76,6 +76,7 @@ FOCUS-FLOW-4.0/
 ├── public/                  # Static assets and app icon
 ├── src/
 │   ├── analytics.js         # Study analytics and streak calculations
+│   ├── data-safety.js       # Verified backup envelopes and storage health checks
 │   ├── main.js              # App rendering and interactions
 │   ├── pdf-maker.js         # Image selection and PDF creation
 │   ├── pdf-studio.js        # PDF reader, annotation, page tools, and file workspace
@@ -130,7 +131,8 @@ cd android
 
 - Study records are stored locally on the device by default.
 - No cloud sync or account system is required for the core study workflow.
-- Export a backup before clearing app storage or uninstalling the app.
+- Export a verified versioned backup before clearing app storage or uninstalling the app. Restore previews record counts, checks the backup integrity checksum, and confirms before replacing current study records. Legacy version-4 JSON backups remain supported.
+- Settings includes localStorage/IndexedDB availability, estimated browser storage usage, and persistent-storage protection status. PDF Library documents are stored separately and are not included in the study-data backup.
 - Photo selection for PDF creation uses the Android system document picker and supports multi-select without granting broad gallery access. Created and imported PDFs are stored in the app's local IndexedDB library; Android Save As can also copy the PDF to a folder you choose.
 
 ## 🧭 Development status
