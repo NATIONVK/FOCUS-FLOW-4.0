@@ -94,7 +94,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v6
         with:
-          name: focus-flow-5.2-debug-apk
+          name: focus-flow-5.3-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
