@@ -142,26 +142,12 @@ public class GalleryPlugin extends Plugin {
 
   @PluginMethod
   public void readImage(PluginCall call) {
-    if (!hasImageAccess()) {
-      call.reject("Photo library permission is required", "PERMISSION_DENIED");
-      return;
-    }
-    String id = call.getString("id");
-    if (id == null) { call.reject("Image id is required"); return; }
+    if(!hasImageAccess()){call.reject("Photo library permission is required","PERMISSION_DENIED");return;}
+    String id=call.getString("id");if(id==null){call.reject("Image id is required");return;}
     try {
-      Uri uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, Long.parseLong(id));
-      try (InputStream in = getContext().getContentResolver().openInputStream(uri);
-           ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-        if (in == null) { call.reject("Image file is unavailable"); return; }
-        byte[] buffer = new byte[16384]; int count;
-        while ((count = in.read(buffer)) != -1) out.write(buffer, 0, count);
-        String mime = getContext().getContentResolver().getType(uri);
-        JSObject result = new JSObject();
-        result.put("dataUrl", "data:" + (mime == null ? "image/jpeg" : mime) + ";base64," +
-          Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP));
-        call.resolve(result);
-      }
-    } catch (Exception e) { call.reject("Unable to open image: " + e.getMessage(), e); }
+      Uri uri=ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,Long.parseLong(id));
+      JSObject response=imageItem(uri);call.resolve(response);
+    } catch(Exception e){call.reject("Unable to open image: "+e.getMessage(),e);}
   }
 
   // System document picker: allows selecting multiple photos in one operation.
