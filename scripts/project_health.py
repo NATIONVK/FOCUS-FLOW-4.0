@@ -17,6 +17,8 @@ REQUIRED = (
     "src/data-safety.js",
     "src/pdf-maker.js",
     "src/pdf-storage.js",
+    "src/pdf-backup.js",
+    "tests/pdf-engine.test.js",
     "tests/core.test.js",
     "tests/data-safety.test.js",
     "native/android/FocusTimerService.java",
