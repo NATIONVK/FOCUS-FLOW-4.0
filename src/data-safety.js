@@ -25,12 +25,14 @@ export function inspectBackup(value){
   }
   if(data.version!==4)throw new Error('Unsupported app data version. Expected version 4.');
   for(const key of ['subjects','sessions','tasks','plans','notes'])if(data[key]!==undefined&&!Array.isArray(data[key]))throw new Error('Invalid backup: '+key+' must be a list.');
+  for(const key of ['subjects','sessions','tasks','notes'])if(!Array.isArray(data[key]))throw new Error('Backup is missing required data list: '+key+'.');
   if(!Array.isArray(data.subjects)||!Array.isArray(data.sessions)||!Array.isArray(data.tasks??[])||!Array.isArray(data.notes??[]))throw new Error('Backup is missing required data lists.');
   if(data.subjects.length>1000||data.sessions.length>200000||(data.tasks??[]).length>50000||(data.notes??[]).length>50000||((data.plans||[]).length>20000))throw new Error('Backup contains an unusually large number of records.');
   const ids=new Set();
   for(const s of data.subjects){if(!isObject(s)||typeof s.name!=='string'||!s.name.trim())throw new Error('Backup contains an invalid subject.');if(s.id){if(ids.has(s.id))throw new Error('Duplicate subject IDs detected.');ids.add(s.id)}}
   for(const s of data.sessions){if(!isObject(s)||!Number.isFinite(Number(s.duration))||Number(s.duration)<0||!Number.isFinite(Date.parse(s.startedAt)))throw new Error('Backup contains an invalid study session.');}
-  for(const t of data.tasks??[])if(!isObject(t)||typeof t.title!=='string'||!t.title.trim())throw new Error('Backup contains an invalid task.');
+  for(const p of data.plans??[])if(!isObject(p)||!Number.isInteger(p.weekday)||p.weekday<0||p.weekday>6||!Number.isFinite(Number(p.minutes))||Number(p.minutes)<5||Number(p.minutes)>1440||!data.subjects.some(s=>s.id===p.subjectId))throw new Error('Backup contains an invalid study plan.');
+  for(const t of data.tasks??[]){if(!isObject(t)||typeof t.title!=='string'||!t.title.trim())throw new Error('Backup contains an invalid task.');if(t.subtasks!==undefined&&!Array.isArray(t.subtasks))throw new Error('Backup task sub-tasks must be a list.');for(const st of t.subtasks??[])if(!isObject(st)||typeof st.title!=='string'||!st.title.trim())throw new Error('Backup contains an invalid sub-task.');}
   for(const n of data.notes??[])if(!isObject(n)||typeof n.title!=='string'||!n.title.trim())throw new Error('Backup contains an invalid note.');
   const count={subjects:data.subjects.length,sessions:data.sessions.length,tasks:(data.tasks||[]).length,plans:(data.plans||[]).length,notes:(data.notes||[]).length};
   return {data,count,legacy,createdAt:value.createdAt||null,checksum:legacy?null:value.integrity.checksum};
