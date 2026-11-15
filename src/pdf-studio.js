@@ -8,7 +8,7 @@ const esc = (v='') => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;
 let pdfjs, PDFDocument, currentBytes=null, currentName='', currentDoc=null, pageNo=1, zoom=1, renderTask=null, renderSequence=0, activeTab='home', bookmarks=new Set(), drawMode=false, drawing=false, lastPoint=null;
 const recentKey='focus-flow-pdf-recent-v1', bookmarkKey='focus-flow-pdf-bookmarks-v1', progressKey='focus-flow-pdf-progress-v1';
 const readRecent=()=>{try{return JSON.parse(localStorage.getItem(recentKey)||'[]')}catch{return []}};
-const saveRecent=item=>{const list=readRecent().filter(x=>x.name!==item.name);list.unshift(item);localStorage.setItem(recentKey,JSON.stringify(list.slice(0,30)))};
+const saveRecent=item=>{try{const list=readRecent().filter(x=>x.name!==item.name);list.unshift(item);localStorage.setItem(recentKey,JSON.stringify(list.slice(0,30)))}catch(error){console.warn('Recent PDF history could not be stored',error)}};
 function loadBookmarks(){try{bookmarks=new Set(JSON.parse(localStorage.getItem(bookmarkKey)||'[]'))}catch{bookmarks=new Set()}}
 function saveBookmarks(){try{localStorage.setItem(bookmarkKey,JSON.stringify([...bookmarks]))}catch{status('Bookmarks could not be saved in local storage.','error')}}
 function saveProgress(){try{const p=JSON.parse(localStorage.getItem(progressKey)||'{}');p[currentName]={page:pageNo,zoom,updatedAt:Date.now()};localStorage.setItem(progressKey,JSON.stringify(p))}catch{}}
