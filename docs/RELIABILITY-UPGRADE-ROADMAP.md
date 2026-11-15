@@ -148,3 +148,10 @@ Before calling a release ready:
 - A failed multi-document write remains an atomic transaction: the database either commits the queued restore writes together or aborts them together.
 - IndexedDB quota exhaustion and aborted/invalid-state operations now produce actionable user-facing errors instead of opaque browser exception names.
 - These changes require CI verification and real WebView testing, especially under low free storage and concurrent restore attempts.
+
+## Additional 5.3 PDF Library integrity audit
+- Added a read-only PDF Library verification action that checks each saved record's ID/name, Blob readability, declared-versus-actual byte size, and PDF header.
+- Detects duplicate backup IDs without deleting or modifying records.
+- The Files tab reports healthy and damaged document counts and a short diagnostic summary; users decide what to delete or re-import.
+- Integrity scan reads only the first 1 KB of each PDF for header validation rather than loading complete documents into memory.
+- Automated regression coverage verifies healthy, damaged, missing-blob, size-mismatch, duplicate-ID and read-only behavior.
