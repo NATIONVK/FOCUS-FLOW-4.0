@@ -9,6 +9,8 @@ from __future__ import annotations
 import argparse
 import json
 import re
+
+from icon_assets import write_android_icon_resources
 from pathlib import Path
 
 PERMISSIONS = (
@@ -83,18 +85,8 @@ def update_android_version(app_dir: Path, package_file: Path) -> None:
 
 
 def write_icon_resources(res_dir: Path) -> None:
-    adaptive_dir = res_dir / "mipmap-anydpi-v26"
-    drawable_dir = res_dir / "drawable"
-    values_dir = res_dir / "values"
-    for directory in (adaptive_dir, drawable_dir, values_dir):
-        directory.mkdir(parents=True, exist_ok=True)
-    (drawable_dir / "ic_launcher_foreground.xml").write_text(FOREGROUND_ICON, encoding="utf-8")
-    for name in ("ic_launcher.xml", "ic_launcher_round.xml"):
-        (adaptive_dir / name).write_text(ADAPTIVE_ICON, encoding="utf-8")
-    (values_dir / "ic_launcher_background.xml").write_text(
-        '<resources><color name="ic_launcher_background">#080b14</color></resources>\n',
-        encoding="utf-8",
-    )
+    """Write Black Hole adaptive icons and legacy density fallbacks."""
+    write_android_icon_resources(res_dir)
 
 
 def main() -> None:
