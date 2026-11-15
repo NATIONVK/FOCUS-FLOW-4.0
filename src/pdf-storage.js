@@ -6,8 +6,9 @@ function openDb(){
   if(!globalThis.indexedDB){reject(new Error('এই WebView-তে IndexedDB পাওয়া যাচ্ছে না'));return;}
   const request=indexedDB.open(DB_NAME,DB_VERSION);
   request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains(STORE))db.createObjectStore(STORE,{keyPath:'id'});};
-  request.onsuccess=()=>resolve(request.result);
+  request.onsuccess=()=>{request.result.onversionchange=()=>request.result.close();resolve(request.result)};
   request.onerror=()=>reject(request.error||new Error('PDF library খুলতে সমস্যা হয়েছে'));
+  request.onblocked=()=>reject(new Error('PDF Library অন্য একটি tab-এ খোলা আছে। অন্য tab বন্ধ করে আবার চেষ্টা করো।'));
  });
 }
 function transaction(mode,work){
