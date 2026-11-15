@@ -22,8 +22,6 @@
 - Black Hole animation speed increases after every completed focus minute, with safe speed limits.
 - Native Android timer commands are serialized so delayed start/pause/stop bridge calls cannot overwrite a newer timer state.
 - Backup metadata and the visible app version now consistently report 5.4.2.
-- Replaced the old clock/book placeholder artwork with one Black Hole identity across the app sidebar, browser favicon, PWA install icons, Android adaptive launcher and legacy Android density icons.
-- Android CI generates and verifies real PNG launcher assets after Capacitor sync, rather than only writing adaptive XML placeholders.
 - The animated disk, corona, lensing rings and energy waves gradually expand; growth is capped to fit Android screens.
 - Animation settings update only once per minute to avoid unnecessary rendering work. Pause and reduced-motion behavior remain respected.
 
@@ -99,7 +97,7 @@ The Android app is packaged with **Capacitor 7**. The repository includes native
 1. Open the [Actions tab](https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions).
 2. Select **Build Android APK**.
 3. Choose **Run workflow** (or push a commit to `main`).
-4. Open the completed workflow run and download the `focus-flow-5.0-debug-apk` artifact.
+4. Open the completed workflow run and download the `focus-flow-5.4.2-debug-apk` artifact.
 5. Install the APK on an Android device and test the features you use.
 
 > A successful web build or workflow badge does not by itself confirm every feature works on every Android device. Always install and test the APK on a real device. Background execution and photo permissions can vary by Android version and device manufacturer.
