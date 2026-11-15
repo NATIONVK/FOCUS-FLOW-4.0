@@ -328,3 +328,16 @@ test('task normalization reconciles parent and subtask completion flags',()=>{
     assert.equal(store.data.tasks[1].done,true);
   }finally{globalThis.localStorage=old}
 });
+
+
+test('task due dates survive normalization and app reload',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};
+  try{
+    const store=new Store();store.addTask('Submit assignment','high','2026-12-01');
+    assert.equal(new Store().data.tasks[0].dueDate,'2026-12-01');
+    const exported={...store.data};
+    store.import(exported);
+    assert.equal(store.data.tasks[0].dueDate,'2026-12-01');
+  }finally{globalThis.localStorage=old}
+});
