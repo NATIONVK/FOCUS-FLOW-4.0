@@ -1,6 +1,6 @@
 export const PDF_BACKUP_FORMAT='focus-flow-pdf-library';
 export const PDF_BACKUP_VERSION=1;
-export const MAX_PDF_BACKUP_BYTES=80*1024*1024;
+export const MAX_PDF_BACKUP_BYTES=40*1024*1024;
 export const MAX_PDF_BACKUP_DOCUMENTS=100;
 function safeName(value){const name=String(value||'document.pdf').replace(/[\\/:*?"<>|]/g,'-').trim().slice(0,180);return /\.pdf$/i.test(name)?name:name+'.pdf'}
 function bytesToBase64(bytes){let binary='';for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode(...bytes.subarray(i,Math.min(i+0x8000,bytes.length)));return btoa(binary)}
@@ -12,7 +12,7 @@ export async function createPdfBackupPayload(records){
  for(const record of records){
   if(!record?.blob||typeof record.blob.arrayBuffer!=='function')throw new Error('A saved PDF could not be read for backup.');
   const bytes=new Uint8Array(await record.blob.arrayBuffer());total+=bytes.byteLength;
-  if(total>MAX_PDF_BACKUP_BYTES)throw new Error('PDF Library backup exceeds the 80 MB limit. Export smaller groups of documents.');
+  if(total>MAX_PDF_BACKUP_BYTES)throw new Error('PDF Library backup exceeds the 40 MB limit. Export smaller groups of documents.');
   if(!hasPdfHeader(bytes))throw new Error('A saved document is not a valid PDF: '+safeName(record.name));
   documents.push({backupId:String(record.backupId||record.id||''),name:safeName(record.name),size:bytes.byteLength,updatedAt:Number(record.updatedAt)||Date.now(),data:bytesToBase64(bytes)});
  }
@@ -26,7 +26,7 @@ export function parsePdfBackupPayload(payload){
   if(!item||typeof item!=='object'||typeof item.data!=='string'||!item.data||item.data.length>Math.ceil(MAX_PDF_BACKUP_BYTES*4/3)+4)throw new Error('PDF backup contains an invalid document record.');
   const backupId=String(item.backupId||'');if(!backupId||backupId.length>200||ids.has(backupId))throw new Error('PDF backup contains a missing or duplicate document ID.');ids.add(backupId);
   const bytes=base64ToBytes(item.data);total+=bytes.byteLength;
-  if(total>MAX_PDF_BACKUP_BYTES)throw new Error('PDF backup exceeds the 80 MB restore limit.');
+  if(total>MAX_PDF_BACKUP_BYTES)throw new Error('PDF backup exceeds the 40 MB restore limit.');
   if(!Number.isSafeInteger(Number(item.size))||Number(item.size)!==bytes.byteLength||!hasPdfHeader(bytes))throw new Error('PDF backup contains a damaged or mismatched PDF file.');
   return {backupId,name:safeName(item.name),size:bytes.byteLength,updatedAt:Number(item.updatedAt)||Date.now(),bytes};
  });
