@@ -32,17 +32,20 @@ function paintTimer() {
   const scene=$('#blackholeScene');
   scene?.classList.toggle('is-paused',timer.paused);
   const focusedMinutes=Math.floor(elapsed/60);
-  // Each completed focus minute increases the visual's pace and radius, with safe caps.
-  const growth=Math.min(0.22,focusedMinutes*0.0125);
-  const speedFactor=Math.max(0.42,1-focusedMinutes*0.018);
   scene?.style.setProperty('--bh-energy',String(Math.min(1,0.25+elapsed/7200)));
-  scene?.style.setProperty('--bh-area-scale',String(1+growth));
-  scene?.style.setProperty('--bh-spin-outer',String(Math.max(4.5,12*speedFactor))+'s');
-  scene?.style.setProperty('--bh-spin-inner',String(Math.max(2.5,6*speedFactor))+'s');
-  scene?.style.setProperty('--bh-wave-speed',String(Math.max(3.5,8*speedFactor))+'s');
-  scene?.style.setProperty('--bh-arc-speed',String(Math.max(4,9*speedFactor))+'s');
-  scene?.style.setProperty('--bh-particle-speed',String(Math.max(3.5,8*speedFactor))+'s');
-  scene?.style.setProperty('--bh-beam-speed',String(Math.max(8,18*speedFactor))+'s');
+  // Update animation styles only when a new focused minute is completed.
+  if(scene && scene.dataset.focusedMinute!==String(focusedMinutes)){
+    const growth=Math.min(0.22,focusedMinutes*0.0125);
+    const speedFactor=Math.max(0.42,1-focusedMinutes*0.018);
+    scene.dataset.focusedMinute=String(focusedMinutes);
+    scene.style.setProperty('--bh-area-scale',String(1+growth));
+    scene.style.setProperty('--bh-spin-outer',String(Math.max(4.5,12*speedFactor))+'s');
+    scene.style.setProperty('--bh-spin-inner',String(Math.max(2.5,6*speedFactor))+'s');
+    scene.style.setProperty('--bh-wave-speed',String(Math.max(3.5,8*speedFactor))+'s');
+    scene.style.setProperty('--bh-arc-speed',String(Math.max(4,9*speedFactor))+'s');
+    scene.style.setProperty('--bh-particle-speed',String(Math.max(3.5,8*speedFactor))+'s');
+    scene.style.setProperty('--bh-beam-speed',String(Math.max(8,18*speedFactor))+'s');
+  }
   const level=Math.min(5,Math.floor(elapsed/1800)); // six visual energy levels, one step per 30 focused minutes
   scene?.setAttribute('data-focus-level',String(level+1));
   scene?.setAttribute('data-second-step',String(Math.floor((elapsed%60)/5)));
