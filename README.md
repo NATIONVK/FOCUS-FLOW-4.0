@@ -1,20 +1,20 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/NATIONVK/FOCUS-FLOW-4.0/main/public/icon.svg" width="112" alt="FOCUS FLOW app icon" />
-  <h1>FOCUS FLOW 4.0</h1>
+  <h1>FOCUS FLOW 5.0</h1>
   <p><strong>Your personal study OS. Focus deeper. Learn smarter. Grow daily.</strong></p>
   <p>
     <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/quality.yml"><img src="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/quality.yml/badge.svg" alt="Quality Checks"></a>
     <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/build-android.yml"><img src="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/build-android.yml/badge.svg" alt="Android APK Build"></a>
     <img src="https://img.shields.io/badge/Platform-Android%20%7C%20Web-8b5cf6" alt="Android and Web">
     <img src="https://img.shields.io/badge/Mode-Offline--first-16a34a" alt="Offline first">
-    <img src="https://img.shields.io/badge/Version-4.0-06b6d4" alt="Version 4.0">
+    <img src="https://img.shields.io/badge/Version-5.0-06b6d4" alt="Version 4.0">
   </p>
   <p><em>Designed for distraction-free study, consistent habits, and measurable progress.</em></p>
 </div>
 
 ---
 
-## Latest reliability upgrade · 4.0.1
+## Latest release · 5.0.0
 
 - Timer rendering now updates once per second instead of four times per second, reducing unnecessary WebView work while keeping elapsed time derived from timestamps.
 - Focus timer render-loop lifecycle is cleaned up when leaving or finishing the timer.
@@ -23,6 +23,20 @@
 - PDF export now reports the actual destination and does not silently claim success when neither the in-app library nor an export destination saved the file.
 
 These changes are covered by the repository's automated workflow; physical-device behavior still needs installation testing.
+
+### Focus Flow 5.0 — app-wide evolution
+
+- Task search now searches both task titles and sub-task titles without losing the current filter.
+- Task completion is normalized consistently across parent tasks and their sub-tasks; deleting the final sub-task no longer silently clears a completed parent task.
+- Deleting the last subject now remains deleted after app restart instead of being recreated by the data normalizer.
+- Backup restore validates plan records and sub-task structures before replacing live study data.
+- Settings dialogs support Escape to close, keyboard focus containment, screen-reader dialog semantics, and focus restoration.
+- Theme preference changes roll back visually if local persistence fails.
+- Android multi-photo selection enforces a total encoded-batch memory budget; native timer bridge errors are returned as actionable plugin errors.
+- PDF Library handles IndexedDB version changes and blocked opens more clearly.
+- Offline shell cache is versioned for the 5.0 release.
+
+Automated tests cover the new data and backup regressions. Physical Android testing remains a separate release gate.
 
 ## ✦ About the project
 
@@ -57,7 +71,7 @@ The Android app is packaged with **Capacitor 7**. The repository includes native
 1. Open the [Actions tab](https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions).
 2. Select **Build Android APK**.
 3. Choose **Run workflow** (or push a commit to `main`).
-4. Open the completed workflow run and download the `focus-flow-4.0-debug-apk` artifact.
+4. Open the completed workflow run and download the `focus-flow-5.0-debug-apk` artifact.
 5. Install the APK on an Android device and test the features you use.
 
 > A successful web build or workflow badge does not by itself confirm every feature works on every Android device. Always install and test the APK on a real device. Background execution and photo permissions can vary by Android version and device manufacturer.
