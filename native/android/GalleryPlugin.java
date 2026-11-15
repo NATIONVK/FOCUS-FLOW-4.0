@@ -1,6 +1,14 @@
 package com.nationvk.focusflow;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Intent;
+import android.provider.OpenableColumns;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.util.Size;
+import androidx.activity.result.ActivityResult;
+import com.getcapacitor.annotation.ActivityCallback;
 import android.content.ContentUris;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -156,4 +164,67 @@ public class GalleryPlugin extends Plugin {
       }
     } catch (Exception e) { call.reject("Unable to open image: " + e.getMessage(), e); }
   }
+
+  // System document picker: allows selecting multiple photos in one operation.
+  @PluginMethod public void pickImages(PluginCall call) {
+    Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT); i.addCategory(Intent.CATEGORY_OPENABLE);
+    i.setType("image/*"); i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE,true);
+    i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+    startActivityForResult(call,i,"imagesPicked");
+  }
+  @ActivityCallback private void imagesPicked(PluginCall call, ActivityResult result) {
+    if(call==null)return;
+    if(result.getResultCode()!=Activity.RESULT_OK||result.getData()==null){call.reject("Photo selection cancelled","CANCELLED");return;}
+    try {
+      Intent d=result.getData(); JSArray items=new JSArray();
+      if(d.getClipData()!=null){for(int n=0;n<d.getClipData().getItemCount();n++)items.put(imageItem(d.getClipData().getItemAt(n).getUri()));}
+      else if(d.getData()!=null)items.put(imageItem(d.getData()));
+      if(items.length()==0)throw new Exception("No photos selected");
+      JSObject out=new JSObject();out.put("items",items);call.resolve(out);
+    }catch(Exception e){call.reject("Could not read selected photos: "+e.getMessage(),e);}
+  }
+  private JSObject imageItem(Uri uri)throws Exception {
+    Bitmap b=null;
+    try {
+      if(Build.VERSION.SDK_INT>=29)b=getContext().getContentResolver().loadThumbnail(uri,new Size(2000,2000),null);
+      else {BitmapFactory.Options o=new BitmapFactory.Options();o.inJustDecodeBounds=true;try(InputStream in=getContext().getContentResolver().openInputStream(uri)){BitmapFactory.decodeStream(in,null,o);}int sample=1;while(Math.max(o.outWidth/sample,o.outHeight/sample)>2000)sample*=2;o.inJustDecodeBounds=false;o.inSampleSize=sample;try(InputStream in=getContext().getContentResolver().openInputStream(uri)){b=BitmapFactory.decodeStream(in,null,o);}}
+      if(b==null)throw new Exception("Image decode failed");
+      ByteArrayOutputStream out=new ByteArrayOutputStream();b.compress(Bitmap.CompressFormat.JPEG,88,out);
+      JSObject item=new JSObject();item.put("name",displayName(uri));item.put("dataUrl","data:image/jpeg;base64,"+Base64.encodeToString(out.toByteArray(),Base64.NO_WRAP));return item;
+    }finally{if(b!=null)b.recycle();}
+  }
+  @PluginMethod public void pickPdf(PluginCall call) {
+    Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);i.addCategory(Intent.CATEGORY_OPENABLE);i.setType("application/pdf");
+    i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);startActivityForResult(call,i,"pdfPicked");
+  }
+  @ActivityCallback private void pdfPicked(PluginCall call,ActivityResult result) {
+    if(call==null)return;
+    if(result.getResultCode()!=Activity.RESULT_OK||result.getData()==null||result.getData().getData()==null){call.reject("PDF selection cancelled","CANCELLED");return;}
+    Uri uri=result.getData().getData();
+    try(InputStream in=getContext().getContentResolver().openInputStream(uri);ByteArrayOutputStream out=new ByteArrayOutputStream()){
+      if(in==null)throw new Exception("Unable to read selected PDF");byte[] buf=new byte[16384];int n;long total=0;
+      while((n=in.read(buf))!=-1){total+=n;if(total>25L*1024*1024)throw new Exception("PDF exceeds 25 MB in-app limit");out.write(buf,0,n);}
+      JSObject response=new JSObject();response.put("name",displayName(uri));response.put("dataUrl","data:application/pdf;base64,"+Base64.encodeToString(out.toByteArray(),Base64.NO_WRAP));call.resolve(response);
+    }catch(Exception e){call.reject("Could not open PDF: "+e.getMessage(),e);}
+  }
+  @PluginMethod public void savePdf(PluginCall call) {
+    Intent i=new Intent(Intent.ACTION_CREATE_DOCUMENT);i.addCategory(Intent.CATEGORY_OPENABLE);i.setType("application/pdf");
+    String name=call.getString("name","Focus-Flow-document.pdf");i.putExtra(Intent.EXTRA_TITLE,name.toLowerCase().endsWith(".pdf")?name:name+".pdf");
+    i.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION|Intent.FLAG_GRANT_READ_URI_PERMISSION);startActivityForResult(call,i,"pdfSaveChosen");
+  }
+  @ActivityCallback private void pdfSaveChosen(PluginCall call,ActivityResult result) {
+    if(call==null)return;
+    if(result.getResultCode()!=Activity.RESULT_OK||result.getData()==null||result.getData().getData()==null){call.reject("Save cancelled","CANCELLED");return;}
+    try {
+      String data=call.getString("base64");if(data==null||data.isEmpty())throw new Exception("PDF data missing");
+      byte[] bytes=Base64.decode(data,Base64.DEFAULT);Uri uri=result.getData().getData();
+      try(OutputStream out=getContext().getContentResolver().openOutputStream(uri,"w")){if(out==null)throw new Exception("Cannot create destination");out.write(bytes);out.flush();}
+      JSObject response=new JSObject();response.put("uri",uri.toString());response.put("bytesWritten",bytes.length);call.resolve(response);
+    }catch(Exception e){call.reject("Could not save PDF: "+e.getMessage(),e);}
+  }
+  private String displayName(Uri uri) {
+    try(Cursor c=getContext().getContentResolver().query(uri,null,null,null,null)){if(c!=null&&c.moveToFirst()){int k=c.getColumnIndex(OpenableColumns.DISPLAY_NAME);if(k>=0)return c.getString(k);}}catch(Exception ignored){}
+    return "document.pdf";
+  }
+
 }
