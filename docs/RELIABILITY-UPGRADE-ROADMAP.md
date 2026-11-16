@@ -189,3 +189,16 @@ Before calling a release ready:
 ## 5.5.1 verification boundary
 - Automated tests and CI build must pass for the exact commit.
 - Android Save As cancellation, file visibility in Files, and bulk-delete interaction require physical-device testing.
+
+
+## Delivered — Focus Flow 5.5.2 Professional PDF Reader
+- Continuous vertical reading uses a bounded five-page canvas window; off-window pages are not retained as rendered canvases.
+- Page navigation supports a comma-separated page range and jumps to the first page in the requested range while reporting the selected range count.
+- Thumbnail canvases render lazily near the visible rail; the thumbnail list is capped at 300 pages for memory safety.
+- Reading page and zoom are restored through validated bounds; zoom remains between 45% and 300%.
+- Page canvas rasterization is capped at a four-million-pixel budget and a 1.5 device-pixel ratio.
+- Added pure helper tests for page ranges, virtual windows, page clamping and progress restoration.
+
+## 5.5.2 verification boundary
+- Automated tests and Android Gradle build must pass for the exact branch head.
+- Continuous scroll feel, large-file memory behavior, drawing overlay alignment and reading position across app process death still require physical Android device testing.
