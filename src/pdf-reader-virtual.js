@@ -10,7 +10,7 @@ export function parsePdfPageRange(value,total){
  if(!raw)throw new Error('Enter a page range, for example 1-3, 5, 8-10.');
  const pages=new Set();
  for(const part of raw.split(',')){
-  const match=part.trim().match(/^(\\d+)(?:\\s*-\\s*(\\d+))?$/);
+  const match=part.trim().match(/^(\d+)(?:\s*-\s*(\d+))?$/);
   if(!match)throw new Error('Use page ranges such as 1-3, 5, 8-10.');
   const first=Number(match[1]),last=Number(match[2]||match[1]);
   if(first<1||last<first||last>count)throw new Error('A page range is outside this document (1-'+count+').');
