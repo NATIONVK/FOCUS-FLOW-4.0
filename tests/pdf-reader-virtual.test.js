@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {clampPdfPage,parsePdfPageRange,getPdfVirtualWindow,restorePdfProgress} from '../src/pdf-reader-virtual.js';
+import {clampPdfPage,parsePdfPageRange,getPdfVirtualWindow,restorePdfProgress,getPdfCanvasScale,shouldRefreshPdfWindow} from '../src/pdf-reader-virtual.js';
 
 test('PDF page range parser supports individual pages, ranges and de-duplicates',()=>{
  assert.deepEqual(parsePdfPageRange('1-3, 5, 3, 8-9',10),[1,2,3,5,8,9]);
@@ -23,4 +23,18 @@ test('PDF page clamping tolerates missing or non-numeric values',()=>{
  assert.equal(clampPdfPage('not-a-page',8),1);
  assert.equal(clampPdfPage(4.9,8),4);
  assert.equal(clampPdfPage(0,8),1);
+});
+
+test('PDF canvas scale respects pixel and device-ratio budgets',()=>{
+ const ratio=getPdfCanvasScale(2000,3000,3);
+ assert.ok(ratio<=1.5);
+ assert.ok(2000*3000*ratio*ratio<=4000000+1);
+ assert.equal(getPdfCanvasScale(0,100,2),1);
+ assert.equal(getPdfCanvasScale(100,100,2,1000000,1.5),1.5);
+});
+test('PDF virtual window refreshes near current boundaries only',()=>{
+ assert.equal(shouldRefreshPdfWindow(11,10,14),true);
+ assert.equal(shouldRefreshPdfWindow(13,10,14),true);
+ assert.equal(shouldRefreshPdfWindow(12,10,14),false);
+ assert.equal(shouldRefreshPdfWindow(3,10,14),true);
 });
