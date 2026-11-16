@@ -21,7 +21,7 @@ function normalize(data){
   return {version:4,subjects,sessions,tasks,plans,notes,settings:{...d.settings,light:!!settings.light,dailyGoalMinutes:Number.isFinite(Number(settings.dailyGoalMinutes))?Math.max(1,Math.min(1440,Number(settings.dailyGoalMinutes))):120,dashboardLayout,dashboardChartType}};
 }
 export class Store {
-  constructor(){this.recoveryAvailable=false;this.storageAvailable=false;this.storageError='';this.onStorageStatusChange=null;this.data=this.load();}
+  constructor(){this.recoveryAvailable=false;this.recoveredFromLastGood=false;this.storageAvailable=false;this.storageError='';this.onStorageStatusChange=null;this.data=this.load();}
   notifyStorageStatus(){this.onStorageStatusChange?.({available:this.storageAvailable,error:this.storageError});}
   load(){
     let raw=null;let storageReadable=false;
@@ -40,9 +40,9 @@ export class Store {
           this.storageError='Data recovered in memory, but could not be written back to device storage: '+(error?.message||'Storage unavailable');
           console.warn('FOCUS FLOW recovered data but could not repair the primary record',error);
         }
-        this.recoveryAvailable=true;
+        this.recoveryAvailable=true;this.recoveredFromLastGood=true;
       }else{
-        this.storageAvailable=true;this.storageError='';this.recoveryAvailable=false;
+        this.storageAvailable=true;this.storageError='';this.recoveryAvailable=false;this.recoveredFromLastGood=false;
       }
       this.lastSavedSnapshot=canonical;
       return clean;
@@ -86,7 +86,8 @@ export class Store {
         try{
           const storage=globalThis.localStorage;
           if(storage&&!storage.getItem(RECOVERY_KEY))storage.setItem(RECOVERY_KEY,raw);
-          this.recoveryAvailable=!!storage?.getItem(LAST_GOOD_KEY);
+          this.recoveryAvailable=!!storage?.getItem(RECOVERY_KEY)||!!storage?.getItem(LAST_GOOD_KEY);
+          this.recoveredFromLastGood=false;
         }catch(recoveryError){
           console.error('FOCUS FLOW could not preserve a recovery copy',recoveryError);
         }
@@ -113,7 +114,7 @@ export class Store {
       }
       if(storage.getItem(KEY)!==serialized)throw new Error('Storage write verification failed');
       this.lastSavedSnapshot=serialized;
-      this.storageAvailable=true;this.storageError='';
+      this.storageAvailable=true;this.storageError='';this.recoveredFromLastGood=false;
       if(serialized.length<=MAX_LAST_GOOD_CHARS){
         try{
           storage.setItem(LAST_GOOD_KEY,serialized);
