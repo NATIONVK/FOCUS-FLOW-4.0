@@ -1,5 +1,5 @@
 import { renderPDFPage, bindPDFPage } from './pdf-maker.js';
-import { clampPdfPage, parsePdfPageRange, getPdfVirtualWindow, restorePdfProgress } from './pdf-reader-virtual.js';
+import { clampPdfPage, parsePdfPageRange, getPdfVirtualWindow, restorePdfProgress, getPdfCanvasScale, shouldRefreshPdfWindow } from './pdf-reader-virtual.js';
 import { savePdfOutput, savePdfToLibrary, getPdfFromLibrary, listPdfLibrary, deletePdfFromLibrary, deletePdfsFromLibrary, exportPdfLibraryBackup, restorePdfLibraryBackup, verifyPdfLibrary, browserDownload } from './pdf-storage.js';
 import { pickDevicePdf, saveDevicePdf, isAndroidGalleryAvailable } from './native-gallery.js';
 import { renderPdfLibrary } from './pdf-library-ui.js';
@@ -89,7 +89,7 @@ async function renderPage(anchorPage=pageNo,anchorOffset=0){
  try{
   for(const number of windowPages.pages){
    if(sequence!==renderSequence)return;
-   const page=await currentDoc.getPage(number),viewport=page.getViewport({scale:zoom}),pixels=Math.max(1,viewport.width*viewport.height),ratio=Math.min(window.devicePixelRatio||1,1.5,Math.sqrt(4000000/pixels));
+   const page=await currentDoc.getPage(number),viewport=page.getViewport({scale:zoom}),ratio=getPdfCanvasScale(viewport.width,viewport.height,window.devicePixelRatio||1);
    const slot=document.createElement('section');slot.className='pdf-virtual-page'+(number===pageNo?' is-current':'');slot.dataset.page=String(number);
    const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.ceil(viewport.width*ratio));canvas.height=Math.max(1,Math.ceil(viewport.height*ratio));canvas.style.width=viewport.width+'px';canvas.style.height=viewport.height+'px';if(number===pageNo)canvas.id='pdfCanvas';
    const ink=document.createElement('canvas');ink.className='pdf-page-ink';ink.width=canvas.width;ink.height=canvas.height;ink.style.width=canvas.style.width;ink.style.height=canvas.style.height;if(number===pageNo)ink.id='pdfInkCanvas';
@@ -109,7 +109,7 @@ async function renderPage(anchorPage=pageNo,anchorOffset=0){
      scheduled=false;const slots=[...stack.querySelectorAll('[data-page]')];if(!slots.length)return;const middle=scroll.getBoundingClientRect().top+scroll.clientHeight*.42;
      const active=slots.reduce((best,slot)=>{const rect=slot.getBoundingClientRect(),center=(rect.top+rect.bottom)/2;return !best||Math.abs(center-middle)<best.distance?{slot,distance:Math.abs(center-middle)}:best},null)?.slot;
      const next=clampPdfPage(active?.dataset.page,currentDoc.numPages);
-     if(next!==pageNo){pageNo=next;$('#pdfPageInput').value=pageNo;$('#pdfBookmark').textContent=bookmarks.has(bookmarkKeyForPage())?'★':'☆';saveProgress();stack.querySelector('.is-current')?.classList.remove('is-current');active.classList.add('is-current');const oldCanvas=stack.querySelector('#pdfCanvas'),oldInk=stack.querySelector('#pdfInkCanvas');if(oldCanvas)oldCanvas.removeAttribute('id');if(oldInk)oldInk.removeAttribute('id');active.querySelector('canvas')?.setAttribute('id','pdfCanvas');active.querySelector('.pdf-page-ink')?.setAttribute('id','pdfInkCanvas');bindInk();if(next<=Number(stack.dataset.windowStart)+1||next>=Number(stack.dataset.windowEnd)-1){const rect=active.getBoundingClientRect();renderPage(pageNo,rect.top-scroll.getBoundingClientRect().top)}}
+     if(next!==pageNo){pageNo=next;$('#pdfPageInput').value=pageNo;$('#pdfBookmark').textContent=bookmarks.has(bookmarkKeyForPage())?'★':'☆';saveProgress();stack.querySelector('.is-current')?.classList.remove('is-current');active.classList.add('is-current');const oldCanvas=stack.querySelector('#pdfCanvas'),oldInk=stack.querySelector('#pdfInkCanvas');if(oldCanvas)oldCanvas.removeAttribute('id');if(oldInk)oldInk.removeAttribute('id');active.querySelector('canvas')?.setAttribute('id','pdfCanvas');active.querySelector('.pdf-page-ink')?.setAttribute('id','pdfInkCanvas');bindInk();if(shouldRefreshPdfWindow(next,stack.dataset.windowStart,stack.dataset.windowEnd)){const rect=active.getBoundingClientRect();renderPage(pageNo,rect.top-scroll.getBoundingClientRect().top)}}
     });
    },{passive:true});
   }
