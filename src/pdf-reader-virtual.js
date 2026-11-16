@@ -34,3 +34,17 @@ export function restorePdfProgress(value,total){
  const zoom=Number.isFinite(rawZoom)?Math.min(3,Math.max(.45,rawZoom)):1;
  return {page,zoom};
 }
+
+export function getPdfCanvasScale(width,height,devicePixelRatio=1,maxPixels=4000000,maxRatio=1.5){
+ const w=Number(width),h=Number(height),dpr=Number(devicePixelRatio),budget=Number(maxPixels),cap=Number(maxRatio);
+ if(!Number.isFinite(w)||!Number.isFinite(h)||w<=0||h<=0)return 1;
+ const safeBudget=Number.isFinite(budget)&&budget>0?budget:4000000;
+ const safeCap=Number.isFinite(cap)&&cap>0?cap:1.5;
+ const safeDpr=Number.isFinite(dpr)&&dpr>0?dpr:1;
+ return Math.max(.1,Math.min(safeDpr,safeCap,Math.sqrt(safeBudget/(w*h))));
+}
+export function shouldRefreshPdfWindow(page,start,end,buffer=1){
+ const p=Number(page),a=Number(start),b=Number(end),margin=Math.max(0,Math.floor(Number(buffer)||0));
+ if(!Number.isFinite(p)||!Number.isFinite(a)||!Number.isFinite(b)||a>b)return true;
+ return p<=a+margin||p>=b-margin;
+}
