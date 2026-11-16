@@ -8,7 +8,7 @@ test('creates an integrity-protected backup and previews record counts',()=>{
  const backup=createBackup(sample());
  const result=inspectBackup(backup);
  assert.equal(result.legacy,false);
- assert.equal(backup.appVersion,'5.5.2');
+ assert.equal(backup.appVersion,'5.5.3');
  assert.deepEqual(result.count,{subjects:1,sessions:1,tasks:1,plans:1,notes:1});
  assert.equal(result.data.subjects[0].name,'Statistics');
 });
