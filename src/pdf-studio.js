@@ -109,7 +109,7 @@ async function renderPage(anchorPage=pageNo,anchorOffset=0){
      scheduled=false;const slots=[...stack.querySelectorAll('[data-page]')];if(!slots.length)return;const middle=scroll.getBoundingClientRect().top+scroll.clientHeight*.42;
      const active=slots.reduce((best,slot)=>{const rect=slot.getBoundingClientRect(),center=(rect.top+rect.bottom)/2;return !best||Math.abs(center-middle)<best.distance?{slot,distance:Math.abs(center-middle)}:best},null)?.slot;
      const next=clampPdfPage(active?.dataset.page,currentDoc.numPages);
-     if(next!==pageNo){pageNo=next;$('#pdfPageInput').value=pageNo;$('#pdfBookmark').textContent=bookmarks.has(bookmarkKeyForPage())?'★':'☆';saveProgress();if(pageNo<=windowPages.start+1||pageNo>=windowPages.end-1){const rect=active.getBoundingClientRect();renderPage(pageNo,rect.top-scroll.getBoundingClientRect().top)}}
+     if(next!==pageNo){pageNo=next;$('#pdfPageInput').value=pageNo;$('#pdfBookmark').textContent=bookmarks.has(bookmarkKeyForPage())?'★':'☆';saveProgress();stack.querySelector('.is-current')?.classList.remove('is-current');active.classList.add('is-current');const oldCanvas=stack.querySelector('#pdfCanvas'),oldInk=stack.querySelector('#pdfInkCanvas');if(oldCanvas)oldCanvas.removeAttribute('id');if(oldInk)oldInk.removeAttribute('id');active.querySelector('canvas')?.setAttribute('id','pdfCanvas');active.querySelector('.pdf-page-ink')?.setAttribute('id','pdfInkCanvas');bindInk();if(pageNo<=windowPages.start+1||pageNo>=windowPages.end-1){const rect=active.getBoundingClientRect();renderPage(pageNo,rect.top-scroll.getBoundingClientRect().top)}}
     });
    },{passive:true});
   }
