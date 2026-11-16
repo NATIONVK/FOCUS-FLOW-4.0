@@ -1,6 +1,8 @@
 name: Build Android APK
 on:
   push:
+    branches: [main, 'upgrade/**']
+  pull_request:
     branches: [main]
   workflow_dispatch:
 
@@ -27,6 +29,10 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: '3.x'
+      - name: Install icon image tooling
+        run: python -m pip install Pillow
+      - name: Generate web and PWA launcher icons
+        run: python scripts/generate_icons.py
       - name: Set up Java
         uses: actions/setup-java@v5
         with:
@@ -67,12 +73,15 @@ jobs:
           res = Path("android/app/src/main/res")
           assert (res / "mipmap-anydpi-v26/ic_launcher.xml").is_file(), "Adaptive launcher icon missing"
           assert (res / "mipmap-anydpi-v26/ic_launcher_round.xml").is_file(), "Round adaptive launcher icon missing"
-          assert (res / "drawable/ic_launcher_foreground.xml").is_file(), "Launcher foreground artwork missing"
+          assert (res / "drawable-nodpi/ic_launcher_foreground.png").is_file(), "Black Hole launcher foreground artwork missing"
+          assert (res / "drawable/ic_stat_focus_flow.xml").is_file(), "Black Hole notification icon missing"
+          for density in ("mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"):
+              assert (res / f"mipmap-{density}/ic_launcher.png").is_file(), f"Legacy launcher icon missing for {density}"
           assert 'android.permission.FOREGROUND_SERVICE' in manifest, "Foreground service permission missing"
           assert 'android.permission.FOREGROUND_SERVICE_SPECIAL_USE' in manifest, "Android 14 special-use foreground permission missing"
           assert re.search(r'<service\b[^>]*android:name="\.FocusTimerService"[^>]*android:foregroundServiceType="specialUse"', manifest), "Focus timer special-use service declaration missing"
           assert 'android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE' in manifest, "Foreground service subtype declaration missing"
-          print("Verified: launcher logo and Android foreground timer service declarations are present.")
+          print("Verified: Black Hole launcher icon (adaptive + legacy densities) and Android foreground timer service declarations are present.")
           PY
       - name: Build debug APK
         working-directory: android
@@ -94,7 +103,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v6
         with:
-          name: focus-flow-5.2-debug-apk
+          name: focus-flow-5.5.3-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14

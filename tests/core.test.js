@@ -341,3 +341,74 @@ test('task due dates survive normalization and app reload',()=>{
     assert.equal(store.data.tasks[0].dueDate,'2026-12-01');
   }finally{globalThis.localStorage=old}
 });
+
+test('timer rejects future-dated or structurally inconsistent snapshots',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={setItem:(k,v)=>map.set(k,v),getItem:k=>map.get(k)||null,removeItem:k=>map.delete(k)};
+  try{
+    const now=Date.now();
+    const invalid=[
+      {subjectId:'x',startedAt:now+600000,segmentStartedAt:now+600000,accumulated:0,paused:false},
+      {subjectId:'x',startedAt:now-1000,segmentStartedAt:now-2000,accumulated:0,paused:false},
+      {subjectId:'x',startedAt:now-1000,segmentStartedAt:now-500,accumulated:Number.MAX_VALUE,paused:false},
+      {subjectId:'x'.repeat(257),startedAt:now-1000,segmentStartedAt:now-500,accumulated:0,paused:false},
+      {subjectId:'x',startedAt:now-1000,segmentStartedAt:now-500,accumulated:0,paused:false,sessionId:'s'.repeat(201)}
+    ];
+    for(const snapshot of invalid){
+      map.set('focus-flow-active-session',JSON.stringify(snapshot));
+      const timer=new FocusTimer(memory());
+      assert.equal(timer.active,false);
+      assert.equal(map.has('focus-flow-active-session'),false);
+    }
+  }finally{globalThis.localStorage=old;}
+});
+
+
+test('store restores a valid last known-good snapshot after the primary record is corrupted',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};
+  try{
+    const original=new Store();
+    original.addSubject('Mathematics');
+    const saved=map.get('focus-flow-v4');
+    assert.ok(saved);
+    assert.equal(map.get('focus-flow-v4-last-good'),saved);
+    map.set('focus-flow-v4','{damaged json');
+    const recovered=new Store();
+    assert.equal(recovered.data.subjects.some(s=>s.name==='Mathematics'),true);
+    assert.equal(recovered.recoveryAvailable,true);
+    assert.equal(map.get('focus-flow-v4'),saved,'recovered data should repair the primary storage record');
+    assert.equal(map.get('focus-flow-v4-recovery'),'{damaged json','the damaged source should be preserved separately');
+  }finally{globalThis.localStorage=old}
+});
+
+test('store can recover the last known-good snapshot when the primary key is missing',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};
+  try{
+    const original=new Store();
+    original.addSubject('Probability');
+    const saved=map.get('focus-flow-v4');
+    map.delete('focus-flow-v4');
+    const recovered=new Store();
+    assert.equal(recovered.data.subjects.some(s=>s.name==='Probability'),true);
+    assert.equal(map.get('focus-flow-v4'),saved);
+    assert.equal(recovered.recoveryAvailable,true);
+  }finally{globalThis.localStorage=old}
+});
+
+
+test('recovery is not blocked when storage quota prevents preserving the damaged source',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={getItem:k=>map.get(k)??null,setItem:(k,v)=>{if(k==='focus-flow-v4-recovery')throw new Error('quota exceeded');map.set(k,v)},removeItem:k=>map.delete(k)};
+  try{
+    const original=new Store();
+    original.addSubject('Calculus');
+    const saved=map.get('focus-flow-v4');
+    map.set('focus-flow-v4','{broken');
+    const recovered=new Store();
+    assert.equal(recovered.data.subjects.some(s=>s.name==='Calculus'),true);
+    assert.equal(map.get('focus-flow-v4'),saved);
+    assert.equal(recovered.recoveryAvailable,true);
+  }finally{globalThis.localStorage=old}
+});

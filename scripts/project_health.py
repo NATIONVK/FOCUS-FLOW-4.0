@@ -18,14 +18,19 @@ REQUIRED = (
     "src/pdf-maker.js",
     "src/pdf-storage.js",
     "src/pdf-backup.js",
+    "src/serial-queue.js",
     "tests/pdf-engine.test.js",
+    "tests/serial-queue.test.js",
+    "tests/analytics-dashboard.test.js",
     "tests/core.test.js",
     "tests/data-safety.test.js",
     "native/android/FocusTimerService.java",
     "native/android/FocusTimerPlugin.java",
     "native/android/GalleryPlugin.java",
     "scripts/prepare_android.py",
+    "scripts/icon_assets.py",
     "tests/test_android_prepare.py",
+    "tests/test_icon_assets.py",
 )
 
 

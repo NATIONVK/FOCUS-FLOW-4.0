@@ -31,7 +31,21 @@ function paintTimer() {
   $('#timerToggle')?.classList.toggle('paused',timer.paused);
   const scene=$('#blackholeScene');
   scene?.classList.toggle('is-paused',timer.paused);
+  const focusedMinutes=Math.floor(elapsed/60);
   scene?.style.setProperty('--bh-energy',String(Math.min(1,0.25+elapsed/7200)));
+  // Update animation styles only when a new focused minute is completed.
+  if(scene && scene.dataset.focusedMinute!==String(focusedMinutes)){
+    const growth=Math.min(0.22,focusedMinutes*0.0125);
+    const speedFactor=Math.max(0.42,1-focusedMinutes*0.018);
+    scene.dataset.focusedMinute=String(focusedMinutes);
+    scene.style.setProperty('--bh-area-scale',String(1+growth));
+    scene.style.setProperty('--bh-spin-outer',String(Math.max(4.5,12*speedFactor))+'s');
+    scene.style.setProperty('--bh-spin-inner',String(Math.max(2.5,6*speedFactor))+'s');
+    scene.style.setProperty('--bh-wave-speed',String(Math.max(3.5,8*speedFactor))+'s');
+    scene.style.setProperty('--bh-arc-speed',String(Math.max(4,9*speedFactor))+'s');
+    scene.style.setProperty('--bh-particle-speed',String(Math.max(3.5,8*speedFactor))+'s');
+    scene.style.setProperty('--bh-beam-speed',String(Math.max(8,18*speedFactor))+'s');
+  }
   const level=Math.min(5,Math.floor(elapsed/1800)); // six visual energy levels, one step per 30 focused minutes
   scene?.setAttribute('data-focus-level',String(level+1));
   scene?.setAttribute('data-second-step',String(Math.floor((elapsed%60)/5)));
@@ -113,7 +127,7 @@ function render() {
   $('#app').innerHTML=`
   <div class="shell">
     <aside class="sidebar"><div class="brand"><img class="brand-logo" src="./icon.svg" alt="FOCUS FLOW logo"><div>FOCUS <b>FLOW</b><small>YOUR SPACE TO GROW</small></div></div>
-      <nav>${nav()}</nav><div class="side-foot"><i class="online-dot"></i> OFFLINE FIRST<br><small>NATIONVK · FOCUS FLOW 5.1</small></div></aside><nav class="mobile-nav">${mobileNav()}</nav>
+      <nav>${nav()}</nav><div class="side-foot"><i class="online-dot"></i> OFFLINE FIRST<br><small>NATIONVK · FOCUS FLOW 5.4.2</small></div></aside><nav class="mobile-nav">${mobileNav()}</nav>
     <main class="main">
       <header class="topbar"><div><span class="eyebrow">YOUR PERSONAL STUDY OS</span><h1>${page==='overview'?'Overview':page==='dashboard'?'Dashboard':page==='pdf-maker'?'PDF Studio':page[0].toUpperCase()+page.slice(1)}</h1></div><div class="status ${store.storageAvailable?'':'storage-offline'}"><i></i> ${store.storageAvailable?'Local data secured':'Storage unavailable'}</div></header>
       ${page==='overview'?overview(t,subjects):page==='dashboard'?dashboardPage(t,subjects):page==='subjects'?subjectPage(subjects):page==='tasks'?taskPage():page==='planner'?plannerPage():page==='notes'?notesPage():page==='history'?historyPage():page==='statistics'?statisticsPage():page==='pdf-maker'?renderPDFStudioPage():settingsPage()}
@@ -122,6 +136,22 @@ function render() {
   if(page==='overview') applyDashboardLayout();
   bind();
   updateStorageStatus();
+  if(page==='overview') requestAnimationFrame(animateDashboardMotion);
+}
+function animateDashboardMotion(){
+  const root=$('.main');if(!root||page!=='overview')return;
+  const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  root.classList.add('dashboard-motion-ready');
+  if(reduceMotion)return;
+  root.querySelectorAll('.dash-chart-track i').forEach((bar,index)=>{
+    bar.style.animationDelay=(index*55)+'ms';
+  });
+  root.querySelectorAll('.dash-month-track i,.progress-track i').forEach((bar)=>{
+    bar.classList.add('dashboard-progress-animate');
+  });
+  root.querySelectorAll('.dash-hero,.dash-kpis,.dash-main-grid,.dash-month-panel,.dash-insights-panel,.dash-lower-grid,.dash-recent-panel').forEach((section,index)=>{
+    section.style.animationDelay=(Math.min(index,6)*65)+'ms';
+  });
 }
 const DASH_WIDGETS=[['hero','Welcome'],['kpis','Quick stats'],['week','Weekly focus & plan'],['month','Monthly progress'],['insights','Smart insights'],['lower','Subjects & tasks'],['recent','Recent sessions']];
 function applyDashboardLayout(){
@@ -177,10 +207,9 @@ function overview(t,subjects) {
   const monthConsistency=Analytics.consistency(sessions,goal/60,today);
   const monthStartOffset=new Date(today.getFullYear(),today.getMonth(),1).getDay();
   const activeDays=week.filter(d=>d.seconds>0).length;
-  const timeBuckets=[{label:'Morning',range:'05:00–11:59',test:h=>h>=5&&h<12,seconds:0},{label:'Afternoon',range:'12:00–16:59',test:h=>h>=12&&h<17,seconds:0},{label:'Evening',range:'17:00–21:59',test:h=>h>=17&&h<22,seconds:0},{label:'Night',range:'22:00–04:59',test:h=>h>=22||h<5,seconds:0}];
-  sessions.forEach(s=>{const hour=new Date(s.startedAt).getHours();const bucket=timeBuckets.find(x=>x.test(hour));if(bucket)bucket.seconds+=Math.max(0,Number(s.duration)||0);});
-  const bestPeriod=[...timeBuckets].sort((a,b)=>b.seconds-a.seconds)[0];
-  const hasTimePattern=bestPeriod?.seconds>0;
+  const startPattern=Analytics.sessionStartSummary(sessions);
+  const bestPeriod=startPattern.best;
+  const hasTimePattern=bestPeriod.count>0;
   const subjectShare=topSubject&&t.all?Math.round(topSubject.seconds/t.all*100):0;
   const bestDay=week.reduce((a,b)=>b.seconds>a.seconds?b:a,week[0]||{label:'—',seconds:0});
   const recent=[...sessions].sort((a,b)=>new Date(b.startedAt)-new Date(a.startedAt)).slice(0,3);
@@ -226,7 +255,7 @@ function overview(t,subjects) {
   <section class="panel dash-insights-panel" data-dashboard-widget="insights">
     <div class="panel-head"><div><span class="eyebrow">YOUR STUDY PATTERNS</span><h3>Smart productivity insights</h3></div><span class="dash-period">BASED ON YOUR SESSIONS</span></div>
     <div class="dash-insights-grid">
-      <div class="dash-insight-card"><span class="dash-insight-icon">◷</span><small>YOUR PEAK PERIOD</small><strong>${hasTimePattern?bestPeriod.label:'Not enough data'}</strong><span>${hasTimePattern?bestPeriod.range+' · '+(bestPeriod.seconds/3600).toFixed(1)+'h recorded':'Complete sessions to discover your strongest time'}</span></div>
+      <div class="dash-insight-card"><span class="dash-insight-icon">◷</span><small>MOST COMMON SESSION START</small><strong>${hasTimePattern?bestPeriod.label:'Not enough data'}</strong><span>${hasTimePattern?bestPeriod.count+' sessions started '+bestPeriod.range+' · '+(bestPeriod.seconds/3600).toFixed(1)+'h recorded in those sessions':'Complete sessions to discover your usual start period'}</span></div>
       <div class="dash-insight-card"><span class="dash-insight-icon">✦</span><small>TOP SUBJECT</small><strong>${topSubject&&topSubject.seconds?esc(topSubject.subject.name):'No sessions yet'}</strong><span>${topSubject&&topSubject.seconds?subjectShare+'% of all recorded focus time':'Start a session to build your subject profile'}</span></div>
       <div class="dash-insight-card"><span class="dash-insight-icon">▥</span><small>AVERAGE ON ACTIVE DAYS</small><strong>${activeDays?(weekTotal/activeDays/3600).toFixed(1)+'h':'—'}</strong><span>${activeDays?activeDays+' active days in the last 7':'No focus time recorded this week'}</span></div>
     </div>
@@ -406,7 +435,7 @@ function showTimer(){
   $('#exitFocus').addEventListener('click',exitTimerView);
   $('#finishFocus').addEventListener('click',finishFocusSession);
 }
-async function exportBackup(){try{const {blob,filename,count,checksum}=await buildVerifiedBackupBlob(store.data);const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);try{localStorage.setItem('focus-flow-last-backup-prepared',JSON.stringify({at:new Date().toISOString(),checksum,count}))}catch{}toast('Backup verified and download prepared. Check Downloads.','success')}catch(error){toast('Backup তৈরি করা যায়নি: '+error.message,'error')}}
+async function exportBackup(){try{const {blob,filename,count,checksum}=await buildVerifiedBackupBlob(store.data);let destination='download';const {isAndroidGalleryAvailable,saveDeviceFile}=await import('./native-gallery.js');if(isAndroidGalleryAvailable()){const saved=await saveDeviceFile(blob,filename,'application/json');if(!saved)throw new Error('Android Save As did not confirm the backup file.');destination='phone folder'}else{const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000)}try{localStorage.setItem('focus-flow-last-backup-exported',JSON.stringify({at:new Date().toISOString(),checksum,count,destination}))}catch{}toast(destination==='phone folder'?'Backup verified and saved to your selected phone folder.':'Backup verified and download prepared. Check Downloads.','success')}catch(error){toast(error?.code==='CANCELLED'?'Backup export cancelled.':'Backup তৈরি করা যায়নি: '+error.message,'error')}}
 async function importBackup(e){const file=e.target.files?.[0];if(!file)return;try{const preview=await inspectBackupFile(file);const c=preview.count;const details='Backup preview\n'+(preview.legacy?'Legacy version-4 JSON':'Integrity verified')+'\n'+(preview.createdAt?'Created: '+preview.createdAt:'')+'\n\nSubjects: '+c.subjects+'\nSessions: '+c.sessions+'\nTasks: '+c.tasks+'\nPlans: '+c.plans+'\nNotes: '+c.notes+'\n\nবর্তমান study data replace হবে। আগে current data-এর backup রেখেছ?';if(!await askConfirm(details))return;store.import(preview.data);render();toast('Backup restored and validated successfully','success')}catch(error){toast('Restore হয়নি: '+(error.message||'Invalid backup file'),'error')}finally{e.target.value=''}}
 async function refreshStorageHealth(){const root=$('#storageHealthDetails');if(!root)return;root.textContent='Checking…';try{const h=await getStorageHealth();const used=h.estimate?.usage,total=h.estimate?.quota;const fmt=n=>n<1024*1024?(n/1024).toFixed(0)+' KB':(n/1024/1024).toFixed(1)+' MB';root.innerHTML='<div><span>Local app data</span><b class="'+(h.localStorage?'health-good':'health-bad')+'">'+(h.localStorage?'Available':'Unavailable')+'</b></div><div><span>PDF/IndexedDB storage</span><b class="'+(h.indexedDB?'health-good':'health-bad')+'">'+(h.indexedDB?'Available':'Unavailable')+'</b></div><div><span>Estimated browser storage</span><b>'+(Number.isFinite(used)&&Number.isFinite(total)?fmt(used)+' / '+fmt(total):'Not reported')+'</b></div><div><span>Persistent storage protection</span><b>'+(h.persisted===true?'Granted':h.persisted===false?'Not granted':'Unknown')+'</b></div>'}catch{root.textContent='Storage health could not be checked on this device.'}}
 window.addEventListener('popstate',async()=>{if(!timerScreenActive||!timer.active)return;const leave=await askConfirm('Focus Screen থেকে বের হবে? Timer ব্যাকগ্রাউন্ডে চলতে থাকবে; Finish হবে না।');if(leave){timerScreenActive=false;stopTimerRenderLoop();page='overview';render();toast('Timer continues in background','success');}else{history.pushState({focusFlowTimer:true},'','#focus');}});
@@ -414,5 +443,5 @@ window.addEventListener('pagehide',()=>{if(timer.active){try{timer.persist();}ca
 document.addEventListener('visibilitychange',()=>{if(timer.active){if(document.visibilityState==='hidden'){try{timer.persist();}catch(error){toast('Timer backup failed: '+error.message,'error');}}else{syncNativeFocusTimer(timer,store.subjectName(timer.subjectId));}}});
 store.data.settings.light&&(document.body.classList.add('light'));
 if(timer.active){selectedSubject=timer.subjectId||selectedSubject;showTimer();}else{render();}
-if(store.recoveryAvailable) toast('A damaged local-data snapshot was preserved for recovery. Check device storage before continuing.','error');
+if(store.recoveredFromLastGood) toast('Study data was restored from a last-known-good snapshot. Export a fresh backup to protect the recovered copy.','success');else if(store.recoveryAvailable) toast('A damaged local-data record was preserved, but no valid recovery snapshot was available. Restore a verified backup before continuing.','error');
 if('serviceWorker' in navigator && import.meta.env.PROD) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));

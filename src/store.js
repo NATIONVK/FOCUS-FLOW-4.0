@@ -1,5 +1,7 @@
 const KEY='focus-flow-v4';
 const RECOVERY_KEY='focus-flow-v4-recovery';
+const LAST_GOOD_KEY='focus-flow-v4-last-good';
+const MAX_LAST_GOOD_CHARS=512*1024;
 const makeId=()=>globalThis.crypto?.randomUUID?.()||`id-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 const defaults=()=>({version:4,subjects:[{id:makeId(),name:'General Study',color:'#8b7cff',goalMinutes:120}],sessions:[],tasks:[],plans:[],notes:[],settings:{light:false,dailyGoalMinutes:120,dashboardLayout:{order:[],hidden:[]},dashboardChartType:'bar'}});
 const text=(v,max=500)=>typeof v==='string'?v.trim().slice(0,max):'';
@@ -19,26 +21,73 @@ function normalize(data){
   return {version:4,subjects,sessions,tasks,plans,notes,settings:{...d.settings,light:!!settings.light,dailyGoalMinutes:Number.isFinite(Number(settings.dailyGoalMinutes))?Math.max(1,Math.min(1440,Number(settings.dailyGoalMinutes))):120,dashboardLayout,dashboardChartType}};
 }
 export class Store {
-  constructor(){this.recoveryAvailable=false;this.storageAvailable=false;this.storageError='';this.onStorageStatusChange=null;this.data=this.load();}
+  constructor(){this.recoveryAvailable=false;this.recoveredFromLastGood=false;this.storageAvailable=false;this.storageError='';this.onStorageStatusChange=null;this.data=this.load();}
   notifyStorageStatus(){this.onStorageStatusChange?.({available:this.storageAvailable,error:this.storageError});}
   load(){
     let raw=null;let storageReadable=false;
+    const acceptSnapshot=(serialized,recovered=false)=>{
+      const clean=normalize(JSON.parse(serialized));
+      const canonical=JSON.stringify(clean);
+      if(recovered){
+        try{
+          const storage=globalThis.localStorage;
+          storage.setItem(KEY,canonical);
+          if(storage.getItem(KEY)!==canonical)throw new Error('Recovered data write verification failed');
+          this.storageAvailable=true;
+          this.storageError='Saved data was recovered from the last known-good snapshot.';
+        }catch(error){
+          this.storageAvailable=false;
+          this.storageError='Data recovered in memory, but could not be written back to device storage: '+(error?.message||'Storage unavailable');
+          console.warn('FOCUS FLOW recovered data but could not repair the primary record',error);
+        }
+        this.recoveryAvailable=true;this.recoveredFromLastGood=true;
+      }else{
+        this.storageAvailable=true;this.storageError='';this.recoveryAvailable=false;this.recoveredFromLastGood=false;
+      }
+      this.lastSavedSnapshot=canonical;
+      return clean;
+    };
     try{
       const storage=globalThis.localStorage;
       if(!storage||typeof storage.getItem!=='function'||typeof storage.setItem!=='function')throw new Error('Browser storage is unavailable');
       raw=storage.getItem(KEY);storageReadable=true;
-      this.storageAvailable=true;this.storageError='';
-      if(!raw){const safe=defaults();this.lastSavedSnapshot=JSON.stringify(safe);return safe;}
-      const clean=normalize(JSON.parse(raw));
-      this.lastSavedSnapshot=JSON.stringify(clean);
-      return clean;
+      if(raw){
+        try{return acceptSnapshot(raw,false);}
+        catch(primaryError){
+          try{
+            const lastGood=storage.getItem(LAST_GOOD_KEY);
+            if(lastGood){
+              // Preserving the damaged bytes is best-effort: a full storage quota
+              // must never prevent restoring the independently valid snapshot.
+              try{if(!storage.getItem(RECOVERY_KEY))storage.setItem(RECOVERY_KEY,raw);}catch(copyError){
+                console.warn('FOCUS FLOW could not preserve the damaged source, continuing with recovery',copyError);
+              }
+              return acceptSnapshot(lastGood,true);
+            }
+          }catch(recoveryError){
+            console.warn('FOCUS FLOW could not restore the last known-good snapshot',recoveryError);
+          }
+          try{if(!storage.getItem(RECOVERY_KEY))storage.setItem(RECOVERY_KEY,raw);}catch(recoveryCopyError){
+            console.warn('FOCUS FLOW could not preserve the damaged data record',recoveryCopyError);
+          }
+          throw primaryError;
+        }
+      }
+      const lastGood=storage.getItem(LAST_GOOD_KEY);
+      if(lastGood)return acceptSnapshot(lastGood,true);
+      const safe=defaults();
+      this.lastSavedSnapshot=JSON.stringify(safe);
+      this.storageAvailable=true;this.storageError='';this.recoveryAvailable=false;
+      return safe;
     }catch(error){
-      this.storageAvailable=storageReadable;this.storageError=storageReadable?'Saved data was invalid; a recovery copy was attempted':(error?.message||'Storage unavailable');
+      this.storageAvailable=storageReadable;
+      this.storageError=storageReadable?(error?.message||'Saved data could not be recovered'):(error?.message||'Storage unavailable');
       if(typeof raw==='string'&&raw.length){
         try{
           const storage=globalThis.localStorage;
           if(storage&&!storage.getItem(RECOVERY_KEY))storage.setItem(RECOVERY_KEY,raw);
-          this.recoveryAvailable=!!storage?.getItem(RECOVERY_KEY);
+          this.recoveryAvailable=!!storage?.getItem(RECOVERY_KEY)||!!storage?.getItem(LAST_GOOD_KEY);
+          this.recoveredFromLastGood=false;
         }catch(recoveryError){
           console.error('FOCUS FLOW could not preserve a recovery copy',recoveryError);
         }
@@ -54,13 +103,36 @@ export class Store {
       const storage=globalThis.localStorage;
       if(!storage||typeof storage.setItem!=='function'||typeof storage.getItem!=='function')throw new Error('Browser storage is unavailable');
       const serialized=JSON.stringify(this.data);
-      storage.setItem(KEY,serialized);
+      try{storage.setItem(KEY,serialized);}
+      catch(firstWriteError){
+        // A stale recovery snapshot can consume the remaining quota. Retry once
+        // after removing only that redundant copy; the primary record is untouched.
+        try{
+          if(storage.getItem(LAST_GOOD_KEY)!==null)storage.removeItem(LAST_GOOD_KEY);
+          storage.setItem(KEY,serialized);
+        }catch{throw firstWriteError;}
+      }
       if(storage.getItem(KEY)!==serialized)throw new Error('Storage write verification failed');
       this.lastSavedSnapshot=serialized;
-      this.storageAvailable=true;this.storageError='';this.notifyStorageStatus();
+      this.storageAvailable=true;this.storageError='';this.recoveredFromLastGood=false;
+      if(serialized.length<=MAX_LAST_GOOD_CHARS){
+        try{
+          storage.setItem(LAST_GOOD_KEY,serialized);
+          if(storage.getItem(LAST_GOOD_KEY)!==serialized)throw new Error('Last known-good snapshot verification failed');
+          this.recoveryAvailable=true;
+        }catch(snapshotError){
+          try{storage.removeItem(LAST_GOOD_KEY);}catch{}
+          this.recoveryAvailable=false;
+          console.warn('FOCUS FLOW saved the primary record but could not refresh its recovery snapshot',snapshotError);
+        }
+      }else{
+        try{storage.removeItem(LAST_GOOD_KEY);}catch{}
+        this.recoveryAvailable=false;
+      }
+      this.notifyStorageStatus();
       return true;
     }catch(error){
-      // Restore the last known-good snapshot so failed writes never leave phantom in-memory changes.
+      // Restore the last known-good in-memory snapshot so failed writes never leave phantom changes.
       try{if(this.lastSavedSnapshot)this.data=normalize(JSON.parse(this.lastSavedSnapshot));}catch(restoreError){console.error('FOCUS FLOW could not restore its last saved snapshot',restoreError);}
       this.storageAvailable=false;this.storageError=error?.message||'Storage write failed';this.notifyStorageStatus();
       console.error('FOCUS FLOW could not save local data',error);

@@ -1,25 +1,43 @@
 import {createPdfBackupPayload,readPdfBackupFile} from './pdf-backup.js';
+import {inspectPdfLibraryRecords} from './pdf-integrity.js';
 const DB_NAME='focus-flow-pdf-library';
 const DB_VERSION=1;
 const STORE='documents';
+function storageError(error){
+ if(error?.name==='QuotaExceededError')return new Error('PDF Library-তে পর্যাপ্ত storage space নেই। কিছু অপ্রয়োজনীয় PDF মুছে আবার চেষ্টা করো।');
+ if(error?.name==='InvalidStateError'||error?.name==='AbortError')return new Error('PDF Library operation সম্পন্ন হয়নি। Storage ব্যস্ত বা বন্ধ হয়ে গেছে; আবার চেষ্টা করো।');
+ return error instanceof Error?error:new Error('PDF Library operation failed.');
+}
 function openDb(){
  return new Promise((resolve,reject)=>{
   if(!globalThis.indexedDB){reject(new Error('এই WebView-তে IndexedDB পাওয়া যাচ্ছে না'));return;}
+  let settled=false;
   const request=indexedDB.open(DB_NAME,DB_VERSION);
   request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains(STORE))db.createObjectStore(STORE,{keyPath:'id'});};
-  request.onsuccess=()=>{request.result.onversionchange=()=>request.result.close();resolve(request.result)};
-  request.onerror=()=>reject(request.error||new Error('PDF library খুলতে সমস্যা হয়েছে'));
-  request.onblocked=()=>reject(new Error('PDF Library অন্য একটি tab-এ খোলা আছে। অন্য tab বন্ধ করে আবার চেষ্টা করো।'));
+  request.onsuccess=()=>{
+   const db=request.result;
+   db.onversionchange=()=>db.close();
+   if(settled){db.close();return;}
+   settled=true;resolve(db);
+  };
+  request.onerror=()=>{if(settled)return;settled=true;reject(request.error||new Error('PDF library খুলতে সমস্যা হয়েছে'));};
+  request.onblocked=()=>{if(settled)return;settled=true;reject(new Error('PDF Library অন্য একটি tab-এ খোলা আছে। অন্য tab বন্ধ করে আবার চেষ্টা করো।'));};
  });
 }
 function transaction(mode,work){
  return openDb().then(db=>new Promise((resolve,reject)=>{
-  const tx=db.transaction(STORE,mode),store=tx.objectStore(STORE);
-  let result;
-  try{result=work(store)}catch(e){reject(e);db.close();return;}
-  tx.oncomplete=()=>{db.close();resolve(result&&typeof result==='object'&&'result' in result?result.result:result)};
-  tx.onerror=()=>{db.close();reject(tx.error||new Error('PDF library save failed'))};
-  tx.onabort=()=>{db.close();reject(tx.error||new Error('PDF library transaction aborted'))};
+  let tx;
+  try{tx=db.transaction(STORE,mode)}catch(error){db.close();reject(error);return;}
+  let result,workError=null,settled=false;
+  const finish=(callback,value)=>{if(settled)return;settled=true;db.close();callback(callback===reject?storageError(value):value)};
+  tx.oncomplete=()=>finish(resolve,result&&typeof result==='object'&&'result' in result?result.result:result);
+  tx.onerror=()=>finish(reject,workError||tx.error||new Error('PDF library save failed'));
+  tx.onabort=()=>finish(reject,workError||tx.error||new Error('PDF library transaction aborted'));
+  try{result=work(tx.objectStore(STORE))}
+  catch(error){
+   workError=error;
+   try{tx.abort()}catch{finish(reject,error)}
+  }
  }));
 }
 export async function savePdfToLibrary(blob,name,source='created'){
@@ -38,6 +56,12 @@ export async function listPdfLibrary(){
 export async function deletePdfFromLibrary(id){
  return transaction('readwrite',s=>s.delete(id));
 }
+export async function deletePdfsFromLibrary(ids){
+ const unique=[...new Set((ids||[]).map(String).filter(Boolean))];
+ if(!unique.length)return 0;
+ await transaction('readwrite',store=>{for(const id of unique)store.delete(id)});
+ return unique.length;
+}
 export async function renamePdfInLibrary(id,name){
  name=String(name||'').trim().replace(/[\\/:*?\"<>|]/g,'-').slice(0,180);
  if(!name)throw new Error('A PDF file name is required');
@@ -48,6 +72,10 @@ export async function renamePdfInLibrary(id,name){
  await transaction('readwrite',s=>s.put(record));
  return {id:record.id,name:record.name,size:record.size,updatedAt:record.updatedAt};
 }
+export async function verifyPdfLibrary(){
+ const records=await transaction('readonly',s=>s.getAll());
+ return inspectPdfLibraryRecords(records||[]);
+}
 export async function exportPdfLibraryBackup(){
  const records=await transaction('readonly',s=>s.getAll());
  const payload=await createPdfBackupPayload(records||[]);
@@ -55,17 +83,21 @@ export async function exportPdfLibraryBackup(){
 }
 export async function restorePdfLibraryBackup(file){
  const backup=await readPdfBackupFile(file);
- const existing=await transaction('readonly',s=>s.getAll());
- const known=new Set((existing||[]).map(x=>String(x.backupId||x.id)));
- const restored=backup.documents.filter(x=>!known.has(x.backupId));
- if(!restored.length)return {restored:0,skipped:backup.documents.length,total:backup.documents.length};
+ const stats={restored:0,skipped:0,total:backup.documents.length};
  await transaction('readwrite',store=>{
-  for(const item of restored){
-   const blob=new Blob([item.bytes],{type:'application/pdf'});
-   store.put({id:'pdf-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10),backupId:item.backupId,name:item.name,blob,type:'application/pdf',size:item.size,source:'backup-restore',updatedAt:item.updatedAt});
-  }
+  const request=store.getAll();
+  request.onsuccess=()=>{
+   const known=new Set((request.result||[]).map(x=>String(x.backupId||x.id)));
+   for(const item of backup.documents){
+    if(known.has(item.backupId)){stats.skipped++;continue;}
+    const id='pdf-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
+    store.put({id,backupId:item.backupId,name:item.name,blob:new Blob([item.bytes],{type:'application/pdf'}),type:'application/pdf',size:item.size,source:'backup-restore',updatedAt:item.updatedAt});
+    known.add(item.backupId);
+    stats.restored++;
+   }
+  };
  });
- return {restored:restored.length,skipped:backup.documents.length-restored.length,total:backup.documents.length};
+ return stats;
 }
 export function browserDownload(blob,name){
  const url=URL.createObjectURL(blob),a=document.createElement('a');

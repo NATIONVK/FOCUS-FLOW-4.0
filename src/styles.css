@@ -425,3 +425,234 @@ body.light .subtask-row{color:#4d5670}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+
+/* Animated analytics dashboard — lightweight, data-driven and motion-accessible */
+.dashboard-motion-ready .dashboard-hero,
+.dashboard-motion-ready .dashboard-chart-panel,
+.dashboard-motion-ready .dashboard-task-panel,
+.dashboard-motion-ready .dash-insights-panel{
+  animation:dashboardCardEnter .48s cubic-bezier(.2,.75,.25,1) both;
+}
+.dashboard-motion-ready .dashboard-chart-panel{animation-delay:70ms}
+.dashboard-motion-ready .dashboard-task-panel{animation-delay:130ms}
+.dashboard-motion-ready .dash-insights-panel{animation-delay:190ms}
+.dashboard-motion-ready .dash-kpi{
+  animation:dashboardCardEnter .42s cubic-bezier(.2,.75,.25,1) both;
+}
+.dashboard-motion-ready .dash-kpi:nth-child(2){animation-delay:45ms}
+.dashboard-motion-ready .dash-kpi:nth-child(3){animation-delay:90ms}
+.dashboard-motion-ready .dash-kpi:nth-child(4){animation-delay:135ms}
+.dashboard-motion-ready .dashboard-bar-col i{
+  transform-origin:bottom;
+  transition:height .65s cubic-bezier(.2,.75,.25,1);
+}
+.dashboard-motion-ready .dashboard-svg .chart-line{
+  stroke-dasharray:900;
+  stroke-dashoffset:900;
+  animation:dashboardLineDraw 1.1s ease forwards;
+}
+.dashboard-motion-ready .dashboard-svg .chart-point{
+  opacity:0;
+  animation:dashboardPointIn .3s ease forwards;
+}
+.dashboard-motion-ready .dashboard-svg .chart-point:nth-of-type(2){animation-delay:100ms}
+.dashboard-motion-ready .dashboard-svg .chart-point:nth-of-type(3){animation-delay:180ms}
+.dashboard-motion-ready .dashboard-svg .chart-point:nth-of-type(4){animation-delay:260ms}
+.dashboard-motion-ready .dash-pie{
+  animation:dashboardPieIn .7s cubic-bezier(.2,.75,.25,1) both;
+}
+.dashboard-motion-ready .task-progress i{
+  transition:width .8s cubic-bezier(.2,.75,.25,1);
+}
+@keyframes dashboardCardEnter{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes dashboardLineDraw{to{stroke-dashoffset:0}}
+@keyframes dashboardPointIn{to{opacity:1}}
+@keyframes dashboardPieIn{from{opacity:.5;transform:scale(.82) rotate(-18deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+@media(prefers-reduced-motion:reduce){
+  .dashboard-motion-ready .dashboard-hero,
+  .dashboard-motion-ready .dashboard-chart-panel,
+  .dashboard-motion-ready .dashboard-task-panel,
+  .dashboard-motion-ready .dash-insights-panel,
+  .dashboard-motion-ready .dash-kpi,
+  .dashboard-motion-ready .dashboard-svg .chart-line,
+  .dashboard-motion-ready .dashboard-svg .chart-point,
+  .dashboard-motion-ready .dash-pie{animation:none!important;opacity:1;transform:none}
+  .dashboard-motion-ready .dashboard-bar-col i,
+  .dashboard-motion-ready .task-progress i{transition:none!important}
+}
+
+
+/* Correct selectors for the live Overview dashboard */
+.dashboard-motion-ready .dash-hero,
+.dashboard-motion-ready .dash-kpis,
+.dashboard-motion-ready .dash-main-grid,
+.dashboard-motion-ready .dash-month-panel,
+.dashboard-motion-ready .dash-insights-panel,
+.dashboard-motion-ready .dash-lower-grid,
+.dashboard-motion-ready .dash-recent-panel{
+  animation:dashboardCardEnter .48s cubic-bezier(.2,.75,.25,1) both;
+}
+.dashboard-motion-ready .dash-kpi{
+  animation:dashboardCardEnter .42s cubic-bezier(.2,.75,.25,1) both;
+}
+.dashboard-motion-ready .dash-chart-track i{
+  transform:scaleY(0);
+  transform-origin:bottom;
+  animation:dashboardBarGrow .72s cubic-bezier(.2,.75,.25,1) forwards;
+}
+.dashboard-motion-ready .dash-month-track i,
+.dashboard-motion-ready .progress-track i{
+  transform:scaleX(0);
+  transform-origin:left;
+  transition:transform .8s cubic-bezier(.2,.75,.25,1);
+}
+.dashboard-motion-ready .dash-month-track i.dashboard-progress-animate,
+.dashboard-motion-ready .progress-track i.dashboard-progress-animate{
+  transform:scaleX(1);
+}
+@keyframes dashboardBarGrow{to{transform:scaleY(1)}}
+@media(prefers-reduced-motion:reduce){
+  .dashboard-motion-ready .dash-hero,
+  .dashboard-motion-ready .dash-kpis,
+  .dashboard-motion-ready .dash-kpi,
+  .dashboard-motion-ready .dash-main-grid,
+  .dashboard-motion-ready .dash-month-panel,
+  .dashboard-motion-ready .dash-insights-panel,
+  .dashboard-motion-ready .dash-lower-grid,
+  .dashboard-motion-ready .dash-recent-panel,
+  .dashboard-motion-ready .dash-chart-track i{animation:none!important;opacity:1;transform:none}
+  .dashboard-motion-ready .dash-month-track i,
+  .dashboard-motion-ready .progress-track i{transition:none!important;transform:none}
+}
+
+/* Dashboard 5.3.1 — responsive interaction polish */
+@media (hover:hover) and (pointer:fine) {
+  .dash-kpi,
+  .dash-hero,
+  .dash-main-grid>.panel,
+  .dash-month-panel,
+  .dash-insights-panel,
+  .dash-lower-grid>.panel,
+  .dash-recent-panel {
+    transition:border-color .2s ease,box-shadow .2s ease;
+  }
+  .dash-kpi:hover,
+  .dash-main-grid>.panel:hover,
+  .dash-month-panel:hover,
+  .dash-insights-panel:hover,
+  .dash-lower-grid>.panel:hover,
+  .dash-recent-panel:hover {
+    border-color:#8b7cff66;
+    box-shadow:0 10px 28px #0002,0 0 0 1px #8b7cff12;
+  }
+}
+@media(max-width:700px) {
+  .dash-actions button,
+  .dash-plan-item button,
+  .dash-task-row button,
+  .dash-recent-row button {
+    min-height:44px;
+  }
+  .dash-chart-col,
+  .dash-chart-track {
+    -webkit-tap-highlight-color:transparent;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .dash-kpi,
+  .dash-hero,
+  .dash-main-grid>.panel,
+  .dash-month-panel,
+  .dash-insights-panel,
+  .dash-lower-grid>.panel,
+  .dash-recent-panel {
+    transition:none!important;
+  }
+}
+
+
+/* FOCUS FLOW 5.4 — calmer, clearer timer transitions and data-led dashboard motion */
+.focus-screen .focus-core strong,
+.focus-screen .time-seconds,
+.focus-screen .bh-corona,
+.focus-screen .bh-disk-outer,
+.focus-screen .bh-disk-inner {
+  transition: color .55s ease, text-shadow .55s ease, box-shadow .8s ease,
+    filter .8s ease, opacity .8s ease;
+}
+.focus-screen .focus-core strong { font-variant-numeric: tabular-nums; }
+.focus-screen .time-seconds { color: var(--seconds-color, #fff); }
+.focus-screen .blackhole-scene { contain: layout style; }
+.dashboard-motion-ready .dash-chart-track i {
+  animation-fill-mode: both;
+}
+.dash-chart[role="img"],
+.dashboard-svg[role="img"] { user-select: none; }
+@media (prefers-reduced-motion: reduce) {
+  .focus-screen .focus-core strong,
+  .focus-screen .time-seconds,
+  .focus-screen .bh-corona,
+  .focus-screen .bh-disk-outer,
+  .focus-screen .bh-disk-inner {
+    transition: none !important;
+  }
+}
+
+
+/* 5.4.1 — Black Hole grows and accelerates with every focused minute.
+   All growth is capped so the scene stays inside small Android viewports. */
+.blackhole-scene {
+  --bh-area-scale: 1;
+  --bh-spin-outer: 12s;
+  --bh-spin-inner: 6s;
+  --bh-arc-speed: 9s;
+  --bh-particle-speed: 8s;
+  --bh-beam-speed: 18s;
+}
+.blackhole-scene .bh-disk-outer {
+  width: calc(88% * var(--bh-area-scale));
+  height: calc(43% * var(--bh-area-scale));
+  animation-duration: var(--bh-spin-outer);
+}
+.blackhole-scene .bh-disk-inner {
+  width: calc(67% * var(--bh-area-scale));
+  height: calc(30% * var(--bh-area-scale));
+  animation-duration: var(--bh-spin-inner);
+}
+.blackhole-scene .bh-corona,
+.blackhole-scene .bh-lensing {
+  width: calc(48% * var(--bh-area-scale));
+  height: calc(48% * var(--bh-area-scale));
+}
+.blackhole-scene .bh-lensing { width: calc(60% * var(--bh-area-scale)); height: calc(60% * var(--bh-area-scale)); }
+.blackhole-scene .bh-energy-waves i {
+  width: calc(52% * var(--bh-area-scale));
+  height: calc(52% * var(--bh-area-scale));
+  animation-duration: var(--bh-wave-speed);
+}
+.blackhole-scene .bh-energy-waves i:nth-child(2) { animation-duration: calc(var(--bh-wave-speed) * 1.12); }
+.blackhole-scene .bh-energy-waves i:nth-child(3) { animation-duration: calc(var(--bh-wave-speed) * 1.24); }
+.blackhole-scene .bh-lensing-arc { animation-duration: var(--bh-arc-speed); }
+.blackhole-scene .bh-lensing-arc-b { animation-duration: calc(var(--bh-arc-speed) * 1.33); }
+.blackhole-scene .bh-particle { animation-duration: var(--bh-particle-speed); }
+.blackhole-scene .bh-particle-b { animation-duration: calc(var(--bh-particle-speed) * 1.38); }
+.blackhole-scene .bh-particle-c { animation-duration: calc(var(--bh-particle-speed) * 1.75); }
+.blackhole-scene .bh-light-beams i { animation-duration: var(--bh-beam-speed); }
+.blackhole-scene .bh-light-beams i:nth-child(2) { animation-duration: calc(var(--bh-beam-speed) * 1.33); }
+.blackhole-scene .bh-light-beams i:nth-child(3) { animation-duration: calc(var(--bh-beam-speed) * 1.66); }
+@media(max-width:700px) {
+  .blackhole-scene { width: min(100vw,640px); height: min(100vw,640px); max-height: 80vh; }
+  .blackhole-scene .bh-disk-outer { filter: blur(4px); }
+}
+@media(prefers-reduced-motion:reduce) {
+  .blackhole-scene .bh-disk-outer,
+  .blackhole-scene .bh-disk-inner,
+  .blackhole-scene .bh-energy-waves i,
+  .blackhole-scene .bh-lensing-arc,
+  .blackhole-scene .bh-particle,
+  .blackhole-scene .bh-light-beams i { animation: none !important; }
+}
