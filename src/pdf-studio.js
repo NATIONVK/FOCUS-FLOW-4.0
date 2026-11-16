@@ -1,6 +1,6 @@
 import { renderPDFPage, bindPDFPage } from './pdf-maker.js';
-import { savePdfOutput, savePdfToLibrary, getPdfFromLibrary, listPdfLibrary, deletePdfFromLibrary, exportPdfLibraryBackup, restorePdfLibraryBackup, verifyPdfLibrary, browserDownload } from './pdf-storage.js';
-import { pickDevicePdf, isAndroidGalleryAvailable } from './native-gallery.js';
+import { savePdfOutput, savePdfToLibrary, getPdfFromLibrary, listPdfLibrary, deletePdfFromLibrary, deletePdfsFromLibrary, exportPdfLibraryBackup, restorePdfLibraryBackup, verifyPdfLibrary, browserDownload } from './pdf-storage.js';
+import { pickDevicePdf, saveDevicePdf, isAndroidGalleryAvailable } from './native-gallery.js';
 import { renderPdfLibrary } from './pdf-library-ui.js';
 import './pdf-studio.css';
 
@@ -21,8 +21,43 @@ function download(bytes,name,type='application/pdf'){const blob=new Blob([bytes]
 async function exportPdf(bytes,name,source='edited'){const blob=bytes instanceof Blob?bytes:new Blob([bytes],{type:'application/pdf'});const saved=await savePdfOutput(blob,name,{askLocation:true,source});const where=saved.destination==='device+library'?'ফোনের Folder ও PDF Library':saved.destination==='device'?'ফোনের নির্বাচিত Folder':saved.destination==='download+library'?'Downloads ও PDF Library':saved.destination==='download'?'Downloads':'PDF Library';status('PDF সংরক্ষিত · '+where+' · '+name,'success');return saved}
 function dataUrlToBytes(dataUrl){const raw=dataUrl.slice(dataUrl.indexOf(',')+1),binary=atob(raw),out=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)out[i]=binary.charCodeAt(i);return out}
 async function openSavedPdf(id){try{const record=await getPdfFromLibrary(id);if(!record?.blob)throw new Error('Saved PDF not found');await openFile(new File([record.blob],record.name,{type:'application/pdf'}),id)}catch(e){status('Saved PDF could not be opened: '+e.message,'error')}}
-async function removeSavedPdf(id){const record=await getPdfFromLibrary(id);if(!record)return status('Saved PDF not found.','error');if(!window.confirm('Delete “'+record.name+'” from this app’s PDF Library? This cannot be undone.'))return;await deletePdfFromLibrary(id);try{localStorage.setItem(recentKey,JSON.stringify(readRecent().filter(x=>x.id!==id)));const progress=JSON.parse(localStorage.getItem(progressKey)||'{}');delete progress[id];localStorage.setItem(progressKey,JSON.stringify(progress));bookmarks=new Set([...bookmarks].filter(key=>!key.startsWith(id+':')));saveBookmarks()}catch{}await loadSavedLibrary();status('PDF deleted from this app.','success')}
-async function loadSavedLibrary(){const root=$('#pdfSavedLibrary');if(!root)return;try{const docs=await listPdfLibrary();renderPdfLibrary(root,docs,{onOpen:openSavedPdf,onDelete:removeSavedPdf,onRefresh:loadSavedLibrary})}catch(e){root.textContent='PDF library unavailable: '+e.message}}
+async function removeSavedPdfs(ids){
+ const unique=[...new Set((ids||[]).map(String).filter(Boolean))];
+ if(!unique.length)return;
+ const records=(await Promise.all(unique.map(getPdfFromLibrary))).filter(Boolean);
+ if(!records.length)return status('No selected PDFs were found.','error');
+ const label=records.length===1?'Delete “'+records[0].name+'” from this app’s PDF Library?':'Delete '+records.length+' selected PDFs from this app’s PDF Library?';
+ if(!window.confirm(label+' This cannot be undone.'))return;
+ try{
+  await deletePdfsFromLibrary(records.map(record=>record.id));
+  const removed=new Set(records.map(record=>record.id));
+  try{
+   localStorage.setItem(recentKey,JSON.stringify(readRecent().filter(item=>!removed.has(item.id))));
+   const progress=JSON.parse(localStorage.getItem(progressKey)||'{}');
+   removed.forEach(id=>delete progress[id]);
+   localStorage.setItem(progressKey,JSON.stringify(progress));
+   bookmarks=new Set([...bookmarks].filter(key=>![...removed].some(id=>key.startsWith(id+':'))));
+   saveBookmarks();
+  }catch{}
+  await loadSavedLibrary();
+  status(records.length+' PDF'+(records.length===1?'':'s')+' deleted from this app.','success');
+ }catch(error){status('PDF deletion failed: '+error.message,'error')}
+}
+async function removeSavedPdf(id){return removeSavedPdfs([id])}
+async function exportSavedPdf(id){
+ try{
+  const record=await getPdfFromLibrary(id);
+  if(!record?.blob)throw new Error('Saved PDF not found');
+  if(isAndroidGalleryAvailable()){
+   await saveDevicePdf(record.blob,record.name);
+   status('PDF saved to your selected phone folder · '+record.name,'success');
+  }else{
+   browserDownload(record.blob,record.name);
+   status('PDF download started · '+record.name,'success');
+  }
+ }catch(error){status(error?.code==='CANCELLED'?'PDF export cancelled.':'Could not export PDF: '+error.message,error?.code==='CANCELLED'?'info':'error')}
+}
+async function loadSavedLibrary(){const root=$('#pdfSavedLibrary');if(!root)return;try{const docs=await listPdfLibrary();renderPdfLibrary(root,docs,{onOpen:openSavedPdf,onDelete:removeSavedPdf,onDeleteMany:removeSavedPdfs,onExport:exportSavedPdf,onRefresh:loadSavedLibrary})}catch(e){root.textContent='PDF library unavailable: '+e.message}}
 function status(message,type='info'){const el=$('#pdfStatus');if(el){el.textContent=message;el.dataset.type=type}}
 function shell(){return `<section class="pdf-studio">
 <header class="pdf-studio-head"><div><span class="eyebrow">DOCUMENT WORKSPACE</span><h2>PDF MASTER STUDIO</h2><p>Read · Edit · Create · Organize — offline on your device</p></div><button type="button" class="pdf-open-btn" id="pdfOpenButton">＋ Open PDF</button><input id="pdfOpenInput" class="pdf-native-file-input" type="file" accept="application/pdf,.pdf,application/x-pdf"></header>
