@@ -362,3 +362,37 @@ test('timer rejects future-dated or structurally inconsistent snapshots',()=>{
     }
   }finally{globalThis.localStorage=old;}
 });
+
+
+test('store restores a valid last known-good snapshot after the primary record is corrupted',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};
+  try{
+    const original=new Store();
+    original.addSubject('Mathematics');
+    const saved=map.get('focus-flow-v4');
+    assert.ok(saved);
+    assert.equal(map.get('focus-flow-v4-last-good'),saved);
+    map.set('focus-flow-v4','{damaged json');
+    const recovered=new Store();
+    assert.equal(recovered.data.subjects.some(s=>s.name==='Mathematics'),true);
+    assert.equal(recovered.recoveryAvailable,true);
+    assert.equal(map.get('focus-flow-v4'),saved,'recovered data should repair the primary storage record');
+    assert.equal(map.get('focus-flow-v4-recovery'),'{damaged json','the damaged source should be preserved separately');
+  }finally{globalThis.localStorage=old}
+});
+
+test('store can recover the last known-good snapshot when the primary key is missing',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};
+  try{
+    const original=new Store();
+    original.addSubject('Probability');
+    const saved=map.get('focus-flow-v4');
+    map.delete('focus-flow-v4');
+    const recovered=new Store();
+    assert.equal(recovered.data.subjects.some(s=>s.name==='Probability'),true);
+    assert.equal(map.get('focus-flow-v4'),saved);
+    assert.equal(recovered.recoveryAvailable,true);
+  }finally{globalThis.localStorage=old}
+});

@@ -161,3 +161,19 @@ Before calling a release ready:
 - Invalid snapshots are discarded instead of producing a frozen or nonsensical timer display.
 - Added regression coverage for malformed/future-dated timer snapshots. Valid legacy snapshots without a session ID remain supported.
 - Android service still uses its persisted elapsed-time baseline and START_STICKY restart behavior; reboot/force-stop recovery and physical-device validation are not claimed by this change.
+
+
+## Delivered — Focus Flow 5.5.0 reliability and offline recovery
+- Added a bounded persistent last-known-good study-data snapshot. If the primary localStorage record is malformed or missing, startup validates and restores the previous snapshot, repairs the primary record when storage permits, and preserves the damaged source separately for diagnosis.
+- The recovery snapshot is capped at 512 KiB to avoid unbounded localStorage duplication. Larger study datasets continue to rely on explicit verified exports rather than consuming excessive device storage.
+- Normal saves verify the primary record before refreshing the recovery snapshot. If the recovery copy cannot be refreshed, the successfully saved primary record is retained and the stale snapshot is discarded.
+- Android study-data backup now uses the native Storage Access Framework Save As picker. Native PDF and general-file exports verify the exact byte count reported by the Android bridge before the UI reports success.
+- Bumped app and backup metadata to 5.5.0, Android APK artifact naming to 5.5.0, and the offline shell cache to v14.
+- Expanded the project health audit to require the native command queue and dashboard/queue regression tests.
+- AI/cloud APIs remain excluded; core workflows remain local and offline-first.
+
+## 5.5 verification boundary
+- CI must pass JavaScript tests, Python build-tool tests, project health audit, production Vite build, Android manifest/icon validation and Gradle debug APK compilation for the exact PR head.
+- Automated tests cover recovery from malformed and missing primary storage records, including preservation of the damaged source and repair of the primary key.
+- Native Save As byte-count confirmation must still be exercised on a physical Android device.
+- Vivo Y29 / Android 15 installation, timer process-death recovery, gallery multi-select, PDF open/save, low-storage restore, battery use and RAM profiling remain manual device checks.
