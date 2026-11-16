@@ -177,3 +177,15 @@ Before calling a release ready:
 - Automated tests cover recovery from malformed and missing primary storage records, including preservation of the damaged source and repair of the primary key.
 - Native Save As byte-count confirmation must still be exercised on a physical Android device.
 - Vivo Y29 / Android 15 installation, timer process-death recovery, gallery multi-select, PDF open/save, low-storage restore, battery use and RAM profiling remain manual device checks.
+
+
+## Delivered — Focus Flow 5.5.1 PDF Library usability
+- Added selection checkboxes, select-visible control, selected count, and bulk delete to the local PDF Library.
+- Bulk delete uses one IndexedDB read-write transaction so the selected set is committed together or aborted together.
+- Added per-document export to Android Save As with native byte-count verification; web builds use browser download.
+- Deletion cleans associated recent-document, reading-progress and bookmark metadata.
+- Bumped app and backup metadata to 5.5.1, shell cache to v15 and Android artifact name to focus-flow-5.5.1-debug-apk.
+
+## 5.5.1 verification boundary
+- Automated tests and CI build must pass for the exact commit.
+- Android Save As cancellation, file visibility in Files, and bulk-delete interaction require physical-device testing.
