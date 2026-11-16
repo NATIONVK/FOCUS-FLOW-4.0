@@ -56,6 +56,12 @@ export async function listPdfLibrary(){
 export async function deletePdfFromLibrary(id){
  return transaction('readwrite',s=>s.delete(id));
 }
+export async function deletePdfsFromLibrary(ids){
+ const unique=[...new Set((ids||[]).map(String).filter(Boolean))];
+ if(!unique.length)return 0;
+ await transaction('readwrite',store=>{for(const id of unique)store.delete(id)});
+ return unique.length;
+}
 export async function renamePdfInLibrary(id,name){
  name=String(name||'').trim().replace(/[\\/:*?\"<>|]/g,'-').slice(0,180);
  if(!name)throw new Error('A PDF file name is required');
