@@ -443,5 +443,5 @@ window.addEventListener('pagehide',()=>{if(timer.active){try{timer.persist();}ca
 document.addEventListener('visibilitychange',()=>{if(timer.active){if(document.visibilityState==='hidden'){try{timer.persist();}catch(error){toast('Timer backup failed: '+error.message,'error');}}else{syncNativeFocusTimer(timer,store.subjectName(timer.subjectId));}}});
 store.data.settings.light&&(document.body.classList.add('light'));
 if(timer.active){selectedSubject=timer.subjectId||selectedSubject;showTimer();}else{render();}
-if(store.recoveryAvailable) toast('A damaged local-data snapshot was preserved for recovery. Check device storage before continuing.','error');
+if(store.recoveryAvailable) toast('Study data was restored from a last-known-good snapshot. Export a fresh backup to protect the recovered copy.','success');
 if('serviceWorker' in navigator && import.meta.env.PROD) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
