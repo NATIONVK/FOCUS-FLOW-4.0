@@ -100,7 +100,7 @@ async function renderPage(anchorPage=pageNo,anchorOffset=0){
   if(sequence!==renderSequence)return;
   $('#pdfPageInput').value=pageNo;$('#pdfPageInput').max=currentDoc.numPages;$('#pdfPageTotal').textContent='/ '+currentDoc.numPages;$('#pdfPageCount').textContent=currentDoc.numPages+' pages';$('#pdfZoomLabel').textContent=Math.round(zoom*100)+'%';
   $('#pdfBookmark').textContent=(bookmarks.has(bookmarkKeyForPage(pageNo))||bookmarks.has(currentName+':'+pageNo))?'★':'☆';$('#pdfDraw').classList.toggle('active',drawMode);saveProgress();bindInk();
-  const anchor=stack.querySelector('[data-page="'+anchorPage+'"]');if(anchor)scroll.scrollTop+=anchor.getBoundingClientRect().top-scroll.getBoundingClientRect().top+anchorOffset;else{const current=stack.querySelector('[data-page="'+pageNo+'"]');if(current)scroll.scrollTop=current.offsetTop-12}
+  const anchor=stack.querySelector('[data-page="'+anchorPage+'"]');if(anchor)scroll.scrollTop+=anchor.getBoundingClientRect().top-scroll.getBoundingClientRect().top-anchorOffset;else{const current=stack.querySelector('[data-page="'+pageNo+'"]');if(current)scroll.scrollTop=current.offsetTop-12}
   if(!scroll.dataset.continuousBound){
    scroll.dataset.continuousBound='1';let scheduled=false;
    scroll.addEventListener('scroll',()=>{
