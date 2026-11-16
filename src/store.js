@@ -57,7 +57,11 @@ export class Store {
           try{
             const lastGood=storage.getItem(LAST_GOOD_KEY);
             if(lastGood){
-              if(!storage.getItem(RECOVERY_KEY))storage.setItem(RECOVERY_KEY,raw);
+              // Preserving the damaged bytes is best-effort: a full storage quota
+              // must never prevent restoring the independently valid snapshot.
+              try{if(!storage.getItem(RECOVERY_KEY))storage.setItem(RECOVERY_KEY,raw);}catch(copyError){
+                console.warn('FOCUS FLOW could not preserve the damaged source, continuing with recovery',copyError);
+              }
               return acceptSnapshot(lastGood,true);
             }
           }catch(recoveryError){

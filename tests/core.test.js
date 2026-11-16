@@ -396,3 +396,19 @@ test('store can recover the last known-good snapshot when the primary key is mis
     assert.equal(recovered.recoveryAvailable,true);
   }finally{globalThis.localStorage=old}
 });
+
+
+test('recovery is not blocked when storage quota prevents preserving the damaged source',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={getItem:k=>map.get(k)??null,setItem:(k,v)=>{if(k==='focus-flow-v4-recovery')throw new Error('quota exceeded');map.set(k,v)},removeItem:k=>map.delete(k)};
+  try{
+    const original=new Store();
+    original.addSubject('Calculus');
+    const saved=map.get('focus-flow-v4');
+    map.set('focus-flow-v4','{broken');
+    const recovered=new Store();
+    assert.equal(recovered.data.subjects.some(s=>s.name==='Calculus'),true);
+    assert.equal(map.get('focus-flow-v4'),saved);
+    assert.equal(recovered.recoveryAvailable,true);
+  }finally{globalThis.localStorage=old}
+});
