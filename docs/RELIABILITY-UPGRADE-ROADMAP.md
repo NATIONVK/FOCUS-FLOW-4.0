@@ -202,3 +202,18 @@ Before calling a release ready:
 ## 5.5.2 verification boundary
 - Automated tests and Android Gradle build must pass for the exact branch head.
 - Continuous scroll feel, large-file memory behavior, drawing overlay alignment and reading position across app process death still require physical Android device testing.
+
+
+## Delivered — FOCUS FLOW 5.5.6 low-memory performance
+
+- PDF canvas backing-store resolution now adapts to the browser's reported device-memory tier, with a conservative 4 GB fallback when the hint is unavailable.
+- Canvas pixel budgets are capped at 0.9M / 1.4M / 1.8M / 2.4M pixels by memory tier, with corresponding DPR ratio caps. The CSS display size and PDF zoom remain unchanged; only backing-store resolution is reduced.
+- Focus Timer's one-second UI refresh now runs only while the Focus Screen is visible and the timer is actively running. It stops on app backgrounding or when the session is paused, then resumes on return/unpause. Elapsed time continues to derive from timestamps and is not tied to the render interval.
+- Added unit tests for device-memory tiers, fallback behavior and canvas pixel budget enforcement.
+- Updated app/backup version metadata to 5.5.6, offline shell cache to v20 and Android artifact naming.
+
+## 5.5.6 verification boundary
+
+- CI must pass all regression tests, Python tooling checks, project health audit, production web build and Android debug APK build for the exact branch head.
+- Browser device-memory hints are approximate and may be unavailable; the conservative fallback is used in that case.
+- Physical Vivo Y29 / Android 15 battery, RAM, PDF readability and long-session checks remain manual gates.
