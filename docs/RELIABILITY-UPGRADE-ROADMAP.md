@@ -233,3 +233,10 @@ Before calling a release ready:
 - Add a lightweight photon precession ring and gravitational halo to the Black Hole scene; retain the timer-only center, pause-state behavior, and reduced-motion fallback.
 - Advance package version to 5.6.0 and service-worker shell cache to v22.
 - Automated CI and Android APK build are required before release; physical Android visual, pause, and performance checks remain manual gates.
+
+
+## Delivered — Focus Flow 5.6.1 Black Hole progressive evolution
+- Replace per-minute visual growth with discrete evolution stages every 210 seconds (3 minutes 30 seconds) of active focus time.
+- Pause is respected automatically because evolution is derived from the timer's accumulated active elapsed time; resume continues from the same stage.
+- Each stage increases scene scale, rotation speed, wave/beam/particle speed, photon-ring intensity, and gravitational glow; growth is capped at 28% and speed at 0.48x to keep the scene bounded on mobile.
+- Add pure evolution calculation and boundary/cap regression tests; bump package and backup metadata to 5.6.1 and service-worker cache to v23.
