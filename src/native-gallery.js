@@ -19,7 +19,8 @@ export async function saveDevicePdf(blob, name) {
   let binary = '';
   const chunk = 0x8000;
   for (let i=0;i<bytes.length;i+=chunk) binary += String.fromCharCode(...bytes.subarray(i,Math.min(i+chunk,bytes.length)));
-  await Gallery.savePdf({name,base64:btoa(binary)});
+  const result=await Gallery.savePdf({name,base64:btoa(binary)});
+  if(Number(result?.bytesWritten)!==bytes.byteLength)throw new Error('Android did not confirm that the complete PDF was written.');
   return true;
 }
 
@@ -29,6 +30,7 @@ export async function saveDeviceFile(blob,name,mimeType='application/json') {
   const bytes=new Uint8Array(await blob.arrayBuffer());let binary='';const chunk=0x8000;
   for(let i=0;i<bytes.length;i+=chunk)binary+=String.fromCharCode(...bytes.subarray(i,Math.min(i+chunk,bytes.length)));
   const safeName=String(name||'focus-flow-backup.json').replace(/[\\/:*?"<>|]/g,'-').slice(0,180);
-  await Gallery.saveFile({name:safeName,mimeType,base64:btoa(binary)});
+  const result=await Gallery.saveFile({name:safeName,mimeType,base64:btoa(binary)});
+  if(Number(result?.bytesWritten)!==bytes.byteLength)throw new Error('Android did not confirm that the complete file was written.');
   return true;
 }

@@ -3,10 +3,39 @@ export class Analytics {
   static subjectSeconds(sessions,id){return sessions.filter(s=>s.subjectId===id).reduce((n,s)=>n+s.duration,0);}
   static weekly(sessions,now=new Date()){return Array.from({length:7},(_,i)=>{const d=new Date(now);d.setHours(0,0,0,0);d.setDate(d.getDate()-6+i);const seconds=sessions.filter(s=>new Date(s.startedAt).toDateString()===d.toDateString()).reduce((n,s)=>n+s.duration,0);return {label:d.toLocaleDateString(undefined,{weekday:'short'}),seconds};});}
 
+  // Classify sessions by their saved local start hour. Duration remains the
+  // whole session's recorded focus duration; pauses are not distributed by clock hour.
+  static sessionStartSummary(sessions){
+    const buckets=[
+      {label:'Morning',range:'05:00–11:59',test:h=>h>=5&&h<12,seconds:0,count:0},
+      {label:'Afternoon',range:'12:00–16:59',test:h=>h>=12&&h<17,seconds:0,count:0},
+      {label:'Evening',range:'17:00–21:59',test:h=>h>=17&&h<22,seconds:0,count:0},
+      {label:'Night',range:'22:00–04:59',test:h=>h>=22||h<5,seconds:0,count:0}
+    ];
+    for(const session of Array.isArray(sessions)?sessions:[]){
+      const started=new Date(session?.startedAt);
+      if(!Number.isFinite(started.getTime()))continue;
+      const bucket=buckets.find(item=>item.test(started.getHours()));
+      if(!bucket)continue;
+      const duration=Number(session?.duration);
+      bucket.seconds+=Number.isFinite(duration)?Math.max(0,duration):0;
+      bucket.count++;
+    }
+    buckets.sort((a,b)=>b.count-a.count||b.seconds-a.seconds);
+    return {buckets,best:buckets[0]};
+  }
   static subjectRanking(sessions,subjects=[]){
     const total=sessions.reduce((sum,s)=>sum+Math.max(0,Number(s.duration)||0),0);
     return subjects.map(subject=>({id:subject.id,name:subject.name,color:subject.color,seconds:this.subjectSeconds(sessions,subject.id),share:total?Math.round(this.subjectSeconds(sessions,subject.id)/total*100):0}))
       .filter(item=>item.seconds>0).sort((a,b)=>b.seconds-a.seconds);
+  }
+  static filterRange(sessions,days=30,now=new Date()){
+    const source=Array.isArray(sessions)?sessions:[];
+    const span=Number(days);
+    if(!Number.isFinite(span)||span<=0)return source.slice();
+    const end=new Date(now);end.setHours(24,0,0,0);
+    const start=new Date(end);start.setDate(start.getDate()-Math.max(1,Math.floor(span)));
+    return source.filter(session=>{const time=new Date(session?.startedAt).getTime();return Number.isFinite(time)&&time>=start.getTime()&&time<end.getTime();});
   }
   static rangeSeconds(sessions,start,end){
     return sessions.reduce((sum,s)=>{const time=new Date(s.startedAt).getTime();return Number.isFinite(time)&&time>=start.getTime()&&time<end.getTime()?sum+Math.max(0,Number(s.duration)||0):sum;},0);

@@ -1,20 +1,80 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/NATIONVK/FOCUS-FLOW-4.0/main/public/icon.svg" width="112" alt="FOCUS FLOW app icon" />
-  <h1>FOCUS FLOW 5.1</h1>
+  <h1>FOCUS FLOW 5.6.1</h1>
   <p><strong>Your personal study OS. Focus deeper. Learn smarter. Grow daily.</strong></p>
   <p>
     <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/quality.yml"><img src="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/quality.yml/badge.svg" alt="Quality Checks"></a>
     <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/build-android.yml"><img src="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/build-android.yml/badge.svg" alt="Android APK Build"></a>
     <img src="https://img.shields.io/badge/Platform-Android%20%7C%20Web-8b5cf6" alt="Android and Web">
     <img src="https://img.shields.io/badge/Mode-Offline--first-16a34a" alt="Offline first">
-    <img src="https://img.shields.io/badge/Version-5.1-06b6d4" alt="Version 4.0">
+    <img src="https://img.shields.io/badge/Version-5.6.1-06b6d4" alt="Version 5.6.1">
   </p>
   <p><em>Designed for distraction-free study, consistent habits, and measurable progress.</em></p>
 </div>
 
 ---
 
-## Latest release · 5.1.0
+## Latest release · 5.6.1
+
+### 5.6.1 — Black Hole Progressive Evolution & Dashboard Analytics
+
+- The Black Hole scene advances one evolution stage every 210 seconds (3 minutes 30 seconds) of active focus time.
+- Eight progressive stages increase accretion-disk growth, photon-ring energy, gravitational effects and particle/beam activity, with visual growth capped at 28%.
+- Pausing freezes evolution; resuming continues from accumulated active focus time. Timer accuracy remains independent of animation.
+- Disk geometry is clamped to stay within narrow mobile screens.
+- Dashboard analytics support selectable 7-day, 30-day, 90-day and all-time periods.
+- Automated tests cover evolution boundaries, growth and speed caps, and invalid inputs.
+
+
+### 5.5.4 — PDF Render Lifecycle & Memory Stability
+
+- Track every in-flight PDF.js page render, not only the currently selected page.
+- Cancel and await superseded render tasks before replacing the virtual page window.
+- Ignore stale asynchronous page loads after a page jump or document switch.
+- Release PDF.js page resources after each render task settles, including cancellation and failure paths.
+- Preserve the five-page virtual window, continuous reading, page-range navigation, annotations and reading-progress behavior.
+- Add isolated regression tests for task cancellation, overlapping render generations and resource cleanup.
+
+### 5.5.3 — PDF Reader Memory & Rendering Reliability
+
+- Added continuous vertical reading with a bounded five-page virtual render window to limit canvas memory use.
+- Added page-range parsing and quick navigation (for example `1-3, 5, 8-10`).
+- Added lazy thumbnail rendering with a 300-page navigation safety limit.
+- Restored reading page and zoom through validated, clamped progress metadata.
+- Reduced canvas pixel budget and device-pixel ratio for lower-memory devices.
+- Existing PDF library, annotation, search, editing, backup format and app design are preserved.
+
+
+
+### 5.5.3 — PDF Library usability
+
+- Added multi-select PDF Library management with a visible selection count and one-confirmation bulk delete.
+- Bulk deletion uses one IndexedDB read-write transaction; if it aborts, the selected documents are not partially removed.
+- Added per-document Save to phone export using Android Save As, with byte-count verification; browser builds use a normal file download.
+- Deleting documents also cleans matching recent-file, reading-progress and bookmark metadata.
+- Existing app design, offline storage and PDF backup format remain unchanged.
+
+
+
+- Corrected the app's actual identity: the former clock/book artwork has been replaced by a Black Hole logo. The same source design now feeds the sidebar, favicon, PWA install assets, Android adaptive icon and legacy density-specific launcher icons.
+- Added generated icon-artwork checks so a future APK build fails if launcher images are missing instead of silently shipping the Capacitor placeholder.
+
+- Black Hole animation speed increases after every completed focus minute, with safe speed limits.
+- Native Android timer commands are serialized so delayed start/pause/stop bridge calls cannot overwrite a newer timer state.
+- Backup metadata and the visible app version now consistently report 5.5.3.
+- Persist a bounded last-known-good study-data snapshot and recover the previous valid record if the primary localStorage record is missing or malformed.
+- Android study-data backup uses the system Save As picker and verifies the exact number of bytes written before reporting success; PDF and JSON exports share the native write verification.
+- The animated disk, corona, lensing rings and energy waves gradually expand; growth is capped to fit Android screens.
+- Animation settings update only once per minute to avoid unnecessary rendering work. Pause and reduced-motion behavior remain respected.
+
+- Black Hole Timer color transitions are smoother while elapsed time remains timestamp-derived and independent of animation frames.
+- Dashboard session-start insight now counts session starts instead of incorrectly ranking periods only by accumulated duration. Its wording explicitly describes session start patterns, not continuous time-of-day productivity.
+- Added automated tests for session-start grouping, invalid timestamps, invalid durations, and empty history.
+- Dashboard and timer animations respect reduced-motion preferences and use restrained transitions for mobile performance.
+
+Physical-device animation smoothness and battery usage still require installation testing on the target Android device.
+
+### Previous release · 5.1.0
 
 - Timer rendering now updates once per second instead of four times per second, reducing unnecessary WebView work while keeping elapsed time derived from timestamps.
 - Focus timer render-loop lifecycle is cleaned up when leaving or finishing the timer.
@@ -79,7 +139,7 @@ The Android app is packaged with **Capacitor 7**. The repository includes native
 1. Open the [Actions tab](https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions).
 2. Select **Build Android APK**.
 3. Choose **Run workflow** (or push a commit to `main`).
-4. Open the completed workflow run and download the `focus-flow-5.0-debug-apk` artifact.
+4. Open the completed workflow run and download the `focus-flow-5.6.1-debug-apk` artifact.
 5. Install the APK on an Android device and test the features you use.
 
 > A successful web build or workflow badge does not by itself confirm every feature works on every Android device. Always install and test the APK on a real device. Background execution and photo permissions can vary by Android version and device manufacturer.
@@ -197,7 +257,7 @@ No license has been added yet. Unless a license is added to this repository, sta
 ---
 
 <div align="center">
-  <strong>FOCUS FLOW 5.1</strong><br>
+  <strong>FOCUS FLOW 5.6.1</strong><br>
   <sub>Build focus. Track progress. Find your flow.</sub><br><br>
   <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0">GitHub Repository</a> ·
   <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/issues">Report an issue</a> ·

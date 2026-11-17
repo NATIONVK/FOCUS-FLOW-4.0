@@ -21,3 +21,22 @@ body.light .pdf-library-row{background:#fff}
 .pdf-studio button:focus-visible,.pdf-studio input:focus-visible,.pdf-studio select:focus-visible{outline:3px solid #9d8bff;outline-offset:2px}
 @media(max-width:760px){.pdf-library-backup-tools{display:grid;grid-template-columns:1fr 1fr}.pdf-library-backup-tools button{width:100%;font-size:11px}.pdf-reader-shell{grid-template-columns:82px minmax(0,1fr)}}
 @media(max-width:420px){.pdf-library-backup-tools{grid-template-columns:1fr}.pdf-reader-shell{grid-template-columns:1fr}.pdf-thumb-rail{border-right:0;border-bottom:1px solid var(--line)}.pdf-thumbnails{display:flex;max-height:120px;overflow-x:auto}.pdf-thumbnails button{min-width:58px}}
+
+.pdf-library-selection{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:9px 0;color:var(--muted);font-size:11px}
+.pdf-library-selection label{display:flex;align-items:center;gap:7px;min-height:40px}
+.pdf-library-selection input{width:18px;height:18px;accent-color:#8877ec}
+.pdf-library-selection small{flex:1}
+.pdf-library-selection button:disabled{opacity:.45;cursor:not-allowed}
+.pdf-library-row{grid-template-columns:24px minmax(0,1fr) auto}
+.pdf-library-check{width:18px;height:18px;align-self:center;accent-color:#8877ec}
+@media(max-width:560px){.pdf-library-row{grid-template-columns:24px minmax(0,1fr)}.pdf-library-row .pdf-library-actions{grid-column:2;justify-content:flex-start;flex-wrap:wrap}.pdf-library-row .pdf-library-actions button{min-height:36px}}
+
+/* Continuous reader: keep only a small virtual page window mounted. */
+.pdf-page-stack{display:flex;flex-direction:column;align-items:center;gap:18px;max-width:none;box-shadow:none}
+.pdf-virtual-page{position:relative;flex:0 0 auto;max-width:100%;background:#fff;box-shadow:0 8px 28px #0008;contain:layout paint}
+.pdf-virtual-page canvas{display:block;max-width:100%;height:auto;background:#fff}
+.pdf-virtual-page .pdf-page-ink{position:absolute;inset:0;touch-action:none;pointer-events:none}
+.pdf-virtual-page.is-current .pdf-page-ink{pointer-events:auto}
+#pdfPageRange{width:84px;min-width:72px;min-height:34px;padding:5px 7px;border:1px solid var(--line);border-radius:7px;background:#0d1422;color:var(--text);font-size:10px}
+#pdfGoRange{min-width:38px}
+body.light #pdfPageRange{background:#fff;color:#252b40}

@@ -1,6 +1,7 @@
 import './styles.css';
 import { Store } from './store.js';
 import { FocusTimer } from './timer.js';
+import { getBlackHoleEvolution } from './blackhole-evolution.js';
 import { syncNativeFocusTimer } from './native-focus-timer.js';
 import { Analytics } from './analytics.js';
 import { renderPDFStudioPage, bindPDFStudioPage } from './pdf-studio.js';
@@ -10,16 +11,22 @@ const $ = (s, root=document) => root.querySelector(s);
 const esc = (v='') => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const store = new Store();
 let page = 'overview';
-let timer = new FocusTimer(store, () => { if ($('#clock')) paintTimer(); });
+let timer = new FocusTimer(store, () => { if ($('#clock')) { paintTimer(); if(timerScreenActive){if(timer.paused)stopTimerRenderLoop();else startTimerRenderLoop();} } });
 let selectedSubject = store.data.subjects[0]?.id || '';
 let taskFilter = 'all';
 let taskSearch = '';
 let plannerDay = new Date().getDay();
 let dashboardCustomize = false;
 let dashboardChartType = store.data.settings.dashboardChartType || 'bar';
+let dashboardRange = '30';
 let timerScreenActive=false;
 let timerRenderInterval=null;
 function stopTimerRenderLoop(){if(timerRenderInterval!==null){clearInterval(timerRenderInterval);timerRenderInterval=null;}}
+function startTimerRenderLoop(){
+  stopTimerRenderLoop();
+  if(!timerScreenActive||timer.paused||document.visibilityState==='hidden'||!$('#clock'))return;
+  timerRenderInterval=setInterval(()=>{if(!timerScreenActive||document.visibilityState==='hidden'||!$('#clock')){stopTimerRenderLoop();return;}paintTimer();},1000);
+}
 
 function paintTimer() {
   const clock=$('#clock'); if(!clock)return;
@@ -31,9 +38,24 @@ function paintTimer() {
   $('#timerToggle')?.classList.toggle('paused',timer.paused);
   const scene=$('#blackholeScene');
   scene?.classList.toggle('is-paused',timer.paused);
-  scene?.style.setProperty('--bh-energy',String(Math.min(1,0.25+elapsed/7200)));
-  const level=Math.min(5,Math.floor(elapsed/1800)); // six visual energy levels, one step per 30 focused minutes
-  scene?.setAttribute('data-focus-level',String(level+1));
+  const evolution=getBlackHoleEvolution(elapsed);
+  scene?.style.setProperty('--bh-energy',String(evolution.energy));
+  scene?.style.setProperty('--bh-intensity',String(evolution.intensity));
+  // Evolve only on completed 3m30s blocks of active focus time. Paused time is excluded by timer.elapsed().
+  if(scene && scene.dataset.evolutionStage!==String(evolution.stage)){
+    const speedFactor=evolution.speedFactor;
+    scene.dataset.evolutionStage=String(evolution.stage);
+    scene.dataset.nextEvolutionIn=String(evolution.nextEvolutionIn);
+    scene.style.setProperty('--bh-area-scale',String(evolution.growth));
+    scene.style.setProperty('--bh-spin-outer',String(12*speedFactor)+'s');
+    scene.style.setProperty('--bh-spin-inner',String(6*speedFactor)+'s');
+    scene.style.setProperty('--bh-wave-speed',String(8*speedFactor)+'s');
+    scene.style.setProperty('--bh-arc-speed',String(9*speedFactor)+'s');
+    scene.style.setProperty('--bh-particle-speed',String(8*speedFactor)+'s');
+    scene.style.setProperty('--bh-beam-speed',String(18*speedFactor)+'s');
+  }
+  scene?.setAttribute('data-focus-level',String(Math.min(6,evolution.level)));
+  scene?.setAttribute('data-evolution-stage',String(evolution.stage));
   scene?.setAttribute('data-second-step',String(Math.floor((elapsed%60)/5)));
 }
 
@@ -113,7 +135,7 @@ function render() {
   $('#app').innerHTML=`
   <div class="shell">
     <aside class="sidebar"><div class="brand"><img class="brand-logo" src="./icon.svg" alt="FOCUS FLOW logo"><div>FOCUS <b>FLOW</b><small>YOUR SPACE TO GROW</small></div></div>
-      <nav>${nav()}</nav><div class="side-foot"><i class="online-dot"></i> OFFLINE FIRST<br><small>NATIONVK · FOCUS FLOW 5.1</small></div></aside><nav class="mobile-nav">${mobileNav()}</nav>
+      <nav>${nav()}</nav><div class="side-foot"><i class="online-dot"></i> OFFLINE FIRST<br><small>NATIONVK · FOCUS FLOW 5.6.0</small></div></aside><nav class="mobile-nav">${mobileNav()}</nav>
     <main class="main">
       <header class="topbar"><div><span class="eyebrow">YOUR PERSONAL STUDY OS</span><h1>${page==='overview'?'Overview':page==='dashboard'?'Dashboard':page==='pdf-maker'?'PDF Studio':page[0].toUpperCase()+page.slice(1)}</h1></div><div class="status ${store.storageAvailable?'':'storage-offline'}"><i></i> ${store.storageAvailable?'Local data secured':'Storage unavailable'}</div></header>
       ${page==='overview'?overview(t,subjects):page==='dashboard'?dashboardPage(t,subjects):page==='subjects'?subjectPage(subjects):page==='tasks'?taskPage():page==='planner'?plannerPage():page==='notes'?notesPage():page==='history'?historyPage():page==='statistics'?statisticsPage():page==='pdf-maker'?renderPDFStudioPage():settingsPage()}
@@ -122,6 +144,22 @@ function render() {
   if(page==='overview') applyDashboardLayout();
   bind();
   updateStorageStatus();
+  if(page==='overview') requestAnimationFrame(animateDashboardMotion);
+}
+function animateDashboardMotion(){
+  const root=$('.main');if(!root||page!=='overview')return;
+  const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  root.classList.add('dashboard-motion-ready');
+  if(reduceMotion)return;
+  root.querySelectorAll('.dash-chart-track i').forEach((bar,index)=>{
+    bar.style.animationDelay=(index*55)+'ms';
+  });
+  root.querySelectorAll('.dash-month-track i,.progress-track i').forEach((bar)=>{
+    bar.classList.add('dashboard-progress-animate');
+  });
+  root.querySelectorAll('.dash-hero,.dash-kpis,.dash-main-grid,.dash-month-panel,.dash-insights-panel,.dash-lower-grid,.dash-recent-panel').forEach((section,index)=>{
+    section.style.animationDelay=(Math.min(index,6)*65)+'ms';
+  });
 }
 const DASH_WIDGETS=[['hero','Welcome'],['kpis','Quick stats'],['week','Weekly focus & plan'],['month','Monthly progress'],['insights','Smart insights'],['lower','Subjects & tasks'],['recent','Recent sessions']];
 function applyDashboardLayout(){
@@ -177,10 +215,9 @@ function overview(t,subjects) {
   const monthConsistency=Analytics.consistency(sessions,goal/60,today);
   const monthStartOffset=new Date(today.getFullYear(),today.getMonth(),1).getDay();
   const activeDays=week.filter(d=>d.seconds>0).length;
-  const timeBuckets=[{label:'Morning',range:'05:00–11:59',test:h=>h>=5&&h<12,seconds:0},{label:'Afternoon',range:'12:00–16:59',test:h=>h>=12&&h<17,seconds:0},{label:'Evening',range:'17:00–21:59',test:h=>h>=17&&h<22,seconds:0},{label:'Night',range:'22:00–04:59',test:h=>h>=22||h<5,seconds:0}];
-  sessions.forEach(s=>{const hour=new Date(s.startedAt).getHours();const bucket=timeBuckets.find(x=>x.test(hour));if(bucket)bucket.seconds+=Math.max(0,Number(s.duration)||0);});
-  const bestPeriod=[...timeBuckets].sort((a,b)=>b.seconds-a.seconds)[0];
-  const hasTimePattern=bestPeriod?.seconds>0;
+  const startPattern=Analytics.sessionStartSummary(sessions);
+  const bestPeriod=startPattern.best;
+  const hasTimePattern=bestPeriod.count>0;
   const subjectShare=topSubject&&t.all?Math.round(topSubject.seconds/t.all*100):0;
   const bestDay=week.reduce((a,b)=>b.seconds>a.seconds?b:a,week[0]||{label:'—',seconds:0});
   const recent=[...sessions].sort((a,b)=>new Date(b.startedAt)-new Date(a.startedAt)).slice(0,3);
@@ -226,7 +263,7 @@ function overview(t,subjects) {
   <section class="panel dash-insights-panel" data-dashboard-widget="insights">
     <div class="panel-head"><div><span class="eyebrow">YOUR STUDY PATTERNS</span><h3>Smart productivity insights</h3></div><span class="dash-period">BASED ON YOUR SESSIONS</span></div>
     <div class="dash-insights-grid">
-      <div class="dash-insight-card"><span class="dash-insight-icon">◷</span><small>YOUR PEAK PERIOD</small><strong>${hasTimePattern?bestPeriod.label:'Not enough data'}</strong><span>${hasTimePattern?bestPeriod.range+' · '+(bestPeriod.seconds/3600).toFixed(1)+'h recorded':'Complete sessions to discover your strongest time'}</span></div>
+      <div class="dash-insight-card"><span class="dash-insight-icon">◷</span><small>MOST COMMON SESSION START</small><strong>${hasTimePattern?bestPeriod.label:'Not enough data'}</strong><span>${hasTimePattern?bestPeriod.count+' sessions started '+bestPeriod.range+' · '+(bestPeriod.seconds/3600).toFixed(1)+'h recorded in those sessions':'Complete sessions to discover your usual start period'}</span></div>
       <div class="dash-insight-card"><span class="dash-insight-icon">✦</span><small>TOP SUBJECT</small><strong>${topSubject&&topSubject.seconds?esc(topSubject.subject.name):'No sessions yet'}</strong><span>${topSubject&&topSubject.seconds?subjectShare+'% of all recorded focus time':'Start a session to build your subject profile'}</span></div>
       <div class="dash-insight-card"><span class="dash-insight-icon">▥</span><small>AVERAGE ON ACTIVE DAYS</small><strong>${activeDays?(weekTotal/activeDays/3600).toFixed(1)+'h':'—'}</strong><span>${activeDays?activeDays+' active days in the last 7':'No focus time recorded this week'}</span></div>
     </div>
@@ -267,8 +304,12 @@ function dashboardInsights(sessions,subjectData){
 
 function dashboardPage(t,subjects){
   const sessions=store.data.sessions,week=Analytics.weekly(sessions),total=week.reduce((n,d)=>n+d.seconds,0);
+  const rangeDays=dashboardRange==='all'?0:Number(dashboardRange)||30;
+  const rangeSessions=Analytics.filterRange(sessions,rangeDays);
+  const rangeTotal=rangeSessions.reduce((sum,session)=>sum+Math.max(0,Number(session.duration)||0),0);
+  const rangeLabel=dashboardRange==='all'?'All time':`Last ${rangeDays} days`;
   const taskTotal=store.data.tasks.length,taskDone=store.data.tasks.filter(x=>x.done).length,taskPct=taskTotal?Math.round(taskDone/taskTotal*100):0;
-  const subjectData=Analytics.subjectRanking(sessions,subjects);
+  const subjectData=Analytics.subjectRanking(rangeSessions,subjects);
   const max=Math.max(1,...week.map(x=>x.seconds));
   const points=week.map((d,i)=>({x:40+i*85,y:170-(d.seconds/max)*125,label:d.label,value:d.seconds}));
   const line=points.map((p,i)=>(i?'L':'M')+` ${p.x} ${p.y}`).join(' ');
@@ -279,10 +320,10 @@ function dashboardPage(t,subjects){
     : dashboardChartType==='line'||dashboardChartType==='area'
       ? `<svg class="dashboard-svg" viewBox="0 0 640 210" role="img" aria-label="Daily focus time line chart">${[45,85,125,165].map(y=>`<line x1="30" y1="${y}" x2="620" y2="${y}" class="chart-gridline"/>`).join('')}${dashboardChartType==='area'?`<path d="${line} L 550 180 L 40 180 Z" class="chart-area"/>`:''}<path d="${line}" class="chart-line"/>${points.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="5" class="chart-point"><title>${p.label}: ${(p.value/3600).toFixed(2)} hours</title></circle><text x="${p.x}" y="202" text-anchor="middle" class="chart-label">${p.label}</text>`).join('')}</svg>`
       : `<div class="dashboard-bars">${week.map(d=>`<div class="dashboard-bar-col"><b>${d.seconds?(d.seconds/3600).toFixed(1)+'h':''}</b><div><i style="height:${Math.max(3,d.seconds/max*100)}%"></i></div><small>${d.label}</small></div>`).join('')}</div>`;
-  return `<section class="dash-hero dashboard-hero"><div class="dash-hero-copy"><span class="eyebrow">FOCUS FLOW ANALYTICS</span><h2>Your <em>Dashboard.</em></h2><p>A dedicated view of your focus patterns, subject distribution and task completion.</p><div class="dash-hero-meta"><span>Updated from your on-device records</span></div></div><div class="dash-goal-ring" style="--goal-progress:${taskPct}%" role="progressbar" aria-valuenow="${taskPct}" aria-valuemin="0" aria-valuemax="100"><div><strong>${taskPct}%</strong><small>TASKS DONE</small><span>${taskDone}/${taskTotal} tasks</span></div></div></section>
-  <section class="dash-kpis"><article class="dash-kpi"><span class="kpi-icon violet">◷</span><div><small>FOCUS TODAY</small><strong>${(t.today/3600).toFixed(1)} <i>hrs</i></strong><span>${fmt(t.today)}</span></div></article><article class="dash-kpi"><span class="kpi-icon mint">◎</span><div><small>LAST 7 DAYS</small><strong>${(total/3600).toFixed(1)} <i>hrs</i></strong><span>Weekly focus time</span></div></article><article class="dash-kpi"><span class="kpi-icon amber">✓</span><div><small>TASK COMPLETION</small><strong>${taskPct}%</strong><span>${taskDone} completed · ${taskTotal-taskDone} left</span></div></article><article class="dash-kpi"><span class="kpi-icon blue">✦</span><div><small>SESSIONS</small><strong>${t.count}</strong><span>${(t.all/3600).toFixed(1)} total hours</span></div></article></section>
-  <section class="panel dashboard-chart-panel"><div class="panel-head"><div><span class="eyebrow">VISUAL ANALYTICS</span><h3>Charts & performance</h3></div><select id="dashboardChartType" class="chart-select"><option value="bar" ${dashboardChartType==='bar'?'selected':''}>Bar chart</option><option value="line" ${dashboardChartType==='line'?'selected':''}>Line chart</option><option value="area" ${dashboardChartType==='area'?'selected':''}>Area chart</option><option value="pie" ${dashboardChartType==='pie'?'selected':''}>Pie chart · Subjects</option></select></div><p class="muted">Weekly focus trend and subject-wise time distribution.</p>${chart}</section>
-  <section class="panel dashboard-task-panel"><div class="panel-head"><div><span class="eyebrow">GOALS IN MOTION</span><h3>Task completion</h3></div><button class="text-btn" data-page="tasks">Manage tasks ↗</button></div><div class="task-progress-head"><span>${taskDone} completed out of ${taskTotal}</span><b>${taskPct}%</b></div><div class="progress-track task-progress"><i style="width:${taskPct}%"></i></div><div class="dashboard-task-breakdown"><span>Completed <b>${taskDone}</b></span><span>Remaining <b>${taskTotal-taskDone}</b></span></div></section>`+dashboardInsights(sessions,subjectData);
+  return `<section class="dash-hero dashboard-hero"><div class="dash-hero-copy"><span class="eyebrow">FOCUS FLOW ANALYTICS</span><h2>Your <em>Dashboard.</em></h2><p>A dedicated view of your focus patterns, subject distribution and task completion.</p><div class="dash-hero-meta"><span>Updated from your on-device records</span><span>${rangeLabel} · ${rangeSessions.length} sessions</span></div><label class="dashboard-range-control" for="dashboardRange">Analytics period<select id="dashboardRange"><option value="7" ${dashboardRange==='7'?'selected':''}>Last 7 days</option><option value="30" ${dashboardRange==='30'?'selected':''}>Last 30 days</option><option value="90" ${dashboardRange==='90'?'selected':''}>Last 90 days</option><option value="all" ${dashboardRange==='all'?'selected':''}>All time</option></select></label></div><div class="dash-goal-ring" style="--goal-progress:${taskPct}%" role="progressbar" aria-valuenow="${taskPct}" aria-valuemin="0" aria-valuemax="100"><div><strong>${taskPct}%</strong><small>TASKS DONE</small><span>${taskDone}/${taskTotal} tasks</span></div></div></section>
+  <section class="dash-kpis"><article class="dash-kpi"><span class="kpi-icon violet">◷</span><div><small>FOCUS · ${rangeLabel.toUpperCase()}</small><strong>${(rangeTotal/3600).toFixed(1)} <i>hrs</i></strong><span>${fmt(rangeTotal)} total focus time</span></div></article><article class="dash-kpi"><span class="kpi-icon mint">◎</span><div><small>LAST 7 DAYS</small><strong>${(total/3600).toFixed(1)} <i>hrs</i></strong><span>Weekly focus time</span></div></article><article class="dash-kpi"><span class="kpi-icon amber">✓</span><div><small>TASK COMPLETION</small><strong>${taskPct}%</strong><span>${taskDone} completed · ${taskTotal-taskDone} left</span></div></article><article class="dash-kpi"><span class="kpi-icon blue">✦</span><div><small>SESSIONS · ${rangeLabel.toUpperCase()}</small><strong>${rangeSessions.length}</strong><span>${(rangeTotal/3600).toFixed(1)} total hours</span></div></article></section>
+  <section class="panel dashboard-chart-panel"><div class="panel-head"><div><span class="eyebrow">VISUAL ANALYTICS</span><h3>Charts & performance</h3></div><select id="dashboardChartType" class="chart-select"><option value="bar" ${dashboardChartType==='bar'?'selected':''}>Bar chart</option><option value="line" ${dashboardChartType==='line'?'selected':''}>Line chart</option><option value="area" ${dashboardChartType==='area'?'selected':''}>Area chart</option><option value="pie" ${dashboardChartType==='pie'?'selected':''}>Pie chart · Subjects</option></select></div><p class="muted">Bars and line show the last 7 days; subject distribution follows ${rangeLabel.toLowerCase()}.</p>${chart}</section>
+  <section class="panel dashboard-task-panel"><div class="panel-head"><div><span class="eyebrow">GOALS IN MOTION</span><h3>Task completion</h3></div><button class="text-btn" data-page="tasks">Manage tasks ↗</button></div><div class="task-progress-head"><span>${taskDone} completed out of ${taskTotal}</span><b>${taskPct}%</b></div><div class="progress-track task-progress"><i style="width:${taskPct}%"></i></div><div class="dashboard-task-breakdown"><span>Completed <b>${taskDone}</b></span><span>Remaining <b>${taskTotal-taskDone}</b></span></div></section>`+dashboardInsights(rangeSessions,subjectData);
 }
 function subjectPage(subjects) {return `<section class="panel"><div class="panel-head"><div><span class="eyebrow">ORGANIZE YOUR LEARNING</span><h3>Subjects</h3></div><button class="primary" id="addSubject">+ New subject</button></div><div class="subject-cards">${subjects.map(s=>`<article class="subject-card"><span class="dot" style="background:${esc(s.color)}"></span><h3>${esc(s.name)}</h3><p>${(Analytics.subjectSeconds(store.data.sessions,s.id)/3600).toFixed(2)} hours focused</p><button class="text-btn" data-edit-subject="${s.id}">Edit</button><button class="text-btn" data-delete-subject="${s.id}">Delete</button></article>`).join('')||'<p class="muted">No subjects yet.</p>'}</div></section>`;}
 function taskPage(){
@@ -346,6 +387,7 @@ function bind(){
   document.querySelectorAll('[data-delete-plan]').forEach(b=>b.addEventListener('click',()=>{store.deletePlan(b.dataset.deletePlan);render();toast('Study block removed','success')}));
   $('#addTask')?.addEventListener('click',async()=>{const value=await askTaskForm();if(value){try{store.addTask(value.title,value.priority,value.dueDate);render();toast('Task added','success')}catch(e){toast(e.message,'error')}}});
   $('#dashboardChartType')?.addEventListener('change',e=>{try{store.setDashboardChartType(e.target.value);dashboardChartType=store.data.settings.dashboardChartType;render();toast('Chart preference saved','success')}catch(error){e.target.value=dashboardChartType;toast(error.message,'error')}});
+  $('#dashboardRange')?.addEventListener('change',e=>{dashboardRange=['7','30','90','all'].includes(e.target.value)?e.target.value:'30';render();});
   document.querySelectorAll('[data-add-subtask]').forEach(b=>b.addEventListener('click',async()=>{const title=await askText('Add sub-task','What is the next small step?');if(title){try{store.addSubtask(b.dataset.addSubtask,title);render();toast('Sub-task added','success')}catch(e){toast(e.message,'error')}}}));
   document.querySelectorAll('[data-subtask]').forEach(b=>b.addEventListener('change',()=>{store.toggleSubtask(b.dataset.subtaskTask,b.dataset.subtask,b.checked);render()}));
   document.querySelectorAll('[data-delete-subtask]').forEach(b=>b.addEventListener('click',()=>{store.deleteSubtask(b.dataset.deleteSubtaskTask,b.dataset.deleteSubtask);render();toast('Sub-task removed','success')}));
@@ -399,20 +441,28 @@ function showTimer(){
   stopTimerRenderLoop();
   syncNativeFocusTimer(timer,store.subjectName(timer.subjectId));
   if(!history.state?.focusFlowTimer)history.pushState({focusFlowTimer:true},'','#focus');
-  $('#app').innerHTML=`<div class="focus-screen"><button type="button" class="exit-focus" id="exitFocus" aria-label="Exit focus screen" title="Exit focus screen">×</button><div class="space-particles" aria-hidden="true"></div><div class="focus-nebula" aria-hidden="true"></div><div class="focus-orbit orbit-a" aria-hidden="true"></div><div class="focus-orbit orbit-b" aria-hidden="true"></div><div class="blackhole-scene ${timer.paused?'is-paused':''}" id="blackholeScene"><div class="bh-starfield" aria-hidden="true"></div><div class="bh-lensing" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-a" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-b" aria-hidden="true"></div><div class="bh-light-beams" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-energy-waves" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-disk bh-disk-outer" aria-hidden="true"></div><div class="bh-disk bh-disk-inner" aria-hidden="true"></div><div class="bh-corona" aria-hidden="true"></div><button class="focus-core" id="timerToggle" aria-label="Pause or resume focus timer"><strong id="clock" aria-live="off">00:00:00</strong></button><span class="bh-particle bh-particle-a" aria-hidden="true"></span><span class="bh-particle bh-particle-b" aria-hidden="true"></span><span class="bh-particle bh-particle-c" aria-hidden="true"></span></div><div class="focus-session-controls"><button type="button" class="finish-session-btn" id="finishFocus" aria-label="Finish focus session">Finish Session</button></div></div>`;
+  $('#app').innerHTML=`<div class="focus-screen"><button type="button" class="exit-focus" id="exitFocus" aria-label="Exit focus screen" title="Exit focus screen">×</button><div class="space-particles" aria-hidden="true"></div><div class="focus-nebula" aria-hidden="true"></div><div class="focus-orbit orbit-a" aria-hidden="true"></div><div class="focus-orbit orbit-b" aria-hidden="true"></div><div class="blackhole-scene ${timer.paused?'is-paused':''}" id="blackholeScene"><div class="bh-starfield" aria-hidden="true"></div><div class="bh-lensing" aria-hidden="true"></div><div class="bh-photon-ring" aria-hidden="true"></div><div class="bh-stage-ripple" aria-hidden="true"></div><div class="bh-gravity-halo" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-a" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-b" aria-hidden="true"></div><div class="bh-light-beams" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-energy-waves" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-disk bh-disk-outer" aria-hidden="true"></div><div class="bh-disk bh-disk-inner" aria-hidden="true"></div><div class="bh-corona" aria-hidden="true"></div><button class="focus-core" id="timerToggle" aria-label="Pause or resume focus timer"><strong id="clock" aria-live="off">00:00:00</strong></button><span class="bh-particle bh-particle-a" aria-hidden="true"></span><span class="bh-particle bh-particle-b" aria-hidden="true"></span><span class="bh-particle bh-particle-c" aria-hidden="true"></span></div><div class="focus-session-controls"><button type="button" class="finish-session-btn" id="finishFocus" aria-label="Finish focus session">Finish Session</button></div></div>`;
   paintTimer();
-  timerRenderInterval=setInterval(()=>{if(!$('#clock')){stopTimerRenderLoop();return}paintTimer();},1000);
+  startTimerRenderLoop();
   $('#timerToggle').addEventListener('click',()=>{try{timer.toggle();}catch(error){toast(error.message,'error');}});
   $('#exitFocus').addEventListener('click',exitTimerView);
   $('#finishFocus').addEventListener('click',finishFocusSession);
 }
-async function exportBackup(){try{const {blob,filename,count,checksum}=await buildVerifiedBackupBlob(store.data);const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);try{localStorage.setItem('focus-flow-last-backup-prepared',JSON.stringify({at:new Date().toISOString(),checksum,count}))}catch{}toast('Backup verified and download prepared. Check Downloads.','success')}catch(error){toast('Backup তৈরি করা যায়নি: '+error.message,'error')}}
+async function exportBackup(){try{const {blob,filename,count,checksum}=await buildVerifiedBackupBlob(store.data);let destination='download';const {isAndroidGalleryAvailable,saveDeviceFile}=await import('./native-gallery.js');if(isAndroidGalleryAvailable()){const saved=await saveDeviceFile(blob,filename,'application/json');if(!saved)throw new Error('Android Save As did not confirm the backup file.');destination='phone folder'}else{const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000)}try{localStorage.setItem('focus-flow-last-backup-exported',JSON.stringify({at:new Date().toISOString(),checksum,count,destination}))}catch{}toast(destination==='phone folder'?'Backup verified and saved to your selected phone folder.':'Backup verified and download prepared. Check Downloads.','success')}catch(error){toast(error?.code==='CANCELLED'?'Backup export cancelled.':'Backup তৈরি করা যায়নি: '+error.message,'error')}}
 async function importBackup(e){const file=e.target.files?.[0];if(!file)return;try{const preview=await inspectBackupFile(file);const c=preview.count;const details='Backup preview\n'+(preview.legacy?'Legacy version-4 JSON':'Integrity verified')+'\n'+(preview.createdAt?'Created: '+preview.createdAt:'')+'\n\nSubjects: '+c.subjects+'\nSessions: '+c.sessions+'\nTasks: '+c.tasks+'\nPlans: '+c.plans+'\nNotes: '+c.notes+'\n\nবর্তমান study data replace হবে। আগে current data-এর backup রেখেছ?';if(!await askConfirm(details))return;store.import(preview.data);render();toast('Backup restored and validated successfully','success')}catch(error){toast('Restore হয়নি: '+(error.message||'Invalid backup file'),'error')}finally{e.target.value=''}}
 async function refreshStorageHealth(){const root=$('#storageHealthDetails');if(!root)return;root.textContent='Checking…';try{const h=await getStorageHealth();const used=h.estimate?.usage,total=h.estimate?.quota;const fmt=n=>n<1024*1024?(n/1024).toFixed(0)+' KB':(n/1024/1024).toFixed(1)+' MB';root.innerHTML='<div><span>Local app data</span><b class="'+(h.localStorage?'health-good':'health-bad')+'">'+(h.localStorage?'Available':'Unavailable')+'</b></div><div><span>PDF/IndexedDB storage</span><b class="'+(h.indexedDB?'health-good':'health-bad')+'">'+(h.indexedDB?'Available':'Unavailable')+'</b></div><div><span>Estimated browser storage</span><b>'+(Number.isFinite(used)&&Number.isFinite(total)?fmt(used)+' / '+fmt(total):'Not reported')+'</b></div><div><span>Persistent storage protection</span><b>'+(h.persisted===true?'Granted':h.persisted===false?'Not granted':'Unknown')+'</b></div>'}catch{root.textContent='Storage health could not be checked on this device.'}}
 window.addEventListener('popstate',async()=>{if(!timerScreenActive||!timer.active)return;const leave=await askConfirm('Focus Screen থেকে বের হবে? Timer ব্যাকগ্রাউন্ডে চলতে থাকবে; Finish হবে না।');if(leave){timerScreenActive=false;stopTimerRenderLoop();page='overview';render();toast('Timer continues in background','success');}else{history.pushState({focusFlowTimer:true},'','#focus');}});
 window.addEventListener('pagehide',()=>{if(timer.active){try{timer.persist();}catch(error){console.error('Could not persist timer during page hide',error);}}});
-document.addEventListener('visibilitychange',()=>{if(timer.active){if(document.visibilityState==='hidden'){try{timer.persist();}catch(error){toast('Timer backup failed: '+error.message,'error');}}else{syncNativeFocusTimer(timer,store.subjectName(timer.subjectId));}}});
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden'){
+    stopTimerRenderLoop();
+    if(timer.active){try{timer.persist();}catch(error){toast('Timer backup failed: '+error.message,'error');}}
+    return;
+  }
+  if(timer.active)syncNativeFocusTimer(timer,store.subjectName(timer.subjectId));
+  if(timerScreenActive){paintTimer();startTimerRenderLoop();}
+});
 store.data.settings.light&&(document.body.classList.add('light'));
 if(timer.active){selectedSubject=timer.subjectId||selectedSubject;showTimer();}else{render();}
-if(store.recoveryAvailable) toast('A damaged local-data snapshot was preserved for recovery. Check device storage before continuing.','error');
+if(store.recoveredFromLastGood) toast('Study data was restored from a last-known-good snapshot. Export a fresh backup to protect the recovered copy.','success');else if(store.recoveryAvailable) toast('A damaged local-data record was preserved, but no valid recovery snapshot was available. Restore a verified backup before continuing.','error');
 if('serviceWorker' in navigator && import.meta.env.PROD) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
