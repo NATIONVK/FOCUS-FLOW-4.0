@@ -217,3 +217,11 @@ Before calling a release ready:
 - CI must pass all regression tests, Python tooling checks, project health audit, production web build and Android debug APK build for the exact branch head.
 - Browser device-memory hints are approximate and may be unavailable; the conservative fallback is used in that case.
 - Physical Vivo Y29 / Android 15 battery, RAM, PDF readability and long-session checks remain manual gates.
+
+
+## Delivered — Focus Flow 5.5.7 Android timer recovery hardening
+- Pass the stable active-session ID through the Capacitor bridge to the native foreground timer service.
+- Persist and restore that identity in Android service preferences alongside subject, elapsed-time base, epoch, and paused state.
+- Keep the JS timer snapshot as the source of truth after WebView/app process recreation; startup restoration re-synchronizes the native notification using the same session identity.
+- Add regression coverage that a restored JS timer retains its session ID, subject, elapsed time, and can finish without leaving an active snapshot.
+- CI verifies source and build behavior; Android process-kill/restart and notification behavior still require physical-device testing.
