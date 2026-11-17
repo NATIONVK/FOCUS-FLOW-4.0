@@ -10,7 +10,7 @@ const $ = (s, root=document) => root.querySelector(s);
 const esc = (v='') => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const store = new Store();
 let page = 'overview';
-let timer = new FocusTimer(store, () => { if ($('#clock')) paintTimer(); });
+let timer = new FocusTimer(store, () => { if ($('#clock')) { paintTimer(); if(timerScreenActive){if(timer.paused)stopTimerRenderLoop();else startTimerRenderLoop();} } });
 let selectedSubject = store.data.subjects[0]?.id || '';
 let taskFilter = 'all';
 let taskSearch = '';
@@ -20,6 +20,11 @@ let dashboardChartType = store.data.settings.dashboardChartType || 'bar';
 let timerScreenActive=false;
 let timerRenderInterval=null;
 function stopTimerRenderLoop(){if(timerRenderInterval!==null){clearInterval(timerRenderInterval);timerRenderInterval=null;}}
+function startTimerRenderLoop(){
+  stopTimerRenderLoop();
+  if(!timerScreenActive||timer.paused||document.visibilityState==='hidden'||!$('#clock'))return;
+  timerRenderInterval=setInterval(()=>{if(!timerScreenActive||document.visibilityState==='hidden'||!$('#clock')){stopTimerRenderLoop();return;}paintTimer();},1000);
+}
 
 function paintTimer() {
   const clock=$('#clock'); if(!clock)return;
@@ -430,7 +435,7 @@ function showTimer(){
   if(!history.state?.focusFlowTimer)history.pushState({focusFlowTimer:true},'','#focus');
   $('#app').innerHTML=`<div class="focus-screen"><button type="button" class="exit-focus" id="exitFocus" aria-label="Exit focus screen" title="Exit focus screen">×</button><div class="space-particles" aria-hidden="true"></div><div class="focus-nebula" aria-hidden="true"></div><div class="focus-orbit orbit-a" aria-hidden="true"></div><div class="focus-orbit orbit-b" aria-hidden="true"></div><div class="blackhole-scene ${timer.paused?'is-paused':''}" id="blackholeScene"><div class="bh-starfield" aria-hidden="true"></div><div class="bh-lensing" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-a" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-b" aria-hidden="true"></div><div class="bh-light-beams" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-energy-waves" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-disk bh-disk-outer" aria-hidden="true"></div><div class="bh-disk bh-disk-inner" aria-hidden="true"></div><div class="bh-corona" aria-hidden="true"></div><button class="focus-core" id="timerToggle" aria-label="Pause or resume focus timer"><strong id="clock" aria-live="off">00:00:00</strong></button><span class="bh-particle bh-particle-a" aria-hidden="true"></span><span class="bh-particle bh-particle-b" aria-hidden="true"></span><span class="bh-particle bh-particle-c" aria-hidden="true"></span></div><div class="focus-session-controls"><button type="button" class="finish-session-btn" id="finishFocus" aria-label="Finish focus session">Finish Session</button></div></div>`;
   paintTimer();
-  timerRenderInterval=setInterval(()=>{if(!$('#clock')){stopTimerRenderLoop();return}paintTimer();},1000);
+  startTimerRenderLoop();
   $('#timerToggle').addEventListener('click',()=>{try{timer.toggle();}catch(error){toast(error.message,'error');}});
   $('#exitFocus').addEventListener('click',exitTimerView);
   $('#finishFocus').addEventListener('click',finishFocusSession);
@@ -440,7 +445,15 @@ async function importBackup(e){const file=e.target.files?.[0];if(!file)return;tr
 async function refreshStorageHealth(){const root=$('#storageHealthDetails');if(!root)return;root.textContent='Checking…';try{const h=await getStorageHealth();const used=h.estimate?.usage,total=h.estimate?.quota;const fmt=n=>n<1024*1024?(n/1024).toFixed(0)+' KB':(n/1024/1024).toFixed(1)+' MB';root.innerHTML='<div><span>Local app data</span><b class="'+(h.localStorage?'health-good':'health-bad')+'">'+(h.localStorage?'Available':'Unavailable')+'</b></div><div><span>PDF/IndexedDB storage</span><b class="'+(h.indexedDB?'health-good':'health-bad')+'">'+(h.indexedDB?'Available':'Unavailable')+'</b></div><div><span>Estimated browser storage</span><b>'+(Number.isFinite(used)&&Number.isFinite(total)?fmt(used)+' / '+fmt(total):'Not reported')+'</b></div><div><span>Persistent storage protection</span><b>'+(h.persisted===true?'Granted':h.persisted===false?'Not granted':'Unknown')+'</b></div>'}catch{root.textContent='Storage health could not be checked on this device.'}}
 window.addEventListener('popstate',async()=>{if(!timerScreenActive||!timer.active)return;const leave=await askConfirm('Focus Screen থেকে বের হবে? Timer ব্যাকগ্রাউন্ডে চলতে থাকবে; Finish হবে না।');if(leave){timerScreenActive=false;stopTimerRenderLoop();page='overview';render();toast('Timer continues in background','success');}else{history.pushState({focusFlowTimer:true},'','#focus');}});
 window.addEventListener('pagehide',()=>{if(timer.active){try{timer.persist();}catch(error){console.error('Could not persist timer during page hide',error);}}});
-document.addEventListener('visibilitychange',()=>{if(timer.active){if(document.visibilityState==='hidden'){try{timer.persist();}catch(error){toast('Timer backup failed: '+error.message,'error');}}else{syncNativeFocusTimer(timer,store.subjectName(timer.subjectId));}}});
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden'){
+    stopTimerRenderLoop();
+    if(timer.active){try{timer.persist();}catch(error){toast('Timer backup failed: '+error.message,'error');}}
+    return;
+  }
+  if(timer.active)syncNativeFocusTimer(timer,store.subjectName(timer.subjectId));
+  if(timerScreenActive){paintTimer();startTimerRenderLoop();}
+});
 store.data.settings.light&&(document.body.classList.add('light'));
 if(timer.active){selectedSubject=timer.subjectId||selectedSubject;showTimer();}else{render();}
 if(store.recoveredFromLastGood) toast('Study data was restored from a last-known-good snapshot. Export a fresh backup to protect the recovered copy.','success');else if(store.recoveryAvailable) toast('A damaged local-data record was preserved, but no valid recovery snapshot was available. Restore a verified backup before continuing.','error');
