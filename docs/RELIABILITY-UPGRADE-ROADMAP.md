@@ -202,3 +202,18 @@ Before calling a release ready:
 ## 5.5.2 verification boundary
 - Automated tests and Android Gradle build must pass for the exact branch head.
 - Continuous scroll feel, large-file memory behavior, drawing overlay alignment and reading position across app process death still require physical Android device testing.
+
+
+## Delivered — FOCUS FLOW 5.5.5 date and storage-health stability
+
+- Task due dates now validate actual Gregorian calendar dates instead of accepting regex-shaped impossible dates such as 2026-02-30.
+- Valid leap days remain supported; invalid imported legacy due dates are safely normalized to an empty date without rejecting the rest of the backup.
+- IndexedDB storage-health checks now settle when an open request is blocked, and close a database connection if it opens after the blocked result was already reported.
+- Storage-health capability checks use guarded `globalThis.navigator` access so restricted browser contexts do not throw.
+- Added regression tests for impossible task dates, valid leap days, safe legacy normalization, blocked IndexedDB health checks, and late connection cleanup.
+- Updated app/backup metadata to 5.5.5, offline shell cache to v19, and Android artifact naming.
+
+## 5.5.5 verification boundary
+
+- CI must pass JavaScript tests, Python tooling tests, project health audit, production web build, and Android Gradle debug APK compilation for the exact branch head.
+- Physical Vivo Y29 / Android 15 checks remain required for PDF rendering, process-death timer recovery, IndexedDB quota behavior, backup restore, battery and RAM profiling.
