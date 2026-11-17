@@ -1,5 +1,5 @@
 import { renderPDFPage, bindPDFPage } from './pdf-maker.js';
-import { clampPdfPage, parsePdfPageRange, getPdfVirtualWindow, restorePdfProgress, getPdfCanvasScale, shouldRefreshPdfWindow } from './pdf-reader-virtual.js';
+import { clampPdfPage, parsePdfPageRange, getPdfVirtualWindow, restorePdfProgress, getPdfCanvasScale, getPdfRenderProfile, shouldRefreshPdfWindow } from './pdf-reader-virtual.js';
 import { savePdfOutput, savePdfToLibrary, getPdfFromLibrary, listPdfLibrary, deletePdfFromLibrary, deletePdfsFromLibrary, exportPdfLibraryBackup, restorePdfLibraryBackup, verifyPdfLibrary, browserDownload } from './pdf-storage.js';
 import { pickDevicePdf, saveDevicePdf, isAndroidGalleryAvailable } from './native-gallery.js';
 import { renderPdfLibrary } from './pdf-library-ui.js';
@@ -96,7 +96,7 @@ async function renderPage(anchorPage=pageNo,anchorOffset=0){
    if(!pdfRenderLifecycle.isCurrent(sequence)||pdfDocument!==currentDoc)return;
    const page=await pdfDocument.getPage(number);
    if(!pdfRenderLifecycle.isCurrent(sequence)||pdfDocument!==currentDoc){page.cleanup?.();return;}
-   const viewport=page.getViewport({scale:targetZoom}),ratio=getPdfCanvasScale(viewport.width,viewport.height,window.devicePixelRatio||1);
+   const viewport=page.getViewport({scale:targetZoom}),renderProfile=getPdfRenderProfile(globalThis.navigator?.deviceMemory),ratio=getPdfCanvasScale(viewport.width,viewport.height,window.devicePixelRatio||1,renderProfile.maxPixels,renderProfile.maxRatio);
    const slot=document.createElement('section');slot.className='pdf-virtual-page'+(number===targetPage?' is-current':'');slot.dataset.page=String(number);
    const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.ceil(viewport.width*ratio));canvas.height=Math.max(1,Math.ceil(viewport.height*ratio));canvas.style.width=viewport.width+'px';canvas.style.height=viewport.height+'px';if(number===targetPage)canvas.id='pdfCanvas';
    const ink=document.createElement('canvas');ink.className='pdf-page-ink';ink.width=canvas.width;ink.height=canvas.height;ink.style.width=canvas.style.width;ink.style.height=canvas.style.height;if(number===targetPage)ink.id='pdfInkCanvas';
