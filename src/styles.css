@@ -656,3 +656,18 @@ body.light .subtask-row{color:#4d5670}
   .blackhole-scene .bh-particle,
   .blackhole-scene .bh-light-beams i { animation: none !important; }
 }
+
+
+/* Focus Flow 5.6.0 — dashboard range controls and photon-ring polish */
+.dashboard-range-control{display:flex;align-items:center;gap:10px;width:max-content;max-width:100%;margin-top:18px;padding:9px 11px;border:1px solid #ffffff20;border-radius:12px;background:#080b1688;color:#c9c4e8;font-size:10px;letter-spacing:.4px}
+.dashboard-range-control select{min-height:36px;min-width:132px;padding:0 30px 0 10px;border:1px solid #ffffff20;border-radius:9px;background:#171c2d;color:#f4f2ff;font:600 11px Manrope,system-ui,sans-serif}
+.dashboard-range-control select:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+.bh-photon-ring{position:absolute;z-index:2;width:51%;height:51%;border:2px solid transparent;border-top-color:#fff0cf;border-left-color:#bda4ff;border-radius:50%;transform:translateZ(22px) rotateX(72deg) rotateZ(-22deg);filter:drop-shadow(0 0 7px #ffe0a8) drop-shadow(0 0 19px #9e83ff);opacity:.72;animation:photonPrecession 10s linear infinite;pointer-events:none}
+.bh-gravity-halo{position:absolute;z-index:0;width:74%;height:74%;border:1px solid #8e7cff25;border-radius:50%;transform:translateZ(-18px) rotateX(72deg);box-shadow:0 0 40px #826bff12,inset 0 0 32px #826bff12;animation:gravityBreath 7s ease-in-out infinite;pointer-events:none}
+.blackhole-scene[data-second-step="1"] .bh-photon-ring,.blackhole-scene[data-second-step="4"] .bh-photon-ring,.blackhole-scene[data-second-step="7"] .bh-photon-ring,.blackhole-scene[data-second-step="10"] .bh-photon-ring{filter:drop-shadow(0 0 10px #fff0c8) drop-shadow(0 0 24px #72dff2);opacity:.94}
+.blackhole-scene[data-focus-level="4"] .bh-photon-ring,.blackhole-scene[data-focus-level="5"] .bh-photon-ring,.blackhole-scene[data-focus-level="6"] .bh-photon-ring{border-top-color:#fff7df;border-left-color:#72e5f3;filter:drop-shadow(0 0 12px #ffe4b4) drop-shadow(0 0 28px #68dff2)}
+.blackhole-scene.is-paused .bh-photon-ring,.blackhole-scene.is-paused .bh-gravity-halo{animation-play-state:paused;opacity:.28}
+@keyframes photonPrecession{to{transform:translateZ(22px) rotateX(72deg) rotateZ(338deg)}}
+@keyframes gravityBreath{0%,100%{opacity:.25;scale:.98}50%{opacity:.75;scale:1.04}}
+@media(max-width:700px){.dashboard-range-control{width:100%;justify-content:space-between}.dashboard-range-control select{flex:0 0 145px}.bh-photon-ring{width:54%;height:54%;border-width:1.5px}}
+@media(prefers-reduced-motion:reduce){.bh-photon-ring,.bh-gravity-halo{animation:none!important}.bh-photon-ring{opacity:.5}}
