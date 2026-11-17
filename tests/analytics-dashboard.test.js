@@ -30,7 +30,7 @@ test('filterRange includes the selected local calendar window and ignores invali
   const now = new Date(2026, 10, 17, 12, 0, 0);
   const sessions = [
     { id: 'today', startedAt: new Date(2026, 10, 17, 8).toISOString(), duration: 60 },
-    { id: 'boundary', startedAt: new Date(2026, 9, 18, 23, 59).toISOString(), duration: 60 },
+    { id: 'boundary', startedAt: new Date(2026, 9, 19, 0, 1).toISOString(), duration: 60 },
     { id: 'outside', startedAt: new Date(2026, 9, 17, 12).toISOString(), duration: 60 },
     { id: 'invalid', startedAt: 'not-a-date', duration: 60 }
   ];
