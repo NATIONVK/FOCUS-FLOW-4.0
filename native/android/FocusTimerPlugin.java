@@ -15,6 +15,7 @@ public class FocusTimerPlugin extends Plugin {
   try {
    Intent i=new Intent(getContext(),FocusTimerService.class).setAction(FocusTimerService.START);
    String subject=call.getString("subject","Focus session");if(subject==null)subject="Focus session";i.putExtra("subject",subject.substring(0,Math.min(80,subject.length())));
+   String sessionId=call.getString("sessionId","");if(sessionId==null)sessionId="";i.putExtra("sessionId",sessionId.substring(0,Math.min(200,sessionId.length())));
    i.putExtra("elapsed",Math.max(0L,call.getLong("elapsedMs",0L))); i.putExtra("paused",call.getBoolean("paused",false));
    if(Build.VERSION.SDK_INT>=26)getContext().startForegroundService(i); else getContext().startService(i); call.resolve();
   } catch(Exception error){call.reject("Unable to start the focus notification service: "+error.getMessage(),error);}
