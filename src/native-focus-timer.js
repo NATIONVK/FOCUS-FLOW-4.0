@@ -11,7 +11,7 @@ export function syncNativeFocusTimer(timer, subjectName='Focus session', request
  return enqueueNativeCommand(async()=>{
   if(!timer?.active){await NativeFocusTimer.stopTimer();return;}
   if(requestPermission)await NativeFocusTimer.requestNotificationPermission();
-  await NativeFocusTimer.startTimer({subject:subjectName,elapsedMs:Math.floor(timer.elapsed()*1000),paused:timer.paused});
+  await NativeFocusTimer.startTimer({subject:subjectName,sessionId:timer.sessionId||'',elapsedMs:Math.floor(timer.elapsed()*1000),paused:timer.paused});
  }).catch(error=>{console.warn('Focus notification unavailable',error);});
 }
 export function stopNativeFocusTimer(){
