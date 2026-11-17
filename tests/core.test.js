@@ -442,7 +442,7 @@ test('task normalization clears impossible legacy due dates without rejecting th
 test('restored active timer preserves its stable session identity across process restart',()=>{
   const old=globalThis.localStorage;const map=new Map();
   globalThis.localStorage={setItem:(k,v)=>map.set(k,v),getItem:k=>map.get(k)||null,removeItem:k=>map.delete(k)};
-  try{const first=new FocusTimer(memory());first.start('subject-a');const id=first.sessionId;first.segmentStartedAt=Date.now()-2500;first.persist();const restored=new FocusTimer(memory());assert.equal(restored.active,true);assert.equal(restored.sessionId,id);assert.equal(restored.subjectId,'subject-a');assert.ok(restored.elapsed()>=2);restored.finish();assert.equal(map.has('focus-flow-active-session'),false);}finally{globalThis.localStorage=old;}
+  try{const first=new FocusTimer(memory());first.start('subject-a');const id=first.sessionId;first.startedAt=Date.now()-2500;first.segmentStartedAt=first.startedAt;first.persist();const restored=new FocusTimer(memory());assert.equal(restored.active,true);assert.equal(restored.sessionId,id);assert.equal(restored.subjectId,'subject-a');assert.ok(restored.elapsed()>=2);restored.finish();assert.equal(map.has('focus-flow-active-session'),false);}finally{globalThis.localStorage=old;}
 });
 
 test('active timer snapshot persists the native session identity contract',()=>{
