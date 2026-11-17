@@ -8,6 +8,7 @@ test('creates an integrity-protected backup and previews record counts',()=>{
  const backup=createBackup(sample());
  const result=inspectBackup(backup);
  assert.equal(result.legacy,false);
+ assert.equal(backup.appVersion,'5.5.7');
  assert.deepEqual(result.count,{subjects:1,sessions:1,tasks:1,plans:1,notes:1});
  assert.equal(result.data.subjects[0].name,'Statistics');
 });
@@ -45,4 +46,24 @@ test('rejects non-list study plans and malformed task subtasks',()=>{
 test('rejects study plans that point to missing subjects',()=>{
   const data=sample();data.plans[0].subjectId='missing';
   assert.throws(()=>inspectBackup(data),/invalid study plan/i);
+});
+
+
+test('storage health check settles when IndexedDB is blocked and closes a late connection',async()=>{
+ const oldIndexedDB=globalThis.indexedDB;
+ let request,closed=false;
+ globalThis.indexedDB={
+  open(){request={};queueMicrotask(()=>request.onblocked?.());return request;},
+  deleteDatabase(){return {}}
+ };
+ try{
+  const health=await (await import('../src/data-safety.js')).getStorageHealth();
+  assert.equal(health.indexedDB,false);
+  request.result={close(){closed=true}};
+  request.onsuccess();
+  assert.equal(closed,true,'a connection that opens after a blocked result must be closed');
+ }finally{
+  if(oldIndexedDB===undefined)delete globalThis.indexedDB;
+  else globalThis.indexedDB=oldIndexedDB;
+ }
 });

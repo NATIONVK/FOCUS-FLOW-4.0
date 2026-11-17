@@ -4,7 +4,7 @@ const formatSize = bytes => bytes < 1024 * 1024
   ? (bytes / 1024).toFixed(0) + ' KB'
   : (bytes / 1024 / 1024).toFixed(1) + ' MB';
 
-export function renderPdfLibrary(root, documents, { onOpen, onDelete, onRefresh } = {}) {
+export function renderPdfLibrary(root, documents, { onOpen, onDelete, onDeleteMany, onExport, onRefresh } = {}) {
   if (!root) return;
   const docs = [...(documents || [])];
   root.replaceChildren();
@@ -26,9 +26,26 @@ export function renderPdfLibrary(root, documents, { onOpen, onDelete, onRefresh 
   toolbar.append(search, sort, summary);
   root.append(toolbar);
 
+  const selectionBar = document.createElement('div');
+  selectionBar.className = 'pdf-library-selection';
+  const selectAllLabel = document.createElement('label');
+  const selectAll = document.createElement('input');
+  selectAll.type = 'checkbox';
+  selectAllLabel.append(selectAll, document.createTextNode(' Select visible PDFs'));
+  const selectionCount = document.createElement('small');
+  selectionCount.textContent = '0 selected';
+  const deleteSelected = document.createElement('button');
+  deleteSelected.type = 'button';
+  deleteSelected.className = 'pdf-link';
+  deleteSelected.textContent = 'Delete selected';
+  deleteSelected.disabled = true;
+  selectionBar.append(selectAllLabel, selectionCount, deleteSelected);
+  root.append(selectionBar);
+
   const list = document.createElement('div');
   list.className = 'pdf-library-list';
   root.append(list);
+  const selected = new Set();
 
   function paint() {
     const query = search.value.trim().toLocaleLowerCase();
@@ -40,6 +57,12 @@ export function renderPdfLibrary(root, documents, { onOpen, onDelete, onRefresh 
       : b.updatedAt-a.updatedAt);
     summary.textContent = visible.length + ' of ' + docs.length + ' PDFs · ' +
       formatSize(docs.reduce((sum,doc)=>sum+(Number(doc.size)||0),0)) + ' stored';
+    const visibleIds = new Set(visible.map(doc => doc.id));
+    const selectedVisible = visible.filter(doc => selected.has(doc.id)).length;
+    selectAll.checked = visible.length > 0 && selectedVisible === visible.length;
+    selectAll.indeterminate = selectedVisible > 0 && selectedVisible < visible.length;
+    selectionCount.textContent = selected.size + ' selected';
+    deleteSelected.disabled = selected.size === 0;
     list.replaceChildren();
     if (!visible.length) {
       const empty = document.createElement('div');
@@ -51,6 +74,12 @@ export function renderPdfLibrary(root, documents, { onOpen, onDelete, onRefresh 
     for (const doc of visible) {
       const row = document.createElement('article');
       row.className = 'pdf-library-row';
+      const check = document.createElement('input');
+      check.type = 'checkbox';
+      check.className = 'pdf-library-check';
+      check.checked = selected.has(doc.id);
+      check.dataset.selectId = doc.id;
+      check.setAttribute('aria-label', 'Select ' + doc.name);
       const info = document.createElement('div');
       info.className = 'pdf-library-info';
       const name = document.createElement('strong');
@@ -64,18 +93,37 @@ export function renderPdfLibrary(root, documents, { onOpen, onDelete, onRefresh 
         const b=document.createElement('button');b.type='button';b.textContent=label;b.dataset.action=action;b.dataset.id=doc.id;
         if(style)b.className=style;return b;
       };
-      actions.append(button('Open','open','pdf-link'),button('Rename','rename','pdf-link'),button('Delete','delete','pdf-link'));
-      row.append(info,actions);list.append(row);
+      actions.append(button('Open','open','pdf-link'),button('Save to phone','export','pdf-link'),button('Rename','rename','pdf-link'),button('Delete','delete','pdf-link'));
+      row.append(check,info,actions);list.append(row);
     }
   }
   search.addEventListener('input',paint);
   sort.addEventListener('change',paint);
+  selectAll.addEventListener('change', () => {
+    const query = search.value.trim().toLocaleLowerCase();
+    docs.filter(doc => String(doc.name).toLocaleLowerCase().includes(query))
+      .forEach(doc => selectAll.checked ? selected.add(doc.id) : selected.delete(doc.id));
+    paint();
+  });
+  list.addEventListener('change', event => {
+    const check = event.target.closest('input[data-select-id]');
+    if (!check) return;
+    check.checked ? selected.add(check.dataset.selectId) : selected.delete(check.dataset.selectId);
+    paint();
+  });
+  deleteSelected.addEventListener('click', async () => {
+    if (!selected.size || !onDeleteMany) return;
+    deleteSelected.disabled = true;
+    try { await onDeleteMany([...selected]); selected.clear(); }
+    finally { paint(); }
+  });
   list.addEventListener('click',async event=>{
     const button=event.target.closest('button[data-action]');
     if(!button)return;
     const {action,id}=button.dataset;
     if(action==='open'){onOpen?.(id);return;}
     if(action==='delete'){onDelete?.(id);return;}
+    if(action==='export'){onExport?.(id);return;}
     if(action==='rename'){
       const current=docs.find(doc=>doc.id===id);
       const next=window.prompt('Rename PDF',current?.name||'document.pdf');

@@ -7,7 +7,7 @@ export function createBackup(data){
   if(!isObject(data)||data.version!==4)throw new Error('Current app data is not a supported version.');
   const payload=JSON.parse(JSON.stringify(data));
   const canonical=JSON.stringify(payload);
-  return {format:FORMAT,schemaVersion:SCHEMA_VERSION,createdAt:new Date().toISOString(),appVersion:'5.2.0',integrity:{algorithm:'fnv1a-32',checksum:fnv1a(canonical)},data:payload};
+  return {format:FORMAT,schemaVersion:SCHEMA_VERSION,createdAt:new Date().toISOString(),appVersion:'5.5.7',integrity:{algorithm:'fnv1a-32',checksum:fnv1a(canonical)},data:payload};
 }
 export function inspectBackup(value){
   if(!isObject(value))throw new Error('Backup file must contain a JSON object.');
@@ -57,9 +57,27 @@ export async function buildVerifiedBackupBlob(data){
 export async function getStorageHealth(){
   const result={localStorage:false,indexedDB:false,estimate:null,persisted:null};
   try{const storage=globalThis.localStorage;const key='__ff_health_probe__';storage.setItem(key,'ok');result.localStorage=storage.getItem(key)==='ok';storage.removeItem(key)}catch{}
-  try{if(globalThis.indexedDB){await new Promise((resolve,reject)=>{const request=indexedDB.open('__ff_health_probe__',1);request.onsuccess=()=>{request.result.close();indexedDB.deleteDatabase('__ff_health_probe__');resolve()};request.onerror=()=>reject(request.error)});result.indexedDB=true}}catch{}
-  try{if(navigator.storage?.estimate)result.estimate=await navigator.storage.estimate()}catch{}
-  try{if(navigator.storage?.persisted)result.persisted=await navigator.storage.persisted()}catch{}
+  try{
+    if(globalThis.indexedDB){
+      await new Promise((resolve,reject)=>{
+        let settled=false;
+        const finish=(callback,value)=>{if(settled)return;settled=true;callback(value)};
+        const request=globalThis.indexedDB.open('__ff_health_probe__',1);
+        request.onsuccess=()=>{
+          const db=request.result;
+          if(settled){db.close();return;}
+          db.close();
+          try{globalThis.indexedDB.deleteDatabase('__ff_health_probe__')}catch{}
+          result.indexedDB=true;
+          finish(resolve);
+        };
+        request.onerror=()=>finish(reject,request.error||new Error('IndexedDB health check failed'));
+        request.onblocked=()=>finish(reject,new Error('IndexedDB health check was blocked'));
+      });
+    }
+  }catch{}
+  try{if(globalThis.navigator?.storage?.estimate)result.estimate=await globalThis.navigator.storage.estimate()}catch{}
+  try{if(globalThis.navigator?.storage?.persisted)result.persisted=await globalThis.navigator.storage.persisted()}catch{}
   return result;
 }
 
