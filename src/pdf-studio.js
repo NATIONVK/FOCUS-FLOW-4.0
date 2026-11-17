@@ -85,17 +85,17 @@ function setTab(tab){if(tab!=='reader')void pdfRenderLifecycle.cancel();activeTa
 async function openFile(file,libraryId=null){if(!file)return;if(file.size>75*1024*1024){status('This file is over the 75 MB safety limit for this device.','error');return}try{status('Opening PDF…');await engines();const bytes=await bytesFrom(file),doc=await pdfjs.getDocument({data:bytes.slice(),maxImageSize:8*1024*1024,canvasMaxAreaInBytes:48*1024*1024,isEvalSupported:false}).promise;let saved=libraryId?{id:libraryId}:null;if(!saved){try{saved=await savePdfToLibrary(file,file.name,'opened')}catch(storageError){console.warn('PDF opened but could not be copied to the in-app library',storageError)}}currentBytes=bytes;currentName=file.name;currentDocumentId=saved?.id||('name:'+file.name.toLocaleLowerCase());currentDoc=doc;pageNo=1;zoom=1;try{const progress=JSON.parse(localStorage.getItem(progressKey)||'{}');const p=progress[documentProgressKey()]||progress[currentName];const restored=restorePdfProgress(p,currentDoc.numPages);pageNo=restored.page;zoom=restored.zoom}catch{pageNo=1;zoom=1}drawMode=false;loadBookmarks();if(saved)saveRecent({id:saved.id,name:file.name,openedAt:new Date().toISOString(),size:file.size});setTab('reader');status('Opened '+file.name+' · '+currentDoc.numPages+' pages'+(saved?'':' · Library copy unavailable'),'success')}catch(e){console.error(e);status('Could not open this PDF. It may be damaged, unsupported or password protected.','error')}}
 async function renderPage(anchorPage=pageNo,anchorOffset=0){
  if(!currentDoc)return;
- const document=currentDoc,targetPage=clampPdfPage(pageNo,document.numPages),targetZoom=zoom;
+ const pdfDocument=currentDoc,targetPage=clampPdfPage(pageNo,pdfDocument.numPages),targetZoom=zoom;
  const sequence=await pdfRenderLifecycle.begin();
- if(!pdfRenderLifecycle.isCurrent(sequence)||document!==currentDoc)return;
+ if(!pdfRenderLifecycle.isCurrent(sequence)||pdfDocument!==currentDoc)return;
  const scroll=$('#pdfCanvasScroll'),stack=$('#pdfPageStack');if(!scroll||!stack)return;
- const windowPages=getPdfVirtualWindow(targetPage,document.numPages,2);
+ const windowPages=getPdfVirtualWindow(targetPage,pdfDocument.numPages,2);
  stack.dataset.windowStart=String(windowPages.start);stack.dataset.windowEnd=String(windowPages.end);stack.replaceChildren();
  try{
   for(const number of windowPages.pages){
-   if(!pdfRenderLifecycle.isCurrent(sequence)||document!==currentDoc)return;
-   const page=await document.getPage(number);
-   if(!pdfRenderLifecycle.isCurrent(sequence)||document!==currentDoc){page.cleanup?.();return;}
+   if(!pdfRenderLifecycle.isCurrent(sequence)||pdfDocument!==currentDoc)return;
+   const page=await pdfDocument.getPage(number);
+   if(!pdfRenderLifecycle.isCurrent(sequence)||pdfDocument!==currentDoc){page.cleanup?.();return;}
    const viewport=page.getViewport({scale:targetZoom}),ratio=getPdfCanvasScale(viewport.width,viewport.height,window.devicePixelRatio||1);
    const slot=document.createElement('section');slot.className='pdf-virtual-page'+(number===targetPage?' is-current':'');slot.dataset.page=String(number);
    const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.ceil(viewport.width*ratio));canvas.height=Math.max(1,Math.ceil(viewport.height*ratio));canvas.style.width=viewport.width+'px';canvas.style.height=viewport.height+'px';if(number===targetPage)canvas.id='pdfCanvas';
@@ -104,10 +104,10 @@ async function renderPage(anchorPage=pageNo,anchorOffset=0){
    const task=page.render({canvasContext:ctx,viewport,transform:ratio!==1?[ratio,0,0,ratio,0,0]:null});
    pdfRenderLifecycle.track(task,()=>page.cleanup?.());
    await task.promise;
-   if(!pdfRenderLifecycle.isCurrent(sequence)||document!==currentDoc)return;
+   if(!pdfRenderLifecycle.isCurrent(sequence)||pdfDocument!==currentDoc)return;
   }
-  if(!pdfRenderLifecycle.isCurrent(sequence)||document!==currentDoc)return;
-  $('#pdfPageInput').value=targetPage;$('#pdfPageInput').max=document.numPages;$('#pdfPageTotal').textContent='/ '+document.numPages;$('#pdfPageCount').textContent=document.numPages+' pages';$('#pdfZoomLabel').textContent=Math.round(targetZoom*100)+'%';
+  if(!pdfRenderLifecycle.isCurrent(sequence)||pdfDocument!==currentDoc)return;
+  $('#pdfPageInput').value=targetPage;$('#pdfPageInput').max=pdfDocument.numPages;$('#pdfPageTotal').textContent='/ '+pdfDocument.numPages;$('#pdfPageCount').textContent=pdfDocument.numPages+' pages';$('#pdfZoomLabel').textContent=Math.round(targetZoom*100)+'%';
   $('#pdfBookmark').textContent=(bookmarks.has(bookmarkKeyForPage(targetPage))||bookmarks.has(currentName+':'+targetPage))?'★':'☆';$('#pdfDraw').classList.toggle('active',drawMode);saveProgress();bindInk();
   const anchor=stack.querySelector('[data-page="'+anchorPage+'"]');if(anchor)scroll.scrollTop+=anchor.getBoundingClientRect().top-scroll.getBoundingClientRect().top-anchorOffset;else{const current=stack.querySelector('[data-page="'+targetPage+'"]');if(current)scroll.scrollTop=current.offsetTop-12}
   if(!scroll.dataset.continuousBound){
@@ -115,15 +115,15 @@ async function renderPage(anchorPage=pageNo,anchorOffset=0){
    scroll.addEventListener('scroll',()=>{
     if(scheduled)return;scheduled=true;
     requestAnimationFrame(()=>{
-     scheduled=false;if(document!==currentDoc||!pdfRenderLifecycle.isCurrent(sequence))return;
+     scheduled=false;if(pdfDocument!==currentDoc||!pdfRenderLifecycle.isCurrent(sequence))return;
      const slots=[...stack.querySelectorAll('[data-page]')];if(!slots.length)return;const middle=scroll.getBoundingClientRect().top+scroll.clientHeight*.42;
      const active=slots.reduce((best,slot)=>{const rect=slot.getBoundingClientRect(),center=(rect.top+rect.bottom)/2;return !best||Math.abs(center-middle)<best.distance?{slot,distance:Math.abs(center-middle)}:best},null)?.slot;
-     const next=clampPdfPage(active?.dataset.page,document.numPages);
+     const next=clampPdfPage(active?.dataset.page,pdfDocument.numPages);
      if(next!==pageNo){pageNo=next;$('#pdfPageInput').value=pageNo;$('#pdfBookmark').textContent=bookmarks.has(bookmarkKeyForPage())?'★':'☆';saveProgress();stack.querySelector('.is-current')?.classList.remove('is-current');active.classList.add('is-current');const oldCanvas=stack.querySelector('#pdfCanvas'),oldInk=stack.querySelector('#pdfInkCanvas');if(oldCanvas)oldCanvas.removeAttribute('id');if(oldInk)oldInk.removeAttribute('id');active.querySelector('canvas')?.setAttribute('id','pdfCanvas');active.querySelector('.pdf-page-ink')?.setAttribute('id','pdfInkCanvas');bindInk();if(shouldRefreshPdfWindow(next,stack.dataset.windowStart,stack.dataset.windowEnd)){const rect=active.getBoundingClientRect();renderPage(pageNo,rect.top-scroll.getBoundingClientRect().top)}}
     });
    },{passive:true});
   }
-  status('Page '+pageNo+' of '+document.numPages+' · continuous reader');
+  status('Page '+pageNo+' of '+pdfDocument.numPages+' · continuous reader');
  }catch(e){if(e?.name!=='RenderingCancelledException'&&pdfRenderLifecycle.isCurrent(sequence))status('Page render failed: '+e.message,'error')}
 }
 async function thumbnails(){
