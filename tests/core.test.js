@@ -412,3 +412,28 @@ test('recovery is not blocked when storage quota prevents preserving the damaged
     assert.equal(recovered.recoveryAvailable,true);
   }finally{globalThis.localStorage=old}
 });
+
+
+test('task due dates reject impossible calendar dates and preserve valid leap days',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};
+  try{
+    const store=new Store();
+    store.addTask('Leap day','high','2028-02-29');
+    const task=store.data.tasks[0];
+    assert.equal(task.dueDate,'2028-02-29');
+    assert.throws(()=>store.addTask('Impossible date','medium','2026-02-30'),/invalid due date/i);
+    assert.throws(()=>store.updateTask(task.id,{dueDate:'2026-13-01'}),/invalid due date/i);
+    assert.equal(task.dueDate,'2028-02-29','a rejected update must not mutate the saved due date');
+  }finally{globalThis.localStorage=old}
+});
+
+test('task normalization clears impossible legacy due dates without rejecting the full backup',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};
+  try{
+    const store=new Store();
+    store.import({...store.data,tasks:[{id:'legacy-date',title:'Legacy task',dueDate:'2026-02-30'}]});
+    assert.equal(store.data.tasks[0].dueDate,'');
+  }finally{globalThis.localStorage=old}
+});
