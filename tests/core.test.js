@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Analytics } from '../src/analytics.js';
 import { FocusTimer } from '../src/timer.js';
+import { getBlackHoleEvolution, BLACK_HOLE_EVOLUTION_INTERVAL_SECONDS } from '../src/blackhole-evolution.js';
 
 function memory(){const data={subjects:[],sessions:[],tasks:[],notes:[],settings:{}};return {data,save(){},subjectName(){return 'Test'}}}
 test('local date keys follow the device calendar rather than UTC',()=>{const date=new Date(2026,10,13,0,30,0);assert.equal(Analytics.dateKey(date),'2026-11-13');});
@@ -448,4 +449,32 @@ test('restored active timer preserves its stable session identity across process
 test('active timer snapshot persists the native session identity contract',()=>{
   const old=globalThis.localStorage;const map=new Map();globalThis.localStorage={setItem:(k,v)=>map.set(k,v),getItem:k=>map.get(k)||null,removeItem:k=>map.delete(k)};
   try{const timer=new FocusTimer(memory());timer.start('subject-b');const saved=JSON.parse(map.get('focus-flow-active-session'));assert.equal(saved.sessionId,timer.sessionId);assert.ok(saved.startedAt>0);assert.equal(saved.paused,false);}finally{globalThis.localStorage=old;}
+});
+
+
+test('Black Hole evolution advances exactly every 3 minutes 30 seconds of focused time',()=>{
+  const step=BLACK_HOLE_EVOLUTION_INTERVAL_SECONDS;
+  assert.equal(step,210);
+  assert.equal(getBlackHoleEvolution(0).stage,0);
+  assert.equal(getBlackHoleEvolution(step-1).stage,0);
+  assert.equal(getBlackHoleEvolution(step).stage,1);
+  assert.equal(getBlackHoleEvolution(step*2-1).stage,1);
+  assert.equal(getBlackHoleEvolution(step*2).stage,2);
+});
+test('Black Hole evolution increases size, speed and energy at each stage with safe caps',()=>{
+  const start=getBlackHoleEvolution(0);
+  const evolved=getBlackHoleEvolution(210*5);
+  const maximum=getBlackHoleEvolution(210*20);
+  assert.ok(evolved.growth>start.growth);
+  assert.ok(evolved.speedFactor<start.speedFactor);
+  assert.ok(evolved.energy>start.energy);
+  assert.ok(maximum.growth<=1.28);
+  assert.ok(maximum.speedFactor>=0.48);
+  assert.equal(maximum.stage,8);
+  assert.equal(maximum.nextEvolutionIn,0);
+});
+test('Black Hole evolution ignores invalid or negative elapsed values safely',()=>{
+  assert.equal(getBlackHoleEvolution(-20).stage,0);
+  assert.equal(getBlackHoleEvolution(Number.NaN).stage,0);
+  assert.equal(getBlackHoleEvolution('invalid').stage,0);
 });
