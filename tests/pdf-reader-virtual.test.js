@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {clampPdfPage,parsePdfPageRange,getPdfVirtualWindow,restorePdfProgress,getPdfCanvasScale,shouldRefreshPdfWindow} from '../src/pdf-reader-virtual.js';
+import {clampPdfPage,parsePdfPageRange,getPdfVirtualWindow,restorePdfProgress,getPdfCanvasScale,getPdfRenderProfile,shouldRefreshPdfWindow} from '../src/pdf-reader-virtual.js';
 
 test('PDF page range parser supports individual pages, ranges and de-duplicates',()=>{
  assert.deepEqual(parsePdfPageRange('1-3, 5, 3, 8-9',10),[1,2,3,5,8,9]);
