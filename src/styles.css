@@ -715,3 +715,8 @@ body.light .subtask-row{color:#4d5670}
 .blackhole-scene.is-paused .bh-stage-ripple{opacity:.12}
 @media(max-width:700px){.blackhole-scene .bh-stage-ripple{width:calc(60% * var(--bh-area-scale,1));height:calc(60% * var(--bh-area-scale,1))}}
 @media(prefers-reduced-motion:reduce){.blackhole-scene .bh-disk-outer,.blackhole-scene .bh-disk-inner,.blackhole-scene .bh-stage-ripple{transition:none!important}}
+
+
+/* Keep expanded accretion geometry inside the scene on narrow phone screens. */
+.blackhole-scene .bh-disk-outer{width:min(calc(88% * var(--bh-area-scale,1)),98%);height:min(calc(43% * var(--bh-area-scale,1)),52%)}
+.blackhole-scene .bh-disk-inner{width:min(calc(67% * var(--bh-area-scale,1)),84%);height:min(calc(30% * var(--bh-area-scale,1)),38%)}
