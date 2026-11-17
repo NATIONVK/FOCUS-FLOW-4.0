@@ -1,20 +1,29 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/NATIONVK/FOCUS-FLOW-4.0/main/public/icon.svg" width="112" alt="FOCUS FLOW app icon" />
-  <h1>FOCUS FLOW 5.5.3</h1>
+  <h1>FOCUS FLOW 5.5.4</h1>
   <p><strong>Your personal study OS. Focus deeper. Learn smarter. Grow daily.</strong></p>
   <p>
     <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/quality.yml"><img src="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/quality.yml/badge.svg" alt="Quality Checks"></a>
     <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/build-android.yml"><img src="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/build-android.yml/badge.svg" alt="Android APK Build"></a>
     <img src="https://img.shields.io/badge/Platform-Android%20%7C%20Web-8b5cf6" alt="Android and Web">
     <img src="https://img.shields.io/badge/Mode-Offline--first-16a34a" alt="Offline first">
-    <img src="https://img.shields.io/badge/Version-5.5.3-06b6d4" alt="Version 5.5.3">
+    <img src="https://img.shields.io/badge/Version-5.5.4-06b6d4" alt="Version 5.5.3">
   </p>
   <p><em>Designed for distraction-free study, consistent habits, and measurable progress.</em></p>
 </div>
 
 ---
 
-## Latest release · 5.5.3
+## Latest release · 5.5.4
+
+### 5.5.4 — PDF Render Lifecycle & Memory Stability
+
+- Track every in-flight PDF.js page render, not only the currently selected page.
+- Cancel and await superseded render tasks before replacing the virtual page window.
+- Ignore stale asynchronous page loads after a page jump or document switch.
+- Release PDF.js page resources after each render task settles, including cancellation and failure paths.
+- Preserve the five-page virtual window, continuous reading, page-range navigation, annotations and reading-progress behavior.
+- Add isolated regression tests for task cancellation, overlapping render generations and resource cleanup.
 
 ### 5.5.3 — PDF Reader Memory & Rendering Reliability
 
@@ -120,7 +129,7 @@ The Android app is packaged with **Capacitor 7**. The repository includes native
 1. Open the [Actions tab](https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions).
 2. Select **Build Android APK**.
 3. Choose **Run workflow** (or push a commit to `main`).
-4. Open the completed workflow run and download the `focus-flow-5.5.3-debug-apk` artifact.
+4. Open the completed workflow run and download the `focus-flow-5.5.4-debug-apk` artifact.
 5. Install the APK on an Android device and test the features you use.
 
 > A successful web build or workflow badge does not by itself confirm every feature works on every Android device. Always install and test the APK on a real device. Background execution and photo permissions can vary by Android version and device manufacturer.
@@ -238,7 +247,7 @@ No license has been added yet. Unless a license is added to this repository, sta
 ---
 
 <div align="center">
-  <strong>FOCUS FLOW 5.5.3</strong><br>
+  <strong>FOCUS FLOW 5.5.4</strong><br>
   <sub>Build focus. Track progress. Find your flow.</sub><br><br>
   <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0">GitHub Repository</a> ·
   <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/issues">Report an issue</a> ·
