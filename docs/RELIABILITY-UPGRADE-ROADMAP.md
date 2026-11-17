@@ -225,3 +225,11 @@ Before calling a release ready:
 - Keep the JS timer snapshot as the source of truth after WebView/app process recreation; startup restoration re-synchronizes the native notification using the same session identity.
 - Add regression coverage that a restored JS timer retains its session ID, subject, elapsed time, and can finish without leaving an active snapshot.
 - CI verifies source and build behavior; Android process-kill/restart and notification behavior still require physical-device testing.
+
+
+## Delivered — Focus Flow 5.6.0 dashboard and Black Hole polish
+- Add dashboard analytics periods for the last 7, 30, and 90 days, plus all-time history; selected periods update focus totals, session counts, subject distribution, and insights without changing the separate seven-day trend chart.
+- Add regression coverage for local-calendar range boundaries and invalid timestamps.
+- Add a lightweight photon precession ring and gravitational halo to the Black Hole scene; retain the timer-only center, pause-state behavior, and reduced-motion fallback.
+- Advance package version to 5.6.0 and service-worker shell cache to v22.
+- Automated CI and Android APK build are required before release; physical Android visual, pause, and performance checks remain manual gates.
