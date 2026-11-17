@@ -26,6 +26,18 @@ test('sessionStartSummary ignores invalid timestamps and clamps invalid duration
   assert.equal(summary.best.seconds, 0);
 });
 
+test('filterRange includes the selected local calendar window and ignores invalid timestamps', () => {
+  const now = new Date(2026, 10, 17, 12, 0, 0);
+  const sessions = [
+    { id: 'today', startedAt: new Date(2026, 10, 17, 8).toISOString(), duration: 60 },
+    { id: 'boundary', startedAt: new Date(2026, 9, 18, 23, 59).toISOString(), duration: 60 },
+    { id: 'outside', startedAt: new Date(2026, 9, 17, 12).toISOString(), duration: 60 },
+    { id: 'invalid', startedAt: 'not-a-date', duration: 60 }
+  ];
+  assert.deepEqual(Analytics.filterRange(sessions, 30, now).map(x => x.id), ['today', 'boundary']);
+  assert.equal(Analytics.filterRange(sessions, 0, now).length, 4);
+});
+
 test('sessionStartSummary returns an empty-data-safe best bucket', () => {
   const summary = Analytics.sessionStartSummary([]);
   assert.equal(summary.best.count, 0);
