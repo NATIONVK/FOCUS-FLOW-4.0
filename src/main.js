@@ -1,6 +1,7 @@
 import './styles.css';
 import { Store } from './store.js';
 import { FocusTimer } from './timer.js';
+import { getBlackHoleEvolution } from './blackhole-evolution.js';
 import { syncNativeFocusTimer } from './native-focus-timer.js';
 import { Analytics } from './analytics.js';
 import { renderPDFStudioPage, bindPDFStudioPage } from './pdf-studio.js';
@@ -37,23 +38,24 @@ function paintTimer() {
   $('#timerToggle')?.classList.toggle('paused',timer.paused);
   const scene=$('#blackholeScene');
   scene?.classList.toggle('is-paused',timer.paused);
-  const focusedMinutes=Math.floor(elapsed/60);
-  scene?.style.setProperty('--bh-energy',String(Math.min(1,0.25+elapsed/7200)));
-  // Update animation styles only when a new focused minute is completed.
-  if(scene && scene.dataset.focusedMinute!==String(focusedMinutes)){
-    const growth=Math.min(0.22,focusedMinutes*0.0125);
-    const speedFactor=Math.max(0.42,1-focusedMinutes*0.018);
-    scene.dataset.focusedMinute=String(focusedMinutes);
-    scene.style.setProperty('--bh-area-scale',String(1+growth));
-    scene.style.setProperty('--bh-spin-outer',String(Math.max(4.5,12*speedFactor))+'s');
-    scene.style.setProperty('--bh-spin-inner',String(Math.max(2.5,6*speedFactor))+'s');
-    scene.style.setProperty('--bh-wave-speed',String(Math.max(3.5,8*speedFactor))+'s');
-    scene.style.setProperty('--bh-arc-speed',String(Math.max(4,9*speedFactor))+'s');
-    scene.style.setProperty('--bh-particle-speed',String(Math.max(3.5,8*speedFactor))+'s');
-    scene.style.setProperty('--bh-beam-speed',String(Math.max(8,18*speedFactor))+'s');
+  const evolution=getBlackHoleEvolution(elapsed);
+  scene?.style.setProperty('--bh-energy',String(evolution.energy));
+  scene?.style.setProperty('--bh-intensity',String(evolution.intensity));
+  // Evolve only on completed 3m30s blocks of active focus time. Paused time is excluded by timer.elapsed().
+  if(scene && scene.dataset.evolutionStage!==String(evolution.stage)){
+    const speedFactor=evolution.speedFactor;
+    scene.dataset.evolutionStage=String(evolution.stage);
+    scene.dataset.nextEvolutionIn=String(evolution.nextEvolutionIn);
+    scene.style.setProperty('--bh-area-scale',String(evolution.growth));
+    scene.style.setProperty('--bh-spin-outer',String(12*speedFactor)+'s');
+    scene.style.setProperty('--bh-spin-inner',String(6*speedFactor)+'s');
+    scene.style.setProperty('--bh-wave-speed',String(8*speedFactor)+'s');
+    scene.style.setProperty('--bh-arc-speed',String(9*speedFactor)+'s');
+    scene.style.setProperty('--bh-particle-speed',String(8*speedFactor)+'s');
+    scene.style.setProperty('--bh-beam-speed',String(18*speedFactor)+'s');
   }
-  const level=Math.min(5,Math.floor(elapsed/1800)); // six visual energy levels, one step per 30 focused minutes
-  scene?.setAttribute('data-focus-level',String(level+1));
+  scene?.setAttribute('data-focus-level',String(Math.min(6,evolution.level)));
+  scene?.setAttribute('data-evolution-stage',String(evolution.stage));
   scene?.setAttribute('data-second-step',String(Math.floor((elapsed%60)/5)));
 }
 
@@ -439,7 +441,7 @@ function showTimer(){
   stopTimerRenderLoop();
   syncNativeFocusTimer(timer,store.subjectName(timer.subjectId));
   if(!history.state?.focusFlowTimer)history.pushState({focusFlowTimer:true},'','#focus');
-  $('#app').innerHTML=`<div class="focus-screen"><button type="button" class="exit-focus" id="exitFocus" aria-label="Exit focus screen" title="Exit focus screen">×</button><div class="space-particles" aria-hidden="true"></div><div class="focus-nebula" aria-hidden="true"></div><div class="focus-orbit orbit-a" aria-hidden="true"></div><div class="focus-orbit orbit-b" aria-hidden="true"></div><div class="blackhole-scene ${timer.paused?'is-paused':''}" id="blackholeScene"><div class="bh-starfield" aria-hidden="true"></div><div class="bh-lensing" aria-hidden="true"></div><div class="bh-photon-ring" aria-hidden="true"></div><div class="bh-gravity-halo" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-a" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-b" aria-hidden="true"></div><div class="bh-light-beams" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-energy-waves" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-disk bh-disk-outer" aria-hidden="true"></div><div class="bh-disk bh-disk-inner" aria-hidden="true"></div><div class="bh-corona" aria-hidden="true"></div><button class="focus-core" id="timerToggle" aria-label="Pause or resume focus timer"><strong id="clock" aria-live="off">00:00:00</strong></button><span class="bh-particle bh-particle-a" aria-hidden="true"></span><span class="bh-particle bh-particle-b" aria-hidden="true"></span><span class="bh-particle bh-particle-c" aria-hidden="true"></span></div><div class="focus-session-controls"><button type="button" class="finish-session-btn" id="finishFocus" aria-label="Finish focus session">Finish Session</button></div></div>`;
+  $('#app').innerHTML=`<div class="focus-screen"><button type="button" class="exit-focus" id="exitFocus" aria-label="Exit focus screen" title="Exit focus screen">×</button><div class="space-particles" aria-hidden="true"></div><div class="focus-nebula" aria-hidden="true"></div><div class="focus-orbit orbit-a" aria-hidden="true"></div><div class="focus-orbit orbit-b" aria-hidden="true"></div><div class="blackhole-scene ${timer.paused?'is-paused':''}" id="blackholeScene"><div class="bh-starfield" aria-hidden="true"></div><div class="bh-lensing" aria-hidden="true"></div><div class="bh-photon-ring" aria-hidden="true"></div><div class="bh-stage-ripple" aria-hidden="true"></div><div class="bh-gravity-halo" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-a" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-b" aria-hidden="true"></div><div class="bh-light-beams" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-energy-waves" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-disk bh-disk-outer" aria-hidden="true"></div><div class="bh-disk bh-disk-inner" aria-hidden="true"></div><div class="bh-corona" aria-hidden="true"></div><button class="focus-core" id="timerToggle" aria-label="Pause or resume focus timer"><strong id="clock" aria-live="off">00:00:00</strong></button><span class="bh-particle bh-particle-a" aria-hidden="true"></span><span class="bh-particle bh-particle-b" aria-hidden="true"></span><span class="bh-particle bh-particle-c" aria-hidden="true"></span></div><div class="focus-session-controls"><button type="button" class="finish-session-btn" id="finishFocus" aria-label="Finish focus session">Finish Session</button></div></div>`;
   paintTimer();
   startTimerRenderLoop();
   $('#timerToggle').addEventListener('click',()=>{try{timer.toggle();}catch(error){toast(error.message,'error');}});
