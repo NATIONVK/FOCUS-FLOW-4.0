@@ -48,3 +48,13 @@ export function shouldRefreshPdfWindow(page,start,end,buffer=1){
  if(!Number.isFinite(p)||!Number.isFinite(a)||!Number.isFinite(b)||a>b)return true;
  return p<=a+margin||p>=b-margin;
 }
+
+
+export function getPdfRenderProfile(deviceMemory){
+ const memory=Number(deviceMemory);
+ const tier=Number.isFinite(memory)&&memory>0?memory:4;
+ if(tier<=2)return {maxPixels:900000,maxRatio:1.1};
+ if(tier<=4)return {maxPixels:1400000,maxRatio:1.2};
+ if(tier<=6)return {maxPixels:1800000,maxRatio:1.3};
+ return {maxPixels:2400000,maxRatio:1.5};
+}
