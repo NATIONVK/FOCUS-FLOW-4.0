@@ -29,6 +29,14 @@ export class Analytics {
     return subjects.map(subject=>({id:subject.id,name:subject.name,color:subject.color,seconds:this.subjectSeconds(sessions,subject.id),share:total?Math.round(this.subjectSeconds(sessions,subject.id)/total*100):0}))
       .filter(item=>item.seconds>0).sort((a,b)=>b.seconds-a.seconds);
   }
+  static filterRange(sessions,days=30,now=new Date()){
+    const source=Array.isArray(sessions)?sessions:[];
+    const span=Number(days);
+    if(!Number.isFinite(span)||span<=0)return source.slice();
+    const end=new Date(now);end.setHours(24,0,0,0);
+    const start=new Date(end);start.setDate(start.getDate()-Math.max(1,Math.floor(span)));
+    return source.filter(session=>{const time=new Date(session?.startedAt).getTime();return Number.isFinite(time)&&time>=start.getTime()&&time<end.getTime();});
+  }
   static rangeSeconds(sessions,start,end){
     return sessions.reduce((sum,s)=>{const time=new Date(s.startedAt).getTime();return Number.isFinite(time)&&time>=start.getTime()&&time<end.getTime()?sum+Math.max(0,Number(s.duration)||0):sum;},0);
   }
