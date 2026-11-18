@@ -688,3 +688,19 @@ body.light .focus-coach-card{background:linear-gradient(120deg,#f1edff,#f3f7ff);
 .planner-week-day>b{font-size:11px;color:var(--text)}.planner-week-day>small{font-size:9px;color:var(--muted);font-variant-numeric:tabular-nums}
 .planner-week-legend{display:flex;justify-content:center;gap:18px;margin-top:13px;color:var(--muted);font-size:10px}.planner-week-legend span{display:flex;align-items:center;gap:6px}.planner-week-legend i{width:9px;height:9px;border-radius:3px}.planner-week-legend i.planned{background:#8b7cff99}.planner-week-legend i.actual{background:#38c9a2}
 @media(max-width:480px){.planner-week-overview{padding:14px}.planner-week-bars{gap:5px}.planner-week-bar{width:27px}.planner-week-totals b{font-size:15px}}
+
+
+/* Daily reflection — uses the existing Notes store and verified backup path. */
+.daily-reflection{margin:0 0 22px;padding:20px;border:1px solid var(--border);background:linear-gradient(135deg,var(--panel),color-mix(in srgb,var(--panel) 88%,#8b7cff 12%))}
+.daily-reflection-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.daily-reflection-head h3{margin:5px 0 6px;color:var(--text);font-size:19px}
+.daily-reflection-head p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}
+.daily-reflection-mark{display:grid;place-items:center;flex:0 0 42px;height:42px;border-radius:14px;background:#8b7cff20;color:#a99aff;font-size:22px}
+.daily-reflection>label{display:block;margin:17px 0 8px;color:var(--text);font-size:12px;font-weight:650}
+.daily-reflection textarea{display:block;width:100%;min-height:88px;resize:vertical;padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--bg);color:var(--text);font:inherit;font-size:13px;line-height:1.6}
+.daily-reflection textarea:focus-visible{outline:2px solid #8b7cff;outline-offset:2px}
+.daily-reflection-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px}
+.daily-reflection-actions small{color:var(--muted);font-size:10px}
+.daily-reflection-actions button{min-height:42px}
+@media(max-width:520px){.daily-reflection{padding:15px}.daily-reflection-actions{align-items:stretch;flex-direction:column}.daily-reflection-actions button{width:100%}}
+@media(prefers-reduced-motion:reduce){.daily-reflection *{scroll-behavior:auto}}
