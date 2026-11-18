@@ -425,3 +425,28 @@ body.light .subtask-row{color:#4d5670}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+/* Stable timer typography: fixed digit slots prevent horizontal jitter on every tick. */
+.focus-screen #clock{
+  width:8ch;
+  min-width:8ch;
+  flex:0 0 8ch;
+  justify-content:center;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1;
+  font-kerning:none;
+}
+.focus-screen #clock .time-main{
+  display:inline-block;
+  width:6ch;
+  flex:0 0 6ch;
+  white-space:pre;
+  font-variant-numeric:tabular-nums;
+}
+.focus-screen #clock .time-seconds{
+  display:inline-block;
+  width:2ch;
+  flex:0 0 2ch;
+  text-align:left;
+  font-variant-numeric:tabular-nums;
+}
