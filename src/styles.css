@@ -677,3 +677,14 @@ body.light .subtask-row{color:#4d5670}
 body.light .focus-coach-card{background:linear-gradient(120deg,#f1edff,#f3f7ff);border-color:#8b7cff55}body.light .focus-coach-copy h3{color:#24213b}body.light .focus-coach-copy p{color:#565b70}body.light .focus-coach-copy p b{color:#24213b}
 @media(max-width:650px){.focus-coach-card{align-items:flex-start;flex-wrap:wrap;padding:17px;gap:12px}.focus-coach-orb{width:40px;height:40px;flex-basis:40px;font-size:20px}.focus-coach-copy{flex-basis:calc(100% - 56px)}.focus-coach-start{width:100%}}
 @media(prefers-reduced-motion:reduce){.focus-coach-orb{animation:none}.focus-coach-start{transition:none}}
+
+/* Weekly planner comparison — derived from existing plans and sessions. */
+.planner-week-overview{margin:18px 0 22px;padding:18px;border:1px solid var(--border);border-radius:17px;background:linear-gradient(145deg,var(--panel),color-mix(in srgb,var(--panel) 84%,#8b7cff 16%))}
+.planner-week-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.planner-week-head h4{margin:4px 0 0;font-size:17px;color:var(--text)}
+.planner-week-totals{display:grid;grid-template-columns:auto auto;align-items:baseline;column-gap:5px;text-align:right}.planner-week-totals b{font-size:17px;color:var(--text);font-variant-numeric:tabular-nums}.planner-week-totals small{font-size:10px;color:var(--muted)}
+.planner-week-bars{height:142px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;margin-top:17px;padding:0 3px}
+.planner-week-day{display:flex;min-width:0;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px}.planner-week-bar{height:104px;width:min(100%,34px);display:flex;align-items:flex-end;justify-content:center;gap:3px;border-bottom:1px solid var(--border);background:linear-gradient(to top,transparent 98%,var(--border) 98%);border-radius:7px 7px 2px 2px;overflow:hidden}
+.planner-week-bar i{display:block;width:10px;min-height:2px;border-radius:5px 5px 1px 1px}.planner-week-bar i.planned{background:#8b7cff66}.planner-week-bar i.actual{background:#38c9a2}
+.planner-week-day>b{font-size:11px;color:var(--text)}.planner-week-day>small{font-size:9px;color:var(--muted);font-variant-numeric:tabular-nums}
+.planner-week-legend{display:flex;justify-content:center;gap:18px;margin-top:13px;color:var(--muted);font-size:10px}.planner-week-legend span{display:flex;align-items:center;gap:6px}.planner-week-legend i{width:9px;height:9px;border-radius:3px}.planner-week-legend i.planned{background:#8b7cff99}.planner-week-legend i.actual{background:#38c9a2}
+@media(max-width:480px){.planner-week-overview{padding:14px}.planner-week-bars{gap:5px}.planner-week-bar{width:27px}.planner-week-totals b{font-size:15px}}
