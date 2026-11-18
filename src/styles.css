@@ -665,3 +665,15 @@ body.light .subtask-row{color:#4d5670}
 @media(prefers-reduced-motion:reduce){
   .atomic-scene .atom-orbit{will-change:auto}
 }
+
+/* Smart next-step coach — additive dashboard module. */
+.focus-coach-card{position:relative;display:flex;align-items:center;gap:18px;overflow:hidden;margin:0 0 22px;padding:20px 22px;border:1px solid #8b7cff38;border-radius:20px;background:radial-gradient(ellipse at 0% 0%,#8b7cff20,transparent 55%),linear-gradient(120deg,#15172b,#101827);box-shadow:0 14px 38px #05071335}
+.focus-coach-orb{flex:0 0 48px;width:48px;height:48px;display:grid;place-items:center;border-radius:50%;color:#d9d0ff;font-size:24px;background:radial-gradient(circle at 35% 30%,#b9a5ff,#7656d9 52%,#29264f);box-shadow:0 0 22px #9275ff65,0 0 48px #7656d933;animation:coachPulse 3.8s ease-in-out infinite}
+.focus-coach-copy{min-width:0;flex:1}.focus-coach-copy h3{margin:4px 0 5px;color:var(--text,#f5f5ff);font-size:18px}.focus-coach-copy p{margin:0;color:var(--muted,#a4a9bd);font-size:13px;line-height:1.55}.focus-coach-copy p b{color:var(--text,#fff)}
+.focus-coach-meta{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:10px;color:#b8aaff;font-size:11px}
+.focus-coach-start{flex:0 0 auto;min-height:44px;padding:0 16px;border:1px solid #a994ff66;border-radius:13px;color:#fff;background:linear-gradient(120deg,#7357d9,#3979a9);font:inherit;font-size:12px;font-weight:750;cursor:pointer;box-shadow:0 7px 20px #6550bb35;transition:transform .2s ease,filter .2s ease}
+.focus-coach-start:hover{transform:translateY(-2px);filter:brightness(1.12)}.focus-coach-start:focus-visible{outline:3px solid #7de4ff;outline-offset:3px}
+@keyframes coachPulse{0%,100%{transform:scale(.96);box-shadow:0 0 18px #9275ff50}50%{transform:scale(1.05);box-shadow:0 0 30px #9275ff88,0 0 55px #7656d944}}
+body.light .focus-coach-card{background:linear-gradient(120deg,#f1edff,#f3f7ff);border-color:#8b7cff55}body.light .focus-coach-copy h3{color:#24213b}body.light .focus-coach-copy p{color:#565b70}body.light .focus-coach-copy p b{color:#24213b}
+@media(max-width:650px){.focus-coach-card{align-items:flex-start;flex-wrap:wrap;padding:17px;gap:12px}.focus-coach-orb{width:40px;height:40px;flex-basis:40px;font-size:20px}.focus-coach-copy{flex-basis:calc(100% - 56px)}.focus-coach-start{width:100%}}
+@media(prefers-reduced-motion:reduce){.focus-coach-orb{animation:none}.focus-coach-start{transition:none}}
