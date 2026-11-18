@@ -511,3 +511,45 @@ body.light .subtask-row{color:#4d5670}
   .blackhole-scene{transition:none!important}
   .blackhole-scene .bh-corona{animation:none!important}
 }
+
+/* Atomic System Timer — animated nucleus and independent electron orbits */
+.timer-theme-picker{display:grid;gap:10px;margin:20px 0 16px;max-width:520px}
+.timer-theme-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.timer-theme-option{display:flex;align-items:center;gap:12px;min-width:0;padding:11px 13px;border:1px solid var(--line);border-radius:15px;background:var(--panel,rgba(255,255,255,.035));color:var(--text);text-align:left;cursor:pointer;transition:border-color .25s,background .25s,transform .25s,box-shadow .25s}
+.timer-theme-option.active{border-color:#9b83ff;box-shadow:0 0 0 2px #9b83ff22,0 8px 26px #7862ff18;background:linear-gradient(135deg,#8b7cff18,transparent)}
+.timer-theme-option:active{transform:scale(.98)}
+.timer-theme-option>span:last-child{display:grid;gap:3px;min-width:0}
+.timer-theme-option b{font-size:12px}.timer-theme-option small{font-size:10px;color:var(--muted)}
+.theme-preview{position:relative;display:block;flex:0 0 42px;width:42px;height:42px;border-radius:50%;overflow:hidden;background:#090c1b}
+.theme-preview-blackhole:before{content:"";position:absolute;inset:10px 3px;border:4px solid #bd8cff;border-left-color:#5bdfff;border-right-color:#ffb36e;border-radius:50%;transform:rotate(-25deg);box-shadow:0 0 13px #a77cff}
+.theme-preview-blackhole:after{content:"";position:absolute;inset:15px;border-radius:50%;background:#02030a;box-shadow:0 0 10px #b38cff}
+.theme-preview-atomic i{position:absolute;left:50%;top:50%;width:35px;height:15px;margin:-7.5px 0 0 -17.5px;border:1px solid #6edfff;border-radius:50%}
+.theme-preview-atomic i:nth-child(2){transform:rotate(60deg);border-color:#b78cff}.theme-preview-atomic i:nth-child(3){transform:rotate(120deg);border-color:#65eac4}
+.theme-preview-atomic:after{content:"";position:absolute;left:17px;top:17px;width:8px;height:8px;border-radius:50%;background:#fff1a8;box-shadow:0 0 10px 4px #ffb85c}
+.atomic-focus-screen{background:radial-gradient(ellipse at 50% 48%,#142e4b 0%,#090e20 42%,#040610 78%)}
+.atomic-scene{--atom-speed:7s;--atom-hue:0deg;position:relative;width:min(78vw,480px);height:min(78vw,480px);max-width:480px;max-height:480px;min-width:250px;min-height:250px;display:grid;place-items:center;isolation:isolate;filter:hue-rotate(var(--atom-hue)) saturate(1.18);transition:filter 120s linear}
+.atomic-scene[data-focus-level="1"]{--atom-speed:7s}.atomic-scene[data-focus-level="2"]{--atom-speed:6.4s}.atomic-scene[data-focus-level="3"]{--atom-speed:5.8s}.atomic-scene[data-focus-level="4"]{--atom-speed:5.1s}.atomic-scene[data-focus-level="5"]{--atom-speed:4.4s}.atomic-scene[data-focus-level="6"]{--atom-speed:3.7s}
+.atomic-scene[data-color-cycle="0"]{--atom-hue:0deg}.atomic-scene[data-color-cycle="1"]{--atom-hue:55deg}.atomic-scene[data-color-cycle="2"]{--atom-hue:115deg}.atomic-scene[data-color-cycle="3"]{--atom-hue:180deg}.atomic-scene[data-color-cycle="4"]{--atom-hue:245deg}.atomic-scene[data-color-cycle="5"]{--atom-hue:305deg}
+.atom-aura{position:absolute;inset:13%;border-radius:50%;background:radial-gradient(circle,#5bdfff20 0%,#9a7cff0b 42%,transparent 70%);filter:blur(12px);animation:atomAura 4s ease-in-out infinite}
+.atom-orbit{position:absolute;left:50%;top:50%;width:90%;height:35%;margin:-17.5% 0 0 -45%;border:1.5px solid #78dcff9c;border-radius:50%;transform-style:preserve-3d;box-shadow:0 0 18px #58cfff28,inset 0 0 16px #58cfff12;animation:atomOrbit var(--atom-speed) linear infinite}
+.atom-orbit.orbit-two{transform:rotate(60deg);border-color:#b99affaa;animation-duration:calc(var(--atom-speed) * 1.13)}
+.atom-orbit.orbit-three{transform:rotate(120deg);border-color:#65eac4aa;animation-duration:calc(var(--atom-speed) * .87)}
+.electron{position:absolute;left:50%;top:-7px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0 12%,#bdf5ff 30%,#4dcaff 65%,#2874ff);box-shadow:0 0 9px 3px #60dfff,0 0 24px 7px #4e9cff88}
+.electron-two{background:radial-gradient(circle at 35% 30%,#fff 0 12%,#e6d3ff 30%,#ae7cff 70%,#654bff);box-shadow:0 0 9px 3px #bd9aff,0 0 24px 7px #946aff88}
+.electron-three{background:radial-gradient(circle at 35% 30%,#fff 0 12%,#caffed 30%,#54e8bb 70%,#20a98c);box-shadow:0 0 9px 3px #6cf0ca,0 0 24px 7px #54dcb488}
+.atom-nucleus{position:absolute;z-index:2;width:72px;height:72px;border-radius:50%;display:grid;grid-template-columns:repeat(2,1fr);place-items:center;padding:13px;background:radial-gradient(circle at 35% 30%,#fff6cf,#ffbd65 28%,#d66aff 58%,#5e4bba 78%,#11162e);box-shadow:0 0 24px #ffcb7c,0 0 65px #b16cffaa,0 0 125px #4ccfff44;animation:nucleusPulse 3.6s ease-in-out infinite}
+.atom-nucleus i{width:17px;height:17px;border-radius:50%;background:radial-gradient(circle at 30% 25%,#fff,#ff9b78 45%,#b24d9c);box-shadow:0 0 8px #ffb2a4}
+.atom-nucleus i:nth-child(2),.atom-nucleus i:nth-child(3){background:radial-gradient(circle at 30% 25%,#fff,#a8dfff 45%,#4773ce)}
+.atom-energy-rings{position:absolute;inset:5%;border:1px solid #8bdfff25;border-radius:50%;animation:atomAura 6s ease-in-out infinite reverse}
+.atom-energy-rings i{position:absolute;inset:8%;border:1px solid #b79cff35;border-radius:50%}.atom-energy-rings i:nth-child(2){inset:17%;border-color:#66e8d833}.atom-energy-rings i:nth-child(3){inset:26%;border-color:#ffc47b33}
+@keyframes atomOrbit{from{rotate:0deg}to{rotate:360deg}}
+@keyframes atomAura{0%,100%{opacity:.48;transform:scale(.96)}50%{opacity:1;transform:scale(1.05)}}
+@keyframes nucleusPulse{0%,100%{transform:scale(.96);filter:brightness(.95)}50%{transform:scale(1.08);filter:brightness(1.3)}}
+.atomic-scene .focus-core{z-index:3;background:transparent;border-color:#ffffff28;box-shadow:0 0 28px #8edfff20,inset 0 0 24px #8edfff12}
+.atomic-scene .focus-core:before{border-color:#91eaff88;box-shadow:0 0 25px #75dfff66,inset 0 0 20px #8edfff30}
+.atomic-scene .focus-core strong{color:#c8f4ff;text-shadow:0 0 13px #5bdfff,0 0 34px #9c7cff}
+.atomic-scene[data-focus-level="4"] .atom-nucleus,.atomic-scene[data-focus-level="5"] .atom-nucleus,.atomic-scene[data-focus-level="6"] .atom-nucleus{box-shadow:0 0 32px #ffcb7c,0 0 80px #b16cffcc,0 0 150px #4ccfff77}
+.atomic-scene.is-paused .atom-orbit,.atomic-scene.is-paused .atom-aura,.atomic-scene.is-paused .atom-nucleus,.atomic-scene.is-paused .atom-energy-rings{animation-play-state:paused!important}
+.atomic-scene.is-paused{filter:saturate(.65) brightness(.82)}
+@media(max-width:700px){.timer-theme-options{grid-template-columns:1fr}.atomic-scene{width:min(82vw,390px);height:min(82vw,390px);min-width:235px;min-height:235px}}
+@media(prefers-reduced-motion:reduce){.atomic-scene,.atomic-scene *{animation:none!important;transition:none!important}}
