@@ -27,7 +27,20 @@ function paintTimer() {
   const hours=String(Math.floor(elapsed/3600)).padStart(2,'0');
   const minutes=String(Math.floor(elapsed%3600/60)).padStart(2,'0');
   const seconds=String(elapsed%60).padStart(2,'0');
-  clock.innerHTML=`<span class="time-main">${hours}:${minutes}:</span><span class="time-seconds">${seconds}</span>`;
+  // Keep the clock DOM stable: replacing innerHTML every second can trigger
+  // WebView layout jitter on mobile. Update only the two text nodes.
+  let mainPart=clock.querySelector('.time-main');
+  let secondsPart=clock.querySelector('.time-seconds');
+  if(!mainPart||!secondsPart){
+    clock.replaceChildren();
+    mainPart=document.createElement('span');
+    mainPart.className='time-main';
+    secondsPart=document.createElement('span');
+    secondsPart.className='time-seconds';
+    clock.append(mainPart,secondsPart);
+  }
+  mainPart.textContent=`${hours}:${minutes}:`;
+  secondsPart.textContent=seconds;
   $('#timerToggle')?.classList.toggle('paused',timer.paused);
   const scene=$('#blackholeScene');
   scene?.classList.toggle('is-paused',timer.paused);
