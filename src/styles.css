@@ -553,3 +553,51 @@ body.light .subtask-row{color:#4d5670}
 .atomic-scene.is-paused{filter:saturate(.65) brightness(.82)}
 @media(max-width:700px){.timer-theme-options{grid-template-columns:1fr}.atomic-scene{width:min(82vw,390px);height:min(82vw,390px);min-width:235px;min-height:235px}}
 @media(prefers-reduced-motion:reduce){.atomic-scene,.atomic-scene *{animation:none!important;transition:none!important}}
+
+
+/* Atomic System evolution — one additional electron every ten focused minutes.
+   Glow is driven by elapsed session time and capped to keep effects performant. */
+.atomic-scene{
+  --atom-glow:0;
+  --atom-glow-alpha:calc(.22 + var(--atom-glow) * .78);
+}
+.atomic-scene .atom-orbit{
+  box-shadow:
+    0 0 calc(18px + var(--atom-glow) * 30px) #58cfff55,
+    inset 0 0 calc(16px + var(--atom-glow) * 24px) #58cfff30;
+  border-width:calc(1.5px + var(--atom-glow) * 1px);
+  transition:box-shadow 2s ease,border-width 2s ease;
+}
+.atomic-scene .electron{
+  width:calc(13px + var(--atom-glow) * 5px);
+  height:calc(13px + var(--atom-glow) * 5px);
+  box-shadow:0 0 calc(9px + var(--atom-glow) * 15px) 3px #60dfff,
+    0 0 calc(24px + var(--atom-glow) * 42px) 7px #4e9cffaa;
+  filter:brightness(calc(1 + var(--atom-glow) * .75));
+  animation:electronSpark 2.4s ease-in-out infinite alternate;
+  animation-delay:calc(var(--electron-angle,0deg) / -90deg * 1s);
+}
+.atomic-scene .electron-two{box-shadow:0 0 calc(9px + var(--atom-glow) * 15px) 3px #bd9aff,0 0 calc(24px + var(--atom-glow) * 42px) 7px #946affaa}
+.atomic-scene .electron-three{box-shadow:0 0 calc(9px + var(--atom-glow) * 15px) 3px #6cf0ca,0 0 calc(24px + var(--atom-glow) * 42px) 7px #54dcb4aa}
+.atomic-scene .atom-nucleus{
+  box-shadow:0 0 calc(24px + var(--atom-glow) * 34px) #ffcb7c,
+    0 0 calc(65px + var(--atom-glow) * 75px) #b16cffcc,
+    0 0 calc(125px + var(--atom-glow) * 100px) #4ccfff88;
+  filter:brightness(calc(1 + var(--atom-glow) * .55));
+  transition:box-shadow 2s ease,filter 2s ease;
+}
+.atomic-scene .atom-aura{
+  opacity:calc(.48 + var(--atom-glow) * .52);
+  filter:blur(calc(12px + var(--atom-glow) * 12px));
+  transition:filter 2s ease,opacity 2s ease;
+}
+.atomic-scene .atom-energy-rings{
+  box-shadow:0 0 calc(18px + var(--atom-glow) * 42px) #8bdfff66;
+  transition:box-shadow 2s ease;
+}
+@keyframes electronSpark{
+  from{filter:brightness(1);scale:.92}
+  to{filter:brightness(1.65);scale:1.12}
+}
+.atomic-scene.is-paused .electron{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){.atomic-scene .electron{animation:none!important}}
