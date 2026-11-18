@@ -66,7 +66,12 @@ function paintTimer() {
         const electron=document.createElement('i');
         electron.className='electron '+(['electron-one','electron-two','electron-three'][index%3]);
         electron.dataset.electronIndex=String(index);
-        electron.style.setProperty('--electron-angle',String(Math.floor(index/3)*31+(index%3)*7)+'deg');
+        const orbitIndex=index%orbits.length;
+        const slot=Math.floor(index/orbits.length);
+        const orbitCount=Math.ceil((electronCount-orbitIndex)/orbits.length);
+        const angle=(360*slot/Math.max(1,orbitCount))+'deg';
+        electron.style.setProperty('--electron-angle',angle);
+        electron.style.setProperty('--electron-radius',(atomic.getBoundingClientRect().height*.175)+'px');
         orbit.appendChild(electron);
       }
     }
