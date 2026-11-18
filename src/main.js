@@ -18,6 +18,7 @@ let plannerDay = new Date().getDay();
 let dashboardCustomize = false;
 let dashboardChartType = store.data.settings.dashboardChartType || 'bar';
 let timerScreenActive=false;
+let timerTheme=store.data.settings.timerTheme||'blackhole';
 let timerRenderInterval=null;
 function stopTimerRenderLoop(){if(timerRenderInterval!==null){clearInterval(timerRenderInterval);timerRenderInterval=null;}}
 
@@ -42,7 +43,7 @@ function paintTimer() {
   mainPart.textContent=`${hours}:${minutes}:`;
   secondsPart.textContent=seconds;
   $('#timerToggle')?.classList.toggle('paused',timer.paused);
-  const scene=$('#blackholeScene');
+  const scene=$('#blackholeScene')||$('#atomicScene');
   scene?.classList.toggle('is-paused',timer.paused);
   scene?.style.setProperty('--bh-energy',String(Math.min(1,0.25+elapsed/7200)));
   // Visual energy rises one level every 2 focused minutes (six levels total).
@@ -206,7 +207,7 @@ function overview(t,subjects) {
   return `
   <section class="dash-hero" data-dashboard-widget="hero">
     <div class="dash-hero-copy"><span class="eyebrow">YOUR PERSONAL STUDY OS · ${today.toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})}</span><h2>${greeting}. <em>Ready to focus?</em></h2><p>Small, consistent sessions build remarkable progress. Make this session count.</p>
-      <div class="dash-actions"><button class="primary" id="startFocus">▶ Start focus session</button><button class="dash-secondary" data-page="planner">View today's plan ↗</button></div>
+      <div class="timer-theme-picker" aria-label="Choose timer theme"><span class="eyebrow">CHOOSE YOUR TIMER WORLD</span><div class="timer-theme-options"><button type="button" class="timer-theme-option ${timerTheme==='blackhole'?'active':''}" data-timer-theme="blackhole" aria-pressed="${timerTheme==='blackhole'}"><span class="theme-preview theme-preview-blackhole"><i></i></span><span><b>Black Hole</b><small>Cosmic gravity</small></span></button><button type="button" class="timer-theme-option ${timerTheme==='atomic'?'active':''}" data-timer-theme="atomic" aria-pressed="${timerTheme==='atomic'}"><span class="theme-preview theme-preview-atomic"><i></i><i></i><i></i></span><span><b>Atomic System</b><small>Orbiting electrons</small></span></button></div></div><div class="dash-actions"><button class="primary" id="startFocus">▶ Start focus session</button><button class="dash-secondary" data-page="planner">View today's plan ↗</button></div>
       <div class="dash-hero-meta"><span><i class="online-dot"></i> Offline-first · Your data stays on this device</span><span>🔥 ${streak} day streak</span></div>
     </div>
     <div class="dash-goal-ring" role="progressbar" aria-label="Daily focus goal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}" aria-valuetext="${progress}% of daily goal; ${fmt(t.today)} focused" style="--goal-progress:${progress}%"><div><strong>${progress}%</strong><small>DAILY GOAL</small><span>${fmt(remaining)} left</span></div></div>
@@ -349,6 +350,7 @@ function bind(){
     }
   });
   document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>{page=b.dataset.page;render()}));
+  document.querySelectorAll('[data-timer-theme]').forEach(b=>b.addEventListener('click',()=>{const next=b.dataset.timerTheme;if(!['blackhole','atomic'].includes(next))return;try{store.setTimerTheme(next);timerTheme=next;render();toast(next==='atomic'?'Atomic System selected':'Black Hole selected','success')}catch(error){toast(error.message||'Theme could not be saved','error')}}));
   $('#moreNavToggle')?.addEventListener('click',()=>{const menu=$('#mobileMore');menu.hidden=!menu.hidden;});
   document.querySelectorAll('[data-subject]').forEach(b=>b.addEventListener('click',()=>{selectedSubject=b.dataset.subject;render()}));
   $('#startFocus')?.addEventListener('click',()=>{if(!selectedSubject&&store.data.subjects[0])selectedSubject=store.data.subjects[0].id;if(!selectedSubject){alert('Please add a subject first.');page='subjects';render();return}showTimer();});
@@ -415,7 +417,9 @@ function showTimer(){
   stopTimerRenderLoop();
   syncNativeFocusTimer(timer,store.subjectName(timer.subjectId));
   if(!history.state?.focusFlowTimer)history.pushState({focusFlowTimer:true},'','#focus');
-  $('#app').innerHTML=`<div class="focus-screen"><button type="button" class="exit-focus" id="exitFocus" aria-label="Exit focus screen" title="Exit focus screen">×</button><div class="space-particles" aria-hidden="true"></div><div class="focus-nebula" aria-hidden="true"></div><div class="focus-orbit orbit-a" aria-hidden="true"></div><div class="focus-orbit orbit-b" aria-hidden="true"></div><div class="blackhole-scene ${timer.paused?'is-paused':''}" id="blackholeScene"><div class="bh-starfield" aria-hidden="true"></div><div class="bh-lensing" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-a" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-b" aria-hidden="true"></div><div class="bh-light-beams" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-energy-waves" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-disk bh-disk-outer" aria-hidden="true"></div><div class="bh-disk bh-disk-inner" aria-hidden="true"></div><div class="bh-corona" aria-hidden="true"></div><button class="focus-core" id="timerToggle" aria-label="Pause or resume focus timer"><strong id="clock" aria-live="off">00:00:00</strong></button><span class="bh-particle bh-particle-a" aria-hidden="true"></span><span class="bh-particle bh-particle-b" aria-hidden="true"></span><span class="bh-particle bh-particle-c" aria-hidden="true"></span></div><div class="focus-session-controls"><button type="button" class="finish-session-btn" id="finishFocus" aria-label="Finish focus session">Finish Session</button></div></div>`;
+  const atomicScene='<div class="atomic-scene '+(timer.paused?'is-paused':'')+'" id="atomicScene"><div class="atom-aura"></div><div class="atom-orbit orbit-one"><i class="electron electron-one"></i></div><div class="atom-orbit orbit-two"><i class="electron electron-two"></i></div><div class="atom-orbit orbit-three"><i class="electron electron-three"></i></div><div class="atom-nucleus"><i></i><i></i><i></i><i></i></div><div class="atom-energy-rings"><i></i><i></i><i></i></div><button class="focus-core" id="timerToggle" aria-label="Pause or resume focus timer"><strong id="clock" aria-live="off">00:00:00</strong></button></div>';
+  const blackholeScene='<div class="blackhole-scene '+(timer.paused?'is-paused':'')+'" id="blackholeScene"><div class="bh-starfield" aria-hidden="true"></div><div class="bh-lensing" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-a" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-b" aria-hidden="true"></div><div class="bh-light-beams" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-energy-waves" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-disk bh-disk-outer" aria-hidden="true"></div><div class="bh-disk bh-disk-inner" aria-hidden="true"></div><div class="bh-corona" aria-hidden="true"></div><button class="focus-core" id="timerToggle" aria-label="Pause or resume focus timer"><strong id="clock" aria-live="off">00:00:00</strong></button><span class="bh-particle bh-particle-a" aria-hidden="true"></span><span class="bh-particle bh-particle-b" aria-hidden="true"></span><span class="bh-particle bh-particle-c" aria-hidden="true"></span></div>';
+  $('#app').innerHTML='<div class="focus-screen '+(timerTheme==='atomic'?'atomic-focus-screen':'')+'"><button type="button" class="exit-focus" id="exitFocus" aria-label="Exit focus screen" title="Exit focus screen">×</button><div class="space-particles" aria-hidden="true"></div><div class="focus-nebula" aria-hidden="true"></div><div class="focus-orbit orbit-a" aria-hidden="true"></div><div class="focus-orbit orbit-b" aria-hidden="true"></div>'+(timerTheme==='atomic'?atomicScene:blackholeScene)+'<div class="focus-session-controls"><button type="button" class="finish-session-btn" id="finishFocus" aria-label="Finish focus session">Finish Session</button></div></div>';
   paintTimer();
   timerRenderInterval=setInterval(()=>{if(!$('#clock')){stopTimerRenderLoop();return}paintTimer();},1000);
   $('#timerToggle').addEventListener('click',()=>{try{timer.toggle();}catch(error){toast(error.message,'error');}});
