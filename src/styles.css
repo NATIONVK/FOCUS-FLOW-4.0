@@ -602,3 +602,66 @@ body.light .subtask-row{color:#4d5670}
 @media(prefers-reduced-motion:reduce){.atomic-scene .electron{animation:none!important}}
 
 .atomic-scene .atom-orbit .electron{left:50%;top:50%;transform:translate(-50%,-50%) rotate(var(--electron-angle,0deg)) translateY(calc(var(--electron-radius,42px) * -1));}
+
+
+/* Atomic System 3D orbital geometry — three genuinely tilted orbital planes. */
+.atomic-scene{
+  perspective:1050px;
+  perspective-origin:50% 48%;
+  transform-style:preserve-3d;
+}
+.atomic-scene .atom-aura,
+.atomic-scene .atom-energy-rings,
+.atomic-scene .atom-nucleus,
+.atomic-scene .atom-orbit{
+  transform-style:preserve-3d;
+  backface-visibility:visible;
+}
+.atomic-scene .atom-orbit{
+  width:94%;
+  height:38%;
+  margin:-19% 0 0 -47%;
+  border-width:1.4px;
+  transform-origin:50% 50%;
+  will-change:rotate;
+}
+.atomic-scene .atom-orbit.orbit-one{
+  transform:rotateX(68deg) rotateY(-22deg);
+  border-color:#78dcffbd;
+}
+.atomic-scene .atom-orbit.orbit-two{
+  transform:rotateX(68deg) rotateY(43deg) rotateZ(60deg);
+  border-color:#c3a0ffbd;
+}
+.atomic-scene .atom-orbit.orbit-three{
+  transform:rotateX(68deg) rotateY(-62deg) rotateZ(120deg);
+  border-color:#65eac4bd;
+}
+.atomic-scene .atom-orbit:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border:inherit;
+  border-radius:50%;
+  opacity:.32;
+  filter:blur(5px);
+  pointer-events:none;
+}
+.atomic-scene .atom-orbit .electron{
+  transform-style:preserve-3d;
+  backface-visibility:visible;
+  z-index:2;
+}
+.atomic-scene .atom-nucleus{
+  transform:translateZ(12px);
+}
+.atomic-scene .atom-energy-rings{
+  transform:rotateX(72deg) rotateY(-12deg) translateZ(-12px);
+}
+.atomic-scene.is-paused .atom-orbit{will-change:auto}
+@media(max-width:700px){
+  .atomic-scene{perspective:850px}
+}
+@media(prefers-reduced-motion:reduce){
+  .atomic-scene .atom-orbit{will-change:auto}
+}
