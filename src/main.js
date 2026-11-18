@@ -45,9 +45,12 @@ function paintTimer() {
   const scene=$('#blackholeScene');
   scene?.classList.toggle('is-paused',timer.paused);
   scene?.style.setProperty('--bh-energy',String(Math.min(1,0.25+elapsed/7200)));
-  const level=Math.min(5,Math.floor(elapsed/1800)); // six visual energy levels, one step per 30 focused minutes
-  scene?.setAttribute('data-focus-level',String(level+1));
-  scene?.setAttribute('data-second-step',String(Math.floor((elapsed%60)/5)));
+  // Visual energy rises one level every 2 focused minutes (six levels total).
+  const level=Math.min(6,Math.floor(elapsed/120)+1);
+  scene?.setAttribute('data-focus-level',String(level));
+  // Rotate the complete scene palette every 10 minutes. CSS eases each
+  // palette shift over 120 seconds, so the transition is never abrupt.
+  scene?.setAttribute('data-color-cycle',String(Math.floor(elapsed/600)%6));
 }
 
 function updateStorageStatus(){
