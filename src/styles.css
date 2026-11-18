@@ -450,3 +450,64 @@ body.light .subtask-row{color:#4d5670}
   text-align:left;
   font-variant-numeric:tabular-nums;
 }
+
+
+/* Black Hole Timer 5.0 — cinematic energy ramp + slow full-scene colour cycles */
+@property --bh-hue {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.blackhole-scene{
+  --bh-animation-speed:8s;
+  filter:hue-rotate(var(--bh-hue,0deg)) saturate(1.16) brightness(1.035);
+  transition:filter 120s linear;
+}
+.blackhole-scene[data-color-cycle="0"]{--bh-hue:0deg}
+.blackhole-scene[data-color-cycle="1"]{--bh-hue:60deg}
+.blackhole-scene[data-color-cycle="2"]{--bh-hue:120deg}
+.blackhole-scene[data-color-cycle="3"]{--bh-hue:180deg}
+.blackhole-scene[data-color-cycle="4"]{--bh-hue:240deg}
+.blackhole-scene[data-color-cycle="5"]{--bh-hue:300deg}
+
+/* Every two minutes the accretion disk, waves and light trails gain energy. */
+.blackhole-scene[data-focus-level="1"]{--bh-animation-speed:8s}
+.blackhole-scene[data-focus-level="2"]{--bh-animation-speed:7s}
+.blackhole-scene[data-focus-level="3"]{--bh-animation-speed:6s}
+.blackhole-scene[data-focus-level="4"]{--bh-animation-speed:5s}
+.blackhole-scene[data-focus-level="5"]{--bh-animation-speed:4s}
+.blackhole-scene[data-focus-level="6"]{--bh-animation-speed:3.2s}
+.blackhole-scene .bh-energy-waves i{animation-duration:var(--bh-animation-speed)}
+.blackhole-scene .bh-disk-outer{animation-duration:calc(var(--bh-animation-speed) * 1.5)}
+.blackhole-scene .bh-disk-inner{animation-duration:var(--bh-animation-speed)}
+.blackhole-scene .bh-lensing-arc{animation-duration:calc(var(--bh-animation-speed) * 1.2)}
+.blackhole-scene .bh-particle{animation-duration:calc(var(--bh-animation-speed) * 1.15)}
+.blackhole-scene .bh-light-beams i{animation-duration:calc(var(--bh-animation-speed) * 2)}
+.blackhole-scene .bh-starfield{animation-duration:calc(var(--bh-animation-speed) * 4)}
+.blackhole-scene .bh-lensing{animation-duration:calc(var(--bh-animation-speed) * .85)}
+
+/* Richer plasma corona and gravitational shimmer, while retaining the dark core. */
+.blackhole-scene .bh-corona{
+  animation:coronaBreath 5.5s ease-in-out infinite;
+  transition:box-shadow 2s ease,background 2s ease;
+}
+@keyframes coronaBreath{
+  0%,100%{filter:brightness(.92) saturate(1.05);transform:translateZ(17px) scale(.985)}
+  50%{filter:brightness(1.22) saturate(1.35);transform:translateZ(17px) scale(1.035)}
+}
+.blackhole-scene[data-focus-level="2"] .bh-corona,
+.blackhole-scene[data-focus-level="3"] .bh-corona{box-shadow:0 0 46px #a98affaa,0 0 125px #6f5cff88,0 0 190px #52cfff30}
+.blackhole-scene[data-focus-level="4"] .bh-corona,
+.blackhole-scene[data-focus-level="5"] .bh-corona,
+.blackhole-scene[data-focus-level="6"] .bh-corona{box-shadow:0 0 58px #ffbd8baa,0 0 150px #c17aff99,0 0 220px #52dfff44}
+.blackhole-scene[data-focus-level="4"] .bh-energy-waves i,
+.blackhole-scene[data-focus-level="5"] .bh-energy-waves i,
+.blackhole-scene[data-focus-level="6"] .bh-energy-waves i{border-width:2px;box-shadow:0 0 24px #b99aff77,inset 0 0 22px #8e75ff44}
+.blackhole-scene[data-focus-level="5"] .bh-disk-outer,
+.blackhole-scene[data-focus-level="6"] .bh-disk-outer{filter:blur(2px) drop-shadow(0 0 42px #c39aff);opacity:1}
+.blackhole-scene[data-focus-level="6"] .bh-light-beams i{opacity:.9;filter:drop-shadow(0 0 13px #e6d0ff)}
+.blackhole-scene.is-paused .bh-corona{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){
+  .blackhole-scene{transition:none!important}
+  .blackhole-scene .bh-corona{animation:none!important}
+}
