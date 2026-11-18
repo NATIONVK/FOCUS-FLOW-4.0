@@ -575,7 +575,6 @@ body.light .subtask-row{color:#4d5670}
     0 0 calc(24px + var(--atom-glow) * 42px) 7px #4e9cffaa;
   filter:brightness(calc(1 + var(--atom-glow) * .75));
   animation:electronSpark 2.4s ease-in-out infinite alternate;
-  animation-delay:calc(var(--electron-angle,0deg) / -90deg * 1s);
 }
 .atomic-scene .electron-two{box-shadow:0 0 calc(9px + var(--atom-glow) * 15px) 3px #bd9aff,0 0 calc(24px + var(--atom-glow) * 42px) 7px #946affaa}
 .atomic-scene .electron-three{box-shadow:0 0 calc(9px + var(--atom-glow) * 15px) 3px #6cf0ca,0 0 calc(24px + var(--atom-glow) * 42px) 7px #54dcb4aa}
@@ -601,3 +600,5 @@ body.light .subtask-row{color:#4d5670}
 }
 .atomic-scene.is-paused .electron{animation-play-state:paused!important}
 @media(prefers-reduced-motion:reduce){.atomic-scene .electron{animation:none!important}}
+
+.atomic-scene .atom-orbit .electron{left:50%;top:50%;transform:translate(-50%,-50%) rotate(var(--electron-angle,0deg)) translateY(calc(var(--electron-radius,42px) * -1));}
