@@ -228,6 +228,9 @@ function overview(t,subjects) {
   const taskPriorityRank={high:0,medium:1,low:2};
   const nextTasks=[...todayTasks].sort((a,b)=>(a.dueDate||'9999').localeCompare(b.dueDate||'9999')||(taskPriorityRank[a.priority||'medium']-taskPriorityRank[b.priority||'medium'])||a.title.localeCompare(b.title)).slice(0,4);
   const greeting=today.getHours()<12?'Good morning':today.getHours()<17?'Good afternoon':'Good evening';
+  const coachSubject=topSubject?.seconds?topSubject.subject:(subjects.find(s=>s.id===selectedSubject)||subjects[0]);
+  const coachMinutes=remaining>50*60?50:25;
+  const coachTask=nextTasks[0];
   return `
   <section class="dash-hero" data-dashboard-widget="hero">
     <div class="dash-hero-copy"><span class="eyebrow">YOUR PERSONAL STUDY OS · ${today.toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})}</span><h2>${greeting}. <em>Ready to focus?</em></h2><p>Small, consistent sessions build remarkable progress. Make this session count.</p>
@@ -235,6 +238,16 @@ function overview(t,subjects) {
       <div class="dash-hero-meta"><span><i class="online-dot"></i> Offline-first · Your data stays on this device</span><span>🔥 ${streak} day streak</span></div>
     </div>
     <div class="dash-goal-ring" role="progressbar" aria-label="Daily focus goal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}" aria-valuetext="${progress}% of daily goal; ${fmt(t.today)} focused" style="--goal-progress:${progress}%"><div><strong>${progress}%</strong><small>DAILY GOAL</small><span>${fmt(remaining)} left</span></div></div>
+  </section>
+  <section class="focus-coach-card" aria-labelledby="focusCoachTitle">
+    <div class="focus-coach-orb" aria-hidden="true">✦</div>
+    <div class="focus-coach-copy">
+      <span class="eyebrow">FOCUS FLOW · SMART NEXT STEP</span>
+      <h3 id="focusCoachTitle">Your next move</h3>
+      <p>${coachTask?'Start with “'+esc(coachTask.title)+'”':'Build momentum with one distraction-free study block.'} ${coachSubject?'Suggested subject: <b>'+esc(coachSubject.name)+'</b>.':'Choose a subject to begin.'}</p>
+      <div class="focus-coach-meta"><span>◷ ${coachMinutes}-minute focus suggestion</span><span>◎ ${fmt(remaining)} daily goal remaining</span></div>
+    </div>
+    ${coachSubject?'<button type="button" class="focus-coach-start" data-focus-coach-start="'+esc(coachSubject.id)+'">Start this focus ↗</button>':'<button type="button" class="focus-coach-start" data-page="subjects">Add a subject ↗</button>'}
   </section>
   <section class="dash-kpis" data-dashboard-widget="kpis">
     <article class="dash-kpi"><span class="kpi-icon violet">◷</span><div><small>FOCUS TODAY</small><strong>${(t.today/3600).toFixed(1)} <i>hrs</i></strong><span>${fmt(t.today)} focused</span></div></article>
@@ -377,6 +390,7 @@ function bind(){
   document.querySelectorAll('[data-timer-theme]').forEach(b=>b.addEventListener('click',()=>{const next=b.dataset.timerTheme;if(!['blackhole','atomic'].includes(next))return;try{store.setTimerTheme(next);timerTheme=next;render();toast(next==='atomic'?'Atomic System selected':'Black Hole selected','success')}catch(error){toast(error.message||'Theme could not be saved','error')}}));
   $('#moreNavToggle')?.addEventListener('click',()=>{const menu=$('#mobileMore');menu.hidden=!menu.hidden;});
   document.querySelectorAll('[data-subject]').forEach(b=>b.addEventListener('click',()=>{selectedSubject=b.dataset.subject;render()}));
+  document.querySelectorAll('[data-focus-coach-start]').forEach(button=>button.addEventListener('click',()=>{const id=button.dataset.focusCoachStart;if(!store.data.subjects.some(subject=>subject.id===id))return;selectedSubject=id;showTimer();}));
   $('#startFocus')?.addEventListener('click',()=>{if(!selectedSubject&&store.data.subjects[0])selectedSubject=store.data.subjects[0].id;if(!selectedSubject){alert('Please add a subject first.');page='subjects';render();return}showTimer();});
   $('#addSubject')?.addEventListener('click',async()=>{const name=await askText('Add a subject','e.g. Statistics');if(name){try{store.addSubject(name);render();toast('Subject added','success')}catch(e){toast(e.message,'error')}}});
   document.querySelectorAll('[data-edit-subject]').forEach(b=>b.addEventListener('click',async()=>{const s=store.data.subjects.find(x=>x.id===b.dataset.editSubject);const name=await askText('Edit subject name','Subject name',s?.name||'');if(name){try{store.editSubject(s.id,name);render();toast('Subject updated','success')}catch(e){toast(e.message,'error')}}}));
