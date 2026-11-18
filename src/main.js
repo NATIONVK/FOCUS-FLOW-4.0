@@ -52,6 +52,25 @@ function paintTimer() {
   // Rotate the complete scene palette every 10 minutes. CSS eases each
   // palette shift over 120 seconds, so the transition is never abrupt.
   scene?.setAttribute('data-color-cycle',String(Math.floor(elapsed/600)%6));
+  if(scene?.id==='atomicScene'){
+    const atomic=$('#atomicScene');
+    const electronCount=3+Math.floor(elapsed/600);
+    atomic.style.setProperty('--atom-glow',String(Math.min(1,elapsed/3600)));
+    atomic.style.setProperty('--atom-electron-count',String(electronCount));
+    const orbits=[...atomic.querySelectorAll('.atom-orbit')];
+    const current=atomic.querySelectorAll('.electron').length;
+    if(current!==electronCount){
+      orbits.forEach(orbit=>orbit.replaceChildren());
+      for(let index=0;index<electronCount;index++){
+        const orbit=orbits[index%orbits.length];
+        const electron=document.createElement('i');
+        electron.className='electron '+(['electron-one','electron-two','electron-three'][index%3]);
+        electron.dataset.electronIndex=String(index);
+        electron.style.setProperty('--electron-angle',String(Math.floor(index/3)*31+(index%3)*7)+'deg');
+        orbit.appendChild(electron);
+      }
+    }
+  }
 }
 
 function updateStorageStatus(){
