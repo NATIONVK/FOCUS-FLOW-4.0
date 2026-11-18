@@ -704,3 +704,33 @@ body.light .focus-coach-card{background:linear-gradient(120deg,#f1edff,#f3f7ff);
 .daily-reflection-actions button{min-height:42px}
 @media(max-width:520px){.daily-reflection{padding:15px}.daily-reflection-actions{align-items:stretch;flex-direction:column}.daily-reflection-actions button{width:100%}}
 @media(prefers-reduced-motion:reduce){.daily-reflection *{scroll-behavior:auto}}
+
+
+/* Atomic System motion correction:
+   orbital tracks stay geometrically fixed; only their electrons revolve
+   around the stationary nucleus. Keep the existing 3D orbital planes. */
+.atomic-scene .atom-orbit{
+  animation:none!important;
+  transform-origin:50% 50%;
+}
+.atomic-scene .atom-orbit .electron{
+  animation:electronOrbit var(--atom-speed,7s) linear infinite,
+    electronSpark 2.4s ease-in-out infinite alternate;
+  transform-origin:50% 50%;
+}
+@keyframes electronOrbit{
+  from{
+    transform:translate(-50%,-50%) rotate(var(--electron-angle,0deg))
+      translateY(calc(var(--electron-radius,42px) * -1));
+  }
+  to{
+    transform:translate(-50%,-50%) rotate(calc(var(--electron-angle,0deg) + 360deg))
+      translateY(calc(var(--electron-radius,42px) * -1));
+  }
+}
+.atomic-scene.is-paused .atom-orbit{animation:none!important}
+.atomic-scene.is-paused .atom-orbit .electron{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){
+  .atomic-scene .atom-orbit{animation:none!important}
+  .atomic-scene .atom-orbit .electron{animation:none!important}
+}
