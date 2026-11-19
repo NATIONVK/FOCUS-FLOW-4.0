@@ -36,7 +36,8 @@ export function mountBlackHoleFocus(scene){
     scene.classList.toggle('bh3-reduced-motion',current.reducedMotion||matchMedia('(prefers-reduced-motion: reduce)').matches);
     orbit.hidden=!current.particles;
     scene.classList.toggle('bh3-energy-off',!current.energy);
-    scene.style.setProperty('--bh3-progress',String(Math.min(1,elapsed/3600)));
+    scene.style.setProperty('--bh3-progress',String(current.energy ? Math.min(1,Math.max(0,elapsed/3600)) : 0));
+    scene.style.setProperty('--bh3-motion-scale',current.reducedMotion?'0.35':'1');
     scene.classList.toggle('bh3-paused',paused);
   };
 }
