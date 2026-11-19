@@ -1,0 +1,111 @@
+/* Black Hole Focus 4.0 — cinematic but battery-aware motion layer.
+   Additive only: existing timer, scene markup and Atomic System are untouched. */
+.blackhole-scene{
+  --bh3-progress:0;
+  --bh3-motion-scale:1;
+  isolation:isolate;
+  perspective:1100px;
+}
+.blackhole-scene .bh-starfield{
+  background-image:
+    radial-gradient(1px 1px at 12% 18%,#fff 50%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 78% 24%,#d7d0ff 50%,transparent 100%),
+    radial-gradient(1px 1px at 34% 76%,#a8eaff 50%,transparent 100%),
+    radial-gradient(1px 1px at 88% 82%,#fff 50%,transparent 100%);
+  background-size:170px 170px,230px 230px,190px 190px,260px 260px;
+  animation:bh4-star-drift 85s linear infinite;
+  will-change:background-position;
+}
+.blackhole-scene .bh-lensing{
+  transform:translateZ(12px) scale(1.02);
+  filter:drop-shadow(0 0 18px color-mix(in srgb,var(--bh3-glow,#9476ff) 60%,transparent));
+}
+.blackhole-scene .bh-lensing::after{
+  content:"";
+  position:absolute;
+  inset:7%;
+  border:1px solid color-mix(in srgb,var(--bh3-accent,#b5a0ff) 50%,transparent);
+  border-radius:50%;
+  transform:rotateX(68deg) scaleY(.42);
+  box-shadow:0 0 18px color-mix(in srgb,var(--bh3-glow,#9476ff) 30%,transparent),inset 0 0 18px #fff2;
+  animation:bh4-lens-breathe 8s ease-in-out infinite;
+}
+.blackhole-scene .bh-disk{
+  transform-style:preserve-3d;
+  backface-visibility:hidden;
+  will-change:transform,filter;
+}
+.blackhole-scene .bh-disk-outer{
+  filter:drop-shadow(0 0 8px color-mix(in srgb,var(--bh3-glow,#9476ff) 50%,transparent));
+}
+.blackhole-scene .bh-disk-outer::after{
+  content:"";
+  position:absolute;
+  inset:-4%;
+  border-radius:50%;
+  border:1px solid color-mix(in srgb,var(--bh3-accent,#b5a0ff) 55%,transparent);
+  transform:rotateX(68deg) scaleY(.43);
+  animation:bh4-disk-pulse 5.5s ease-in-out infinite;
+}
+.blackhole-scene .bh-disk-inner{
+  filter:brightness(calc(1 + var(--bh3-progress)*.28)) saturate(1.18);
+  box-shadow:0 0 calc(12px + var(--bh3-progress)*28px) var(--bh3-glow,#9476ff);
+}
+.blackhole-scene .bh-corona{
+  transform:translateZ(18px);
+  filter:drop-shadow(0 0 calc(12px + var(--bh3-progress)*24px) var(--bh3-glow,#9476ff));
+  animation:bh4-corona-breathe 6.5s ease-in-out infinite;
+}
+.blackhole-scene .bh-light-beams i{
+  transform-origin:50% 50%;
+  animation:bh4-beam-shimmer 4.8s ease-in-out infinite alternate;
+}
+.blackhole-scene .bh-light-beams i:nth-child(2){animation-delay:-1.6s}
+.blackhole-scene .bh-light-beams i:nth-child(3){animation-delay:-3.2s}
+.blackhole-scene .bh-energy-waves i{
+  border-color:color-mix(in srgb,var(--bh3-accent,#b5a0ff) 55%,transparent);
+  animation:bh4-wave-expand 7s ease-out infinite;
+}
+.blackhole-scene .bh-energy-waves i:nth-child(2){animation-delay:-2.3s}
+.blackhole-scene .bh-energy-waves i:nth-child(3){animation-delay:-4.6s}
+.blackhole-scene .bh-particle{
+  box-shadow:0 0 12px 3px color-mix(in srgb,var(--bh3-accent,#b5a0ff) 70%,transparent);
+  animation:bh4-particle-glint 3.8s ease-in-out infinite alternate;
+}
+.blackhole-scene .bh-particle-b{animation-delay:-1.2s}
+.blackhole-scene .bh-particle-c{animation-delay:-2.4s}
+.blackhole-scene .bh3-orbiters{transform-style:preserve-3d;filter:drop-shadow(0 0 5px var(--bh3-glow,#9476ff))}
+.blackhole-scene .bh3-orbiter{
+  transform:rotate(calc(var(--i)*45deg)) translateX(clamp(105px,19vw,190px)) translateZ(calc((var(--i) - 3)*1px));
+  animation-duration:calc(3.4s / var(--bh3-motion-scale));
+}
+.blackhole-scene.bh3-energy-off{--bh3-progress:0!important}
+.blackhole-scene.bh3-paused *,
+.blackhole-scene.is-paused *{animation-play-state:paused!important}
+.blackhole-scene.bh3-reduced-motion .bh-starfield,
+.blackhole-scene.bh3-reduced-motion .bh-lensing::after,
+.blackhole-scene.bh3-reduced-motion .bh-disk-outer::after,
+.blackhole-scene.bh3-reduced-motion .bh-corona,
+.blackhole-scene.bh3-reduced-motion .bh-light-beams i,
+.blackhole-scene.bh3-reduced-motion .bh-energy-waves i,
+.blackhole-scene.bh3-reduced-motion .bh-particle{
+  animation-duration:30s!important;
+}
+@keyframes bh4-star-drift{to{background-position:170px 85px,-230px 115px,95px -190px,-130px 260px}}
+@keyframes bh4-lens-breathe{0%,100%{opacity:.28;transform:rotateX(68deg) scaleY(.42) scale(.96)}50%{opacity:.8;transform:rotateX(68deg) scaleY(.42) scale(1.04)}}
+@keyframes bh4-disk-pulse{0%,100%{opacity:.2;scale:.98}50%{opacity:.75;scale:1.025}}
+@keyframes bh4-corona-breathe{0%,100%{opacity:.82}50%{opacity:1}}
+@keyframes bh4-beam-shimmer{from{opacity:.18;filter:blur(1px)}to{opacity:.72;filter:blur(3px)}}
+@keyframes bh4-wave-expand{0%{transform:scale(.72);opacity:0}18%{opacity:.48}100%{transform:scale(1.32);opacity:0}}
+@keyframes bh4-particle-glint{from{opacity:.35;filter:brightness(.8)}to{opacity:1;filter:brightness(1.6)}}
+@media(max-width:700px){
+ .blackhole-scene .bh3-orbiter{transform:rotate(calc(var(--i)*45deg)) translateX(112px)}
+ .blackhole-scene .bh-starfield{animation-duration:130s}
+}
+@media(prefers-reduced-motion:reduce){
+ .blackhole-scene .bh-starfield,.blackhole-scene .bh-lensing::after,
+ .blackhole-scene .bh-disk-outer::after,.blackhole-scene .bh-corona,
+ .blackhole-scene .bh-light-beams i,.blackhole-scene .bh-energy-waves i,
+ .blackhole-scene .bh-particle,.blackhole-scene .bh3-orbiters,
+ .blackhole-scene .bh3-orbiter{animation:none!important;will-change:auto}
+}
