@@ -19,7 +19,7 @@ export class ProductivityIntelligence{
   const dailyMean=mean(days30.map(d=>d.seconds));
   const last14=days30.slice(-14).map(d=>d.seconds);
   const trendPerDay=slope(last14);
-  const elapsedWeek=Math.min(7,now.getDay()===0?7:now.getDay()+1);
+  const elapsedWeek=Math.min(7,now.getDay()===0?7:now.getDay());
   const weeklyProjection=weekSeconds/Math.max(1,elapsedWeek)*7;
   const monthStart=new Date(year,now.getMonth(),1);
   const monthElapsed=now.getDate();
