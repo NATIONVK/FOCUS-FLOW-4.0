@@ -734,3 +734,41 @@ body.light .focus-coach-card{background:linear-gradient(120deg,#f1edff,#f3f7ff);
   .atomic-scene .atom-orbit{animation:none!important}
   .atomic-scene .atom-orbit .electron{animation:none!important}
 }
+
+
+/* Atomic System — stable orbit correction.
+   Fixed orbital planes; electrons alone revolve around the stationary nucleus. */
+.atomic-scene .atom-orbit{
+  animation:none!important;
+  transform-origin:50% 50%;
+  will-change:auto;
+}
+.atomic-scene .atom-nucleus{
+  animation:none!important;
+  transform:translateZ(12px);
+}
+.atomic-scene .atom-aura,
+.atomic-scene .atom-energy-rings{
+  animation:none!important;
+  transform-style:preserve-3d;
+}
+.atomic-scene .atom-orbit .electron{
+  animation:atomElectronRevolve var(--electron-period,7s) linear infinite,
+    atomElectronGlow 3.6s ease-in-out infinite alternate!important;
+  transform-origin:50% 50%;
+  will-change:transform;
+}
+.atomic-scene .atom-orbit.orbit-two .electron{--electron-period:8.1s}
+.atomic-scene .atom-orbit.orbit-three .electron{--electron-period:6.2s}
+@keyframes atomElectronRevolve{
+  from{transform:translate(-50%,-50%) rotate(var(--electron-angle,0deg)) translateY(calc(var(--electron-radius,42px)*-1))}
+  to{transform:translate(-50%,-50%) rotate(calc(var(--electron-angle,0deg) + 360deg)) translateY(calc(var(--electron-radius,42px)*-1))}
+}
+@keyframes atomElectronGlow{
+  from{opacity:.82;filter:brightness(1)}
+  to{opacity:1;filter:brightness(1.45)}
+}
+.atomic-scene.is-paused .atom-orbit .electron{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){
+  .atomic-scene .atom-orbit .electron{animation:none!important}
+}
