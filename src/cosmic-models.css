@@ -1,0 +1,52 @@
+
+/* Focus Universe: two independent, offline-first animated environments. */
+.timer-theme-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.theme-preview-spiral:before,.theme-preview-binary:before{content:"";position:absolute;inset:6px;border-radius:50%;background:radial-gradient(circle,#fff7d6 0 4%,#f6b4ff 7%,#795dff 19%,transparent 67%)}
+.theme-preview-spiral i{position:absolute;left:50%;top:50%;width:36px;height:12px;border:2px solid #a99aff;border-left-color:#ffe2ae;border-radius:50%;transform:translate(-50%,-50%) rotate(var(--preview-angle,0deg));box-shadow:0 0 9px #a78aff}
+.theme-preview-spiral i:nth-child(2){--preview-angle:60deg}.theme-preview-spiral i:nth-child(3){--preview-angle:120deg}
+.theme-preview-binary i{position:absolute;top:50%;left:50%;width:13px;height:13px;margin:-6.5px;border-radius:50%;background:#8bdfff;box-shadow:0 0 13px 4px #55cfff;transform:translateX(-17px)}
+.theme-preview-binary i:nth-child(2){background:#ffe2a0;box-shadow:0 0 13px 4px #ffb65e;transform:translateX(17px)}
+.theme-preview-binary:after{content:"";position:absolute;inset:5px 9px;border:1px solid #a98cff88;border-radius:50%;transform:rotate(-24deg)}
+.cosmic-model-scene{position:absolute;inset:0;width:100%;height:100%;display:grid;place-items:center;overflow:hidden;isolation:isolate;pointer-events:none}
+.cosmic-model-scene .cosmic-focus-core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;width:min(42vw,250px);height:min(42vw,250px);min-width:190px;min-height:190px;max-width:250px;max-height:250px;padding:0;pointer-events:auto;background:radial-gradient(circle,#050710 0 52%,#0b1021 66%,#1d2140 76%,#5d4c9a 79%,transparent 83%);border:1px solid #c8b5ff88;box-shadow:0 0 30px #a88bff55,0 0 95px #7d69ff44,inset 0 0 36px #6b8bff33}
+.cosmic-model-scene .cosmic-focus-core:before{inset:-7px;border-color:#c6b5ff88;box-shadow:0 0 22px #a78bff88}
+.cosmic-model-scene .cosmic-focus-core strong{font-size:clamp(25px,6vw,42px);letter-spacing:0;color:#e7e0ff;text-shadow:0 0 16px #a98cff}
+.cosmic-model-scene.is-paused *,.cosmic-focus-screen .space-particles,.cosmic-focus-screen .focus-orbit{animation-play-state:paused!important}
+.cosmic-model-scene[data-focus-level="1"]{--cosmic-glow:1}
+.cosmic-model-scene[data-focus-level="2"]{--cosmic-glow:1.12}
+.cosmic-model-scene[data-focus-level="3"]{--cosmic-glow:1.24}
+.cosmic-model-scene[data-focus-level="4"]{--cosmic-glow:1.36}
+.cosmic-model-scene[data-focus-level="5"]{--cosmic-glow:1.48}
+.cosmic-model-scene[data-focus-level="6"]{--cosmic-glow:1.6}
+.cosmic-model-scene[data-color-cycle="0"]{--cosmic-hue:0deg}
+.cosmic-model-scene[data-color-cycle="1"]{--cosmic-hue:18deg}
+.cosmic-model-scene[data-color-cycle="2"]{--cosmic-hue:42deg}
+.cosmic-model-scene[data-color-cycle="3"]{--cosmic-hue:170deg}
+.cosmic-model-scene[data-color-cycle="4"]{--cosmic-hue:235deg}
+.cosmic-model-scene[data-color-cycle="5"]{--cosmic-hue:300deg}
+.spiral-galaxy-scene{background:radial-gradient(ellipse at center,#191432 0,#080b18 42%,#03050d 100%)}
+.cosmic-starfield,.binary-starfield{position:absolute;inset:-10%;background-image:radial-gradient(1px 1px at 12% 18%,#fff 50%,transparent 100%),radial-gradient(1.5px 1.5px at 78% 24%,#d7d0ff 50%,transparent 100%),radial-gradient(1px 1px at 34% 76%,#a8eaff 50%,transparent 100%),radial-gradient(1px 1px at 88% 82%,#fff 50%,transparent 100%),radial-gradient(2px 2px at 52% 12%,#ffd8aa 50%,transparent 100%);background-size:170px 170px,230px 230px,190px 190px,260px 260px,310px 310px;opacity:.8;animation:cosmicStarDrift 90s linear infinite}
+.galaxy-art{position:absolute;width:min(94vmin,900px);height:min(94vmin,900px);overflow:visible;filter:hue-rotate(var(--cosmic-hue,0deg)) saturate(1.25);animation:galaxySlowTurn 150s linear infinite;opacity:.94}
+.galaxy-arms path{fill:none;stroke:url(#galaxyArm);stroke-width:21;stroke-linecap:round;filter:url(#galaxyGlow);opacity:.7}
+.galaxy-arms path:nth-child(even){stroke-width:15;opacity:.5}
+.galaxy-dust circle{fill:#fff3d4;filter:drop-shadow(0 0 7px #a98cff);opacity:.85}
+.galaxy-core-glow{position:absolute;width:min(24vmin,190px);height:min(24vmin,190px);border-radius:50%;background:radial-gradient(circle,#fff8d8 0 2%,#ffe0a8 8%,#c18cff 25%,#7662ff44 55%,transparent 72%);filter:blur(3px);box-shadow:0 0 45px #d8a6ff88,0 0 130px #896aff66;animation:galaxyCorePulse 5s ease-in-out infinite}
+.binary-star-scene{background:radial-gradient(ellipse at center,#17162d 0,#080b18 48%,#03050d 100%)}
+.binary-orbit{position:absolute;left:50%;top:50%;width:min(82vw,850px);height:min(42vw,430px);border:1px solid #9f9aff66;border-radius:50%;transform:translate(-50%,-50%) rotate(-18deg);box-shadow:0 0 25px #8d83ff22,inset 0 0 25px #8d83ff11}
+.binary-orbit-wide{animation:binaryOrbit 18s linear infinite}
+.binary-orbit-inner{width:min(60vw,620px);height:min(30vw,310px);border-color:#66dff744;transform:translate(-50%,-50%) rotate(24deg);animation:binaryOrbitReverse 13s linear infinite}
+.binary-star{position:absolute;left:0;top:50%;width:clamp(30px,5vw,62px);height:clamp(30px,5vw,62px);margin:-30px 0 0 -30px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#fff 0 7%,#d7f8ff 20%,#6acfff 54%,#2454a9 78%,transparent 100%);box-shadow:0 0 16px 5px #69cfffaa,0 0 65px 20px #388bff66}
+.binary-star:nth-child(2){left:100%;top:50%;margin:-30px 0 0 -30px}
+.binary-star.star-gold{background:radial-gradient(circle at 34% 28%,#fff 0 7%,#fff1c7 20%,#ffb85d 54%,#c95b4a 78%,transparent 100%);box-shadow:0 0 16px 5px #ffc36caa,0 0 65px 20px #ff984866}
+.binary-star.star-white{width:clamp(18px,3vw,36px);height:clamp(18px,3vw,36px);margin:-18px 0 0 -18px;background:radial-gradient(circle,#fff 0 15%,#a9efff 40%,#398bff 75%);box-shadow:0 0 12px 4px #70dfff}
+.binary-star.star-violet{width:clamp(18px,3vw,36px);height:clamp(18px,3vw,36px);margin:-18px 0 0 -18px;background:radial-gradient(circle,#fff 0 15%,#e3caff 40%,#9567ff 75%);box-shadow:0 0 12px 4px #b28cff}
+.binary-gravity-rings{position:absolute;width:min(52vw,520px);height:min(24vw,240px);border:1px solid #b9a5ff44;border-radius:50%;transform:rotate(-18deg);box-shadow:0 0 35px #a98aff33,inset 0 0 35px #a98aff22;animation:gravityBreath 7s ease-in-out infinite}
+.binary-star-scene .cosmic-focus-core{background:radial-gradient(circle,#03050d 0 52%,#090e20 67%,#282047 77%,#7561b7 80%,transparent 84%)}
+@keyframes cosmicStarDrift{to{background-position:170px 170px,-230px 230px,190px -190px,-260px 260px,310px -310px}}
+@keyframes galaxySlowTurn{to{transform:rotate(360deg)}}
+@keyframes galaxyCorePulse{0%,100%{opacity:.75;transform:scale(.94)}50%{opacity:1;transform:scale(1.08)}}
+@keyframes binaryOrbit{to{transform:translate(-50%,-50%) rotate(342deg)}}
+@keyframes binaryOrbitReverse{to{transform:translate(-50%,-50%) rotate(-336deg)}}
+@keyframes gravityBreath{0%,100%{opacity:.35;scale:.96}50%{opacity:.8;scale:1.04}}
+@media(max-width:700px){.cosmic-model-scene .cosmic-focus-core{width:min(52vw,230px);height:min(52vw,230px);min-width:180px;min-height:180px}.galaxy-art{width:min(110vmin,720px);height:min(110vmin,720px)}.binary-orbit{width:112vw;height:54vw}.binary-orbit-inner{width:82vw;height:40vw}.binary-star{width:34px;height:34px;margin:-17px 0 0 -17px}.binary-star.star-white,.binary-star.star-violet{width:22px;height:22px;margin:-11px 0 0 -11px}}
+@media(prefers-reduced-motion:reduce){.cosmic-model-scene *,.cosmic-model-scene{animation:none!important;transition:none!important}}
