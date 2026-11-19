@@ -1,0 +1,15 @@
+/* Black Hole Focus 3.0 — additive visual layer */
+.bh3-orbiters{position:absolute;inset:0;z-index:5;pointer-events:none;animation:bh3-orbit 28s linear infinite}
+.bh3-orbiter{position:absolute;left:50%;top:50%;width:5px;height:5px;border-radius:50%;background:#d9caff;box-shadow:0 0 9px 3px #a88cffaa;transform:rotate(calc(var(--i)*45deg)) translateX(clamp(105px,19vw,190px));animation:bh3-pulse 3.4s ease-in-out infinite;animation-delay:var(--delay)}
+.bh3-orbiter:nth-child(3n){width:3px;height:3px;background:#8deaff;box-shadow:0 0 9px #62d9e8}
+.blackhole-scene[data-bh3-theme="cyan"]{--bh3-accent:#62d9e8;--bh3-glow:#35c9e9}
+.blackhole-scene[data-bh3-theme="amber"]{--bh3-accent:#ffc77a;--bh3-glow:#ff9b4a}
+.blackhole-scene[data-bh3-theme="violet"]{--bh3-accent:#b5a0ff;--bh3-glow:#9476ff}
+.blackhole-scene[data-bh3-theme] .bh-corona{filter:hue-rotate(0deg);box-shadow:0 0 calc(20px + var(--bh3-progress,0)*45px) var(--bh3-glow,#9476ff)}
+.blackhole-scene.bh3-energy-off{--bh-energy:.35!important}
+.blackhole-scene.bh3-paused .bh3-orbiters{animation-play-state:paused}
+.blackhole-scene.bh3-reduced-motion *,.blackhole-scene.bh3-reduced-motion .bh3-orbiters{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition:none!important}
+.bh3-settings{margin-top:18px}.bh3-setting{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 0;border-bottom:1px solid var(--line);cursor:pointer}.bh3-setting span{display:grid;gap:5px}.bh3-setting small{color:var(--muted);font-size:11px}.bh3-setting input{width:20px;height:20px;accent-color:var(--purple);flex:none}
+@keyframes bh3-orbit{to{transform:rotate(360deg)}}@keyframes bh3-pulse{0%,100%{opacity:.35;scale:.7}50%{opacity:1;scale:1.25}}
+@media(max-width:700px){.bh3-orbiter{transform:rotate(calc(var(--i)*45deg)) translateX(112px)}}
+@media(prefers-reduced-motion:reduce){.bh3-orbiters,.bh3-orbiter{animation:none!important}}
