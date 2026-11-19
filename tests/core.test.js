@@ -341,3 +341,17 @@ test('task due dates survive normalization and app reload',()=>{
     assert.equal(store.data.tasks[0].dueDate,'2026-12-01');
   }finally{globalThis.localStorage=old}
 });
+
+
+test('store persists the new Spiral Galaxy and Binary Star focus models',()=>{
+  const old=globalThis.localStorage;const map=new Map();
+  globalThis.localStorage={getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};
+  try{
+    const store=new Store();
+    store.setTimerTheme('spiral');
+    assert.equal(new Store().data.settings.timerTheme,'spiral');
+    store.setTimerTheme('binary');
+    assert.equal(new Store().data.settings.timerTheme,'binary');
+    assert.throws(()=>store.setTimerTheme('wormhole'));
+  }finally{globalThis.localStorage=old;}
+});
