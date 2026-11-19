@@ -9,6 +9,7 @@ import { renderDailyReflection, bindDailyReflection } from './daily-reflection.j
 import { mountBlackHoleFocus, renderBlackHoleSettings, bindBlackHoleSettings } from './blackhole-focus.js';
 import './blackhole-focus.css';
 import './blackhole-focus-4.css';
+import './cosmic-models.css';
 
 const $ = (s, root=document) => root.querySelector(s);
 const esc = (v='') => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -48,7 +49,7 @@ function paintTimer() {
   mainPart.textContent=`${hours}:${minutes}:`;
   secondsPart.textContent=seconds;
   $('#timerToggle')?.classList.toggle('paused',timer.paused);
-  const scene=$('#blackholeScene')||$('#atomicScene');
+  const scene=$('#blackholeScene')||$('#atomicScene')||$('#cosmicScene');
   scene?.classList.toggle('is-paused',timer.paused);
   scene?.style.setProperty('--bh-energy',String(Math.min(1,0.25+elapsed/7200)));
   // Visual energy rises one level every 2 focused minutes (six levels total).
@@ -236,7 +237,7 @@ function overview(t,subjects) {
   return `
   <section class="dash-hero" data-dashboard-widget="hero">
     <div class="dash-hero-copy"><span class="eyebrow">YOUR PERSONAL STUDY OS · ${today.toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})}</span><h2>${greeting}. <em>Ready to focus?</em></h2><p>Small, consistent sessions build remarkable progress. Make this session count.</p>
-      <div class="timer-theme-picker" aria-label="Choose timer theme"><span class="eyebrow">CHOOSE YOUR TIMER WORLD</span><div class="timer-theme-options"><button type="button" class="timer-theme-option ${timerTheme==='blackhole'?'active':''}" data-timer-theme="blackhole" aria-pressed="${timerTheme==='blackhole'}"><span class="theme-preview theme-preview-blackhole"><i></i></span><span><b>Black Hole</b><small>Cosmic gravity</small></span></button><button type="button" class="timer-theme-option ${timerTheme==='atomic'?'active':''}" data-timer-theme="atomic" aria-pressed="${timerTheme==='atomic'}"><span class="theme-preview theme-preview-atomic"><i></i><i></i><i></i></span><span><b>Atomic System</b><small>Orbiting electrons</small></span></button></div></div><div class="dash-actions"><button class="primary" id="startFocus">▶ Start focus session</button><button class="dash-secondary" data-page="planner">View today's plan ↗</button></div>
+      <div class="timer-theme-picker" aria-label="Choose timer theme"><span class="eyebrow">CHOOSE YOUR TIMER WORLD</span><div class="timer-theme-options"><button type="button" class="timer-theme-option ${timerTheme==='blackhole'?'active':''}" data-timer-theme="blackhole" aria-pressed="${timerTheme==='blackhole'}"><span class="theme-preview theme-preview-blackhole"><i></i></span><span><b>Black Hole</b><small>Cosmic gravity</small></span></button><button type="button" class="timer-theme-option ${timerTheme==='atomic'?'active':''}" data-timer-theme="atomic" aria-pressed="${timerTheme==='atomic'}"><span class="theme-preview theme-preview-atomic"><i></i><i></i><i></i></span><span><b>Atomic System</b><small>Orbiting electrons</small></span></button><button type="button" class="timer-theme-option \${timerTheme==='spiral'?'active':''}" data-timer-theme="spiral" aria-pressed="\${timerTheme==='spiral'}"><span class="theme-preview theme-preview-spiral"><i></i><i></i><i></i></span><span><b>Spiral Galaxy</b><small>Rotating star arms</small></span></button><button type="button" class="timer-theme-option \${timerTheme==='binary'?'active':''}" data-timer-theme="binary" aria-pressed="\${timerTheme==='binary'}"><span class="theme-preview theme-preview-binary"><i></i><i></i></span><span><b>Binary Star</b><small>Two orbiting stars</small></span></button></div></div><div class="dash-actions"><button class="primary" id="startFocus">▶ Start focus session</button><button class="dash-secondary" data-page="planner">View today's plan ↗</button></div>
       <div class="dash-hero-meta"><span><i class="online-dot"></i> Offline-first · Your data stays on this device</span><span>🔥 ${streak} day streak</span></div>
     </div>
     <div class="dash-goal-ring" role="progressbar" aria-label="Daily focus goal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}" aria-valuetext="${progress}% of daily goal; ${fmt(t.today)} focused" style="--goal-progress:${progress}%"><div><strong>${progress}%</strong><small>DAILY GOAL</small><span>${fmt(remaining)} left</span></div></div>
@@ -394,7 +395,7 @@ function bind(){
     }
   });
   document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>{page=b.dataset.page;render()}));
-  document.querySelectorAll('[data-timer-theme]').forEach(b=>b.addEventListener('click',()=>{const next=b.dataset.timerTheme;if(!['blackhole','atomic'].includes(next))return;try{store.setTimerTheme(next);timerTheme=next;render();toast(next==='atomic'?'Atomic System selected':'Black Hole selected','success')}catch(error){toast(error.message||'Theme could not be saved','error')}}));
+  document.querySelectorAll('[data-timer-theme]').forEach(b=>b.addEventListener('click',()=>{const next=b.dataset.timerTheme;if(!['blackhole','atomic','spiral','binary'].includes(next))return;try{store.setTimerTheme(next);timerTheme=next;render();toast(({atomic:'Atomic System',blackhole:'Black Hole',spiral:'Spiral Galaxy',binary:'Binary Star'}[next])+' selected','success')}catch(error){toast(error.message||'Theme could not be saved','error')}}));
   $('#moreNavToggle')?.addEventListener('click',()=>{const menu=$('#mobileMore');menu.hidden=!menu.hidden;});
   document.querySelectorAll('[data-subject]').forEach(b=>b.addEventListener('click',()=>{selectedSubject=b.dataset.subject;render()}));
   document.querySelectorAll('[data-focus-coach-start]').forEach(button=>button.addEventListener('click',()=>{const id=button.dataset.focusCoachStart;if(!store.data.subjects.some(subject=>subject.id===id))return;selectedSubject=id;showTimer();}));
