@@ -109,3 +109,46 @@
  .blackhole-scene .bh-particle,.blackhole-scene .bh3-orbiters,
  .blackhole-scene .bh3-orbiter{animation:none!important;will-change:auto}
 }
+
+
+/* Black Hole — immersive full-display mode and viewport-wide gravitational waves. */
+.focus-screen:has(#blackholeScene){overflow:hidden;isolation:isolate}
+.focus-screen #blackholeScene.blackhole-scene{
+  position:absolute;inset:0;width:100vw;height:100vh;height:100dvh;
+  max-width:none;max-height:none;min-width:0;min-height:0;
+  overflow:hidden;z-index:1;perspective:1200px;
+}
+#blackholeScene .bh-lensing{width:min(78vmin,900px);height:min(78vmin,900px)}
+#blackholeScene .bh-lensing-arc{inset:-2%}
+#blackholeScene .bh-lensing-arc-b{inset:4%}
+#blackholeScene .bh-disk-outer{width:min(94vw,118vh);height:min(48vw,60vh)}
+#blackholeScene .bh-disk-inner{width:min(72vw,92vh);height:min(36vw,46vh)}
+#blackholeScene .bh-corona{width:min(48vmin,520px);height:min(48vmin,520px)}
+#blackholeScene .bh-energy-waves{position:absolute;inset:0;overflow:visible;z-index:0}
+#blackholeScene .bh-energy-waves i{
+  width:150vmax;height:150vmax;max-width:none;max-height:none;
+  border-width:1px;opacity:0;transform:scale(.08);
+  box-shadow:0 0 30px #9e82ff55,inset 0 0 28px #9e82ff22;
+  animation:bh-viewport-wave 10s cubic-bezier(.12,.55,.32,1) infinite;
+}
+#blackholeScene .bh-energy-waves i:nth-child(2){animation-delay:3.3s}
+#blackholeScene .bh-energy-waves i:nth-child(3){animation-delay:6.6s}
+@keyframes bh-viewport-wave{
+  0%{transform:scale(.08);opacity:0}
+  12%{opacity:.5}
+  72%{opacity:.16}
+  100%{transform:scale(1);opacity:0}
+}
+#blackholeScene .bh3-orbiters{z-index:4}
+#blackholeScene .focus-core{z-index:6}
+#blackholeScene .bh-particle{z-index:5}
+#blackholeScene .bh-starfield{z-index:-1}
+#blackholeScene.is-paused .bh-energy-waves i{animation-play-state:paused!important}
+@media(max-width:700px){
+  #blackholeScene .bh-disk-outer{width:112vw;height:54vw}
+  #blackholeScene .bh-disk-inner{width:86vw;height:42vw}
+  #blackholeScene .bh-corona{width:62vw;height:62vw}
+}
+@media(prefers-reduced-motion:reduce){
+  #blackholeScene .bh-energy-waves i{animation:none!important;opacity:.08;transform:scale(.8)}
+}
