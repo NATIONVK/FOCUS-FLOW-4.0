@@ -16,7 +16,7 @@ function normalize(data){
   const settings=data.settings&&typeof data.settings==='object'&&!Array.isArray(data.settings)?data.settings:{};
   const allowedWidgets=['hero','kpis','week','month','insights','lower','recent'];const layout=settings.dashboardLayout&&typeof settings.dashboardLayout==='object'?settings.dashboardLayout:{};const dashboardLayout={order:Array.isArray(layout.order)?layout.order.filter((x,i,a)=>allowedWidgets.includes(x)&&a.indexOf(x)===i):[],hidden:Array.isArray(layout.hidden)?layout.hidden.filter((x,i,a)=>allowedWidgets.includes(x)&&a.indexOf(x)===i):[]};
   const dashboardChartType=['bar','line','area','pie'].includes(settings.dashboardChartType)?settings.dashboardChartType:'bar';
-  const timerTheme=['blackhole','atomic'].includes(settings.timerTheme)?settings.timerTheme:'blackhole';
+  const timerTheme=['blackhole','atomic','spiral','binary'].includes(settings.timerTheme)?settings.timerTheme:'blackhole';
   return {version:4,subjects,sessions,tasks,plans,notes,settings:{...d.settings,light:!!settings.light,timerTheme,dailyGoalMinutes:Number.isFinite(Number(settings.dailyGoalMinutes))?Math.max(1,Math.min(1440,Number(settings.dailyGoalMinutes))):120,dashboardLayout,dashboardChartType}};
 }
 export class Store {
@@ -88,7 +88,7 @@ export class Store {
   subjectName(id){return this.data.subjects.find(s=>s.id===id)?.name||'Deleted subject';}
   setDashboardLayout(layout={}){const allowed=['hero','kpis','week','month','insights','lower','recent'];const clean=list=>Array.isArray(list)?[...new Set(list.filter(x=>allowed.includes(x)))]:[];this.data.settings.dashboardLayout={order:clean(layout.order),hidden:clean(layout.hidden)};this.save();}
   setDashboardChartType(type){if(!['bar','line','area','pie'].includes(type))throw new Error('Invalid dashboard chart type');this.data.settings.dashboardChartType=type;this.save();}
-  setTimerTheme(theme){if(!['blackhole','atomic'].includes(theme))throw new Error('Invalid timer theme');this.data.settings.timerTheme=theme;this.save();}
+  setTimerTheme(theme){if(!['blackhole','atomic','spiral','binary'].includes(theme))throw new Error('Invalid timer theme');this.data.settings.timerTheme=theme;this.save();}
   setDailyGoal(minutes){const value=Number(minutes);if(!Number.isFinite(value)||value<1||value>1440)throw new Error('Daily goal must be between 1 and 1440 minutes');this.data.settings.dailyGoalMinutes=Math.round(value);this.save();}
   import(data){const clean=normalize(data);const previous=this.data;this.data=clean;try{this.save();}catch(error){this.data=previous;throw error;}}
 }
