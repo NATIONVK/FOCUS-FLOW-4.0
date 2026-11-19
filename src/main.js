@@ -8,6 +8,7 @@ import { buildVerifiedBackupBlob, inspectBackupFile, getStorageHealth, requestPe
 import { renderDailyReflection, bindDailyReflection } from './daily-reflection.js';
 import { mountBlackHoleFocus, renderBlackHoleSettings, bindBlackHoleSettings } from './blackhole-focus.js';
 import './blackhole-focus.css';
+import './blackhole-focus-4.css';
 
 const $ = (s, root=document) => root.querySelector(s);
 const esc = (v='') => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -59,27 +60,23 @@ function paintTimer() {
   if(scene?.id==='blackholeScene')updateBlackHoleFocus(elapsed,timer.paused);
   if(scene?.id==='atomicScene'){
     const atomic=$('#atomicScene');
-    const electronCount=3+Math.floor(elapsed/600);
+    // Keep three electrons permanently mounted: no periodic DOM rebuilds
+    // or sudden count changes while the user is focusing.
+    const electronCount=3;
     atomic.style.setProperty('--atom-glow',String(Math.min(1,elapsed/3600)));
     atomic.style.setProperty('--atom-electron-count',String(electronCount));
     const orbits=[...atomic.querySelectorAll('.atom-orbit')];
-    const current=atomic.querySelectorAll('.electron').length;
-    if(current!==electronCount){
-      orbits.forEach(orbit=>orbit.replaceChildren());
-      for(let index=0;index<electronCount;index++){
-        const orbit=orbits[index%orbits.length];
+    const radius=Math.min(atomic.clientWidth,atomic.clientHeight)*.175;
+    orbits.forEach((orbit,index)=>{
+      if(!orbit.querySelector('.electron')){
         const electron=document.createElement('i');
         electron.className='electron '+(['electron-one','electron-two','electron-three'][index%3]);
         electron.dataset.electronIndex=String(index);
-        const orbitIndex=index%orbits.length;
-        const slot=Math.floor(index/orbits.length);
-        const orbitCount=Math.ceil((electronCount-orbitIndex)/orbits.length);
-        const angle=(360*slot/Math.max(1,orbitCount))+'deg';
-        electron.style.setProperty('--electron-angle',angle);
-        electron.style.setProperty('--electron-radius',(atomic.getBoundingClientRect().height*.175)+'px');
+        electron.style.setProperty('--electron-angle',['12deg','132deg','252deg'][index%3]);
+        electron.style.setProperty('--electron-radius',radius+'px');
         orbit.appendChild(electron);
       }
-    }
+    });
   }
 }
 
