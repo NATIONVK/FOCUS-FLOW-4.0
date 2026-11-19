@@ -118,12 +118,8 @@
   max-width:none;max-height:none;min-width:0;min-height:0;
   overflow:hidden;z-index:1;perspective:1200px;
 }
-#blackholeScene .bh-lensing{width:min(78vmin,900px);height:min(78vmin,900px)}
 #blackholeScene .bh-lensing-arc{inset:-2%}
 #blackholeScene .bh-lensing-arc-b{inset:4%}
-#blackholeScene .bh-disk-outer{width:min(94vw,118vh);height:min(48vw,60vh)}
-#blackholeScene .bh-disk-inner{width:min(72vw,92vh);height:min(36vw,46vh)}
-#blackholeScene .bh-corona{width:min(48vmin,520px);height:min(48vmin,520px)}
 #blackholeScene .bh-energy-waves{position:absolute;inset:0;overflow:visible;z-index:0}
 #blackholeScene .bh-energy-waves i{
   width:150vmax;height:150vmax;max-width:none;max-height:none;
