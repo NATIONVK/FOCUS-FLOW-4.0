@@ -148,3 +148,19 @@
 @media(prefers-reduced-motion:reduce){
   #blackholeScene .bh-energy-waves i{animation:none!important;opacity:.08;transform:scale(.8)}
 }
+
+
+/* Black Hole core geometry correction — keep the event-horizon centre circular.
+   The full-screen scene is viewport-sized (often portrait); percentage width and
+   height therefore produced an oval on phones. Keep the centre square and stable.
+   Gravitational waves remain independent and may expand around it. */
+#blackholeScene > .focus-core{
+  width:clamp(190px,46vmin,300px);
+  height:clamp(190px,46vmin,300px);
+  min-width:0;
+  min-height:0;
+  aspect-ratio:1 / 1;
+  flex:0 0 auto;
+  border-radius:50%;
+  box-sizing:border-box;
+}
