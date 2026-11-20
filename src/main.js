@@ -200,7 +200,7 @@ function renderTimerThemePicker(){
  const label={blackhole:'BLACK HOLE',atomic:'ATOMIC SYSTEM',spiral:'SPIRAL GALAXY',binary:'BINARY STAR'};
  return '<section class="timer-theme-picker theme-gallery" aria-label="Choose your focus environment"><div class="theme-gallery-heading"><div><span class="eyebrow">PERSONALIZE YOUR FOCUS</span><h3>Choose your universe</h3><p>Switch the visual environment without changing your focus session or study data.</p></div><span class="theme-current"><i></i> '+(label[timerTheme]||'BLACK HOLE')+' ACTIVE</span></div><div class="timer-theme-options">'+themes.map(([id,name,desc,preview,art])=>'<button type="button" class="timer-theme-option theme-option-'+id+' '+(timerTheme===id?'active':'')+'" data-timer-theme="'+id+'" aria-pressed="'+(timerTheme===id)+'"><span class="theme-preview '+preview+'">'+art+'</span><span class="theme-option-copy"><b>'+name+'</b><small>'+desc+'</small></span><span class="theme-selected-mark">✓</span></button>').join('')+'</div></section>';
 }
-\nfunction overview(t,subjects) {
+function overview(t,subjects) {
   const sessions=store.data.sessions;
   const week=Analytics.weekly(sessions);
   const goal=Math.max(1,Number(store.data.settings.dailyGoalMinutes)||120)*60;
