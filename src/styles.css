@@ -772,3 +772,7 @@ body.light .focus-coach-card{background:linear-gradient(120deg,#f1edff,#f3f7ff);
 @media(prefers-reduced-motion:reduce){
   .atomic-scene .atom-orbit .electron{animation:none!important}
 }
+
+/* Stability: stop scale-pulsing that makes fixed centres look like they shake. */
+.atom-nucleus{animation:none!important}
+.focus-core::before{animation:none!important}
