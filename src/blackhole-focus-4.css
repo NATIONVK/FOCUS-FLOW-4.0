@@ -164,3 +164,18 @@
   border-radius:50%;
   box-sizing:border-box;
 }
+
+/* Black Hole stability: retain orbit and expanding waves, remove flicker/pulsing. */
+#blackholeScene .bh-lensing::after,
+#blackholeScene .bh-disk-outer::after,
+#blackholeScene .bh-corona,
+#blackholeScene .bh-light-beams i,
+#blackholeScene .bh-particle{
+  animation:none!important;
+}
+#blackholeScene .bh-lensing::after{opacity:.42}
+#blackholeScene .bh-disk-outer::after{opacity:.3}
+#blackholeScene .bh-corona{opacity:.92}
+#blackholeScene .bh-light-beams i{opacity:.28}
+#blackholeScene .bh-particle{opacity:.72}
+#blackholeScene .bh3-orbiter{animation-duration:18s!important}
