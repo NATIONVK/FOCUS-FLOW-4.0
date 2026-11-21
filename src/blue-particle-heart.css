@@ -12,3 +12,144 @@
 .blue-heart-focus-screen .focus-session-controls{z-index:4}
 .blue-heart-focus-screen .finish-session-btn{border-color:color-mix(in srgb,var(--heart-color) 40%,transparent);background:color-mix(in srgb,var(--heart-color) 12%,#000);color:var(--heart-color)}
 @media(prefers-reduced-motion:reduce){.theme-preview-blueheart:before{animation:none}}
+
+/* Blue Particle Heart — focus UI layout fixes */
+.blue-heart-focus-screen .exit-focus{
+ display:grid!important;
+ place-items:center;
+ position:fixed;
+ top:max(14px,env(safe-area-inset-top));
+ left:max(14px,env(safe-area-inset-left));
+ width:44px;
+ height:44px;
+ min-width:44px;
+ min-height:44px;
+ padding:0;
+ border:1px solid color-mix(in srgb,var(--heart-color,#258fff) 58%,transparent);
+ border-radius:14px;
+ background:rgba(0,12,28,.82);
+ color:#d9efff;
+ font-size:26px;
+ line-height:1;
+ z-index:20;
+ backdrop-filter:blur(14px);
+ -webkit-backdrop-filter:blur(14px);
+}
+.blue-heart-focus-screen .blue-heart-scene{
+ position:absolute;
+ inset:0;
+ width:100%;
+ height:100%;
+ min-width:0;
+ min-height:0;
+}
+.blue-heart-focus-screen #blueHeartCanvas{
+ position:absolute;
+ inset:0;
+ width:100%;
+ height:100%;
+ max-width:none;
+ max-height:none;
+}
+.blue-heart-focus-screen .blue-heart-clock{
+ position:absolute;
+ left:50%;
+ top:50%;
+ transform:translate(-50%,-50%);
+ display:inline-flex;
+ align-items:center;
+ justify-content:center;
+ width:max-content;
+ max-width:calc(100vw - 112px);
+ min-width:0;
+ min-height:44px;
+ margin:0;
+ padding:10px 13px;
+ border:1px solid color-mix(in srgb,var(--heart-color,#258fff) 18%,transparent);
+ border-radius:14px;
+ background:rgba(0,5,16,.38);
+ box-shadow:0 4px 22px #0008;
+ pointer-events:auto;
+}
+.blue-heart-focus-screen .blue-heart-clock:before{
+ display:none!important;
+}
+.blue-heart-focus-screen .blue-heart-clock strong{
+ display:flex;
+ align-items:baseline;
+ justify-content:center;
+ gap:0;
+ max-width:100%;
+ font-size:clamp(19px,5.2vw,30px);
+ line-height:1.2;
+ letter-spacing:.045em;
+ font-variant-numeric:tabular-nums;
+ white-space:nowrap;
+}
+.blue-heart-focus-screen .focus-session-controls{
+ position:fixed;
+ left:max(14px,env(safe-area-inset-left));
+ right:max(14px,env(safe-area-inset-right));
+ bottom:max(14px,env(safe-area-inset-bottom));
+ z-index:20;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ pointer-events:none;
+}
+.blue-heart-focus-screen .finish-session-btn{
+ min-width:168px;
+ min-height:46px;
+ padding:0 22px;
+ border:1px solid color-mix(in srgb,var(--heart-color,#258fff) 55%,transparent);
+ border-radius:999px;
+ background:rgba(0,15,34,.88);
+ color:#d9efff;
+ font-size:12px;
+ font-weight:700;
+ letter-spacing:.04em;
+ opacity:1;
+ pointer-events:auto;
+ backdrop-filter:blur(14px);
+ -webkit-backdrop-filter:blur(14px);
+ box-shadow:0 8px 26px #0008,0 0 18px color-mix(in srgb,var(--heart-color,#258fff) 16%,transparent);
+}
+.blue-heart-focus-screen .finish-session-btn:active{
+ transform:scale(.97);
+ background:rgba(0,35,70,.94);
+}
+.blue-heart-focus-screen .exit-focus:focus-visible,
+.blue-heart-focus-screen .finish-session-btn:focus-visible,
+.blue-heart-focus-screen .blue-heart-clock:focus-visible{
+ outline:2px solid var(--heart-color,#258fff);
+ outline-offset:4px;
+}
+@media(max-width:380px){
+ .blue-heart-focus-screen .blue-heart-clock{
+  max-width:calc(100vw - 88px);
+  padding:8px 9px;
+ }
+ .blue-heart-focus-screen .blue-heart-clock strong{
+  font-size:clamp(17px,5vw,22px);
+  letter-spacing:.025em;
+ }
+ .blue-heart-focus-screen .finish-session-btn{
+  min-width:150px;
+  min-height:44px;
+ }
+}
+@media(max-height:430px){
+ .blue-heart-focus-screen .exit-focus{
+  top:max(8px,env(safe-area-inset-top));
+  left:max(8px,env(safe-area-inset-left));
+  width:40px;
+  height:40px;
+ }
+ .blue-heart-focus-screen .focus-session-controls{
+  bottom:max(8px,env(safe-area-inset-bottom));
+ }
+ .blue-heart-focus-screen .finish-session-btn{
+  min-height:40px;
+ }
+}
+
