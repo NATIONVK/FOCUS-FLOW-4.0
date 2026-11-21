@@ -845,3 +845,4 @@ body.light .focus-coach-card{background:linear-gradient(120deg,#f1edff,#f3f7ff);
 .blue-heart-focus-screen .focus-session-controls{z-index:4}
 .blue-heart-focus-screen .finish-session-btn{border-color:#258fff66;background:#03152b;color:#9bcfff}
 @media(prefers-reduced-motion:reduce){.theme-preview-blueheart:before{animation:none}}
+}
