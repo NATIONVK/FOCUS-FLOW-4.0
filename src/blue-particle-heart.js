@@ -3,7 +3,12 @@ export function mountBlueParticleHeart(root){
  const canvas=root.querySelector('#blueHeartCanvas'),ctx=canvas?.getContext('2d',{alpha:false});
  if(!canvas||!ctx)return ()=>{};
  const TAU=Math.PI*2,rand=(a,b)=>a+Math.random()*(b-a),clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),lerp=(a,b,t)=>a+(b-a)*t;
- const mobileCount=1875,desktopCount=3150,baseScale=.235,dissolveDuration=2.8,gatherDuration=2.1,baseSpeed=3;\n const palette=['#258fff','#a855f7','#ff4fa3','#ff8a3d','#35d6c5','#f5d547'];\n let speed=baseSpeed,currentColor=palette[0];\n const hexRgb=h=>({r:parseInt(h.slice(1,3),16),g:parseInt(h.slice(3,5),16),b:parseInt(h.slice(5,7),16)});\n const mixColor=(a,b,t)=>{const x=hexRgb(a),y=hexRgb(b);return `rgb(${Math.round(lerp(x.r,y.r,t))},${Math.round(lerp(x.g,y.g,t))},${Math.round(lerp(x.b,y.b,t))})`;};\n function updateTimedEffects(){const slot=900,hold=720,stage=Math.floor(time/slot)%palette.length,within=time%slot,next=(stage+1)%palette.length,blend=clamp((within-hold)/180,0,1);currentColor=blend>0?mixColor(palette[stage],palette[next],blend):palette[stage];speed=baseSpeed+Math.min(time/900,8)*.45;root.style.setProperty('--heart-color',currentColor);}
+ const mobileCount=1875,desktopCount=3150,baseScale=.235,dissolveDuration=2.8,gatherDuration=2.1,baseSpeed=3;
+ const palette=['#258fff','#a855f7','#ff4fa3','#ff8a3d','#35d6c5','#f5d547'];
+ let speed=baseSpeed,currentColor=palette[0];
+ const hexRgb=h=>({r:parseInt(h.slice(1,3),16),g:parseInt(h.slice(3,5),16),b:parseInt(h.slice(5,7),16)});
+ const mixColor=(a,b,t)=>{const x=hexRgb(a),y=hexRgb(b);return `rgb(${Math.round(lerp(x.r,y.r,t))},${Math.round(lerp(x.g,y.g,t))},${Math.round(lerp(x.b,y.b,t))})`;};
+ function updateTimedEffects(){const slot=900,hold=720,stage=Math.floor(time/slot)%palette.length,within=time%slot,next=(stage+1)%palette.length,blend=clamp((within-hold)/180,0,1);currentColor=blend>0?mixColor(palette[stage],palette[next],blend):palette[stage];speed=baseSpeed+Math.min(time/900,8)*.45;root.style.setProperty('--heart-color',currentColor);}
  let W=0,H=0,DPR=1,particles=[],last=0,time=0,mode='normal',gather=0,dissolve=0,nextDissolve=24,beat=0,raf=0,active=true;
  const center={x:0,y:0},pointer={x:0,y:0,down:false};
  const point=t=>({x:16*Math.pow(Math.sin(t),3),y:-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))});
