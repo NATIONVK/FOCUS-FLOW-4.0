@@ -15,9 +15,6 @@ PERMISSIONS = (
     '    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />',
     '    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />',
     '    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />',
-    '    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />',
-    '    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />',
-    '    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />',
 )
 SERVICE = '''        <service android:name=".FocusTimerService" android:exported="false" android:foregroundServiceType="specialUse">
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="Ongoing study focus timer with persistent notification" />

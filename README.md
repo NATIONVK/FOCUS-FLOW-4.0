@@ -1,216 +1,39 @@
-<div align="center">
-  <img src="https://raw.githubusercontent.com/NATIONVK/FOCUS-FLOW-4.0/main/public/icon.svg" width="112" alt="FOCUS FLOW app icon" />
-  <h1>FOCUS FLOW 5.1</h1>
-  <p><strong>Your personal study OS. Focus deeper. Learn smarter. Grow daily.</strong></p>
-  <p>
-    <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/quality.yml"><img src="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/quality.yml/badge.svg" alt="Quality Checks"></a>
-    <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/build-android.yml"><img src="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions/workflows/build-android.yml/badge.svg" alt="Android APK Build"></a>
-    <img src="https://img.shields.io/badge/Platform-Android%20%7C%20Web-8b5cf6" alt="Android and Web">
-    <img src="https://img.shields.io/badge/Mode-Offline--first-16a34a" alt="Offline first">
-    <img src="https://img.shields.io/badge/Version-5.1-06b6d4" alt="Version 4.0">
-  </p>
-  <p><em>Designed for distraction-free study, consistent habits, and measurable progress.</em></p>
-</div>
+# FOCUS FLOW 5.3
 
----
+Your personal study OS. Focus deeper. Learn smarter. Grow daily.
 
-## Latest release · 5.1.0
+## Latest update · 5.3.0
+- Removed the document/PDF workspace, navigation, UI, storage, native picker/export bridge, dedicated tests and third-party libraries.
+- Kept study-data backup and restore independent for subjects, sessions, tasks, plans, notes and settings.
+- Removed unused Android media-library permissions and native gallery registration.
+- Preserved the focus timer, Black Hole and other timer themes, dashboard, analytics, tasks, planner, notes, history and offline-first app shell.
 
-- Timer rendering now updates once per second instead of four times per second, reducing unnecessary WebView work while keeping elapsed time derived from timestamps.
-- Focus timer render-loop lifecycle is cleaned up when leaving or finishing the timer.
-- Paused Black Hole scenes freeze disk, particle, beam and wave animations.
-- Photo-to-PDF creation caps each batch at 20 pages and downsizes oversized source images before encoding to reduce memory pressure on Android.
-- PDF export now reports the actual destination and does not silently claim success when neither the in-app library nor an export destination saved the file.
+## Core features
+- Focus timer with persistent Android notification support.
+- Black Hole, Atomic System, Spiral Galaxy, Binary Star and Blue Particle Heart environments.
+- Customizable dashboard, progress summaries and productivity insights.
+- Subjects, tasks with subtasks, weekly study planner and notes.
+- Study history, statistics and verified JSON backup/restore.
 
-These changes are covered by the repository's automated workflow; physical-device behavior still needs installation testing.
-
-### Focus Flow 5.0 — app-wide evolution
-
-### Focus Flow 5.1 — PDF portability and Android resilience
-
-- PDF Library now exports a portable JSON backup containing saved PDFs, with file signature, size, count and total-size validation on restore.
-- Restore merges documents into the current library, skips already restored copies, and never clears existing PDFs.
-- PDF rendering is limited to 75 MB source documents, 6 million output pixels per page, 8 million source-image pixels and 18 thumbnails to reduce memory spikes on Android phones.
-- Android timer permission is requested on explicit session start, not every pause/resume. The foreground service restores validated snapshots after process recreation and uses a system chronometer instead of a frequent wake-up loop.
-- PDF backup controls include mobile focus-visible styling and responsive layouts.
-
-- Task search now searches both task titles and sub-task titles without losing the current filter.
-- Task completion is normalized consistently across parent tasks and their sub-tasks; deleting the final sub-task no longer silently clears a completed parent task.
-- Deleting the last subject now remains deleted after app restart instead of being recreated by the data normalizer.
-- Backup restore validates plan records and sub-task structures before replacing live study data.
-- Settings dialogs support Escape to close, keyboard focus containment, screen-reader dialog semantics, and focus restoration.
-- Theme preference changes roll back visually if local persistence fails.
-- Android multi-photo selection enforces a total encoded-batch memory budget; native timer bridge errors are returned as actionable plugin errors.
-- PDF Library handles IndexedDB version changes and blocked opens more clearly.
-- Offline shell cache is versioned for the 5.0 release.
-
-Automated tests cover the new data and backup regressions. Physical Android testing remains a separate release gate.
-
-## ✦ About the project
-
-**FOCUS FLOW** is an offline-first study planner and productivity companion built with HTML, CSS, and JavaScript, then packaged for Android using Capacitor. It brings focus sessions, subject tracking, tasks, weekly planning, study analytics, notes, and image-to-PDF tools into one workspace.
-
-The app is designed to keep your study records on your device by default. You can use its core workflow without depending on a cloud account or a constant internet connection.
-
-## 🚀 What you can do
-
-| Workspace | What it helps you do |
-| --- | --- |
-| **Focus Timer** | Run focus sessions, pause/resume, and recover timer state after reload. Android supports an ongoing foreground notification. |
-| **Subjects** | Organize subjects and see study time recorded for each one. |
-| **Tasks** | Create tasks, set priorities and due dates, filter work, and track completion. |
-| **Weekly Planner** | Arrange study blocks across the week, launch a session from a plan, and compare planned time with actual focus time for today. |
-| **Overview & Goals** | See today's study time, daily-goal progress, streaks, pending tasks, and today's planned work. |
-| **Statistics & History** | Review study sessions and daily, weekly, monthly, and subject-level progress. |
-| **Notes** | Keep quick study notes in the same workspace. |
-| **PDF Master Studio** | PDF reading, page thumbnails, zoom, text search, bookmarks, reading-position recovery, pen annotations, photo-to-PDF with image quality and scan filters, merge, extract, rotate, text/image overlays, watermark, page numbers, crop, duplicate, delete, reorder, metadata, text export, print, and recent-file history. |
-| **Themes & Settings** | Personalize the workspace and manage local data, including backup and restore options. |
-
-### PDF Studio implementation notes
-
-PDF processing runs locally in the app. The Android build uses the Storage Access Framework for multi-photo selection, PDF open, and Save As; generated/imported documents are also kept in an IndexedDB-backed in-app PDF Library so they can be reopened from the Files tab. The current web/Capacitor implementation provides PDF.js rendering and pdf-lib page/document operations. Text overlay is additive and does not rewrite existing PDF text objects. Password encryption/decryption, Bangla/English OCR, automatic edge detection and perspective correction, digital-signature verification, PDF repair, and DOCX conversion are not yet implemented; they are not advertised as available tools. Android-specific OCR requires a native ML Kit/Tesseract bridge and language model packaging before it can be considered offline-ready.
-
-## 📱 Android app
-
-The Android app is packaged with **Capacitor 7**. The repository includes native Android bridges for the background focus timer, device photo gallery, multi-photo document picker, PDF open, and PDF Save As.
-
-### Build an APK with GitHub Actions
-
-1. Open the [Actions tab](https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions).
-2. Select **Build Android APK**.
-3. Choose **Run workflow** (or push a commit to `main`).
-4. Open the completed workflow run and download the `focus-flow-5.0-debug-apk` artifact.
-5. Install the APK on an Android device and test the features you use.
-
-> A successful web build or workflow badge does not by itself confirm every feature works on every Android device. Always install and test the APK on a real device. Background execution and photo permissions can vary by Android version and device manufacturer.
-
-## 🧰 Tech stack
-
-- **HTML5** — app shell and semantic structure
-- **CSS3** — responsive layout, themes, and interface styling
-- **Vanilla JavaScript (ES modules)** — application logic and interactions
-- **Vite 6** — development server and production bundling
-- **Capacitor 7** — Android packaging and native bridge
-- **Java** — Android foreground timer and gallery integration
-- **Python 3** — Android build preparation, project health audits, and QA automation
-- **jsPDF** — offline photo-to-PDF generation
-- **PDF.js** — local PDF rendering, page navigation, text search, and text extraction
-- **pdf-lib** — local PDF merging, page extraction, rotation, and annotated-copy export
-- **Node.js + Python unittest** — JavaScript core tests and build-tool regression tests
-- **GitHub Actions + Gradle** — automated quality checks and APK builds
-
-## 🗂️ Project structure
-
-```text
-FOCUS-FLOW-4.0/
-├── .github/workflows/       # Quality checks and Android APK workflow
-├── native/android/          # Native timer, gallery, and activity bridges
-├── public/                  # Static assets and app icon
-├── src/
-│   ├── analytics.js         # Study analytics and streak calculations
-│   ├── data-safety.js       # Verified backup envelopes and storage health checks
-│   ├── main.js              # App rendering and interactions
-│   ├── pdf-maker.js         # Image selection and PDF creation
-│   ├── pdf-studio.js        # PDF reader, annotation, page tools, and file workspace
-│   ├── pdf-studio.css       # Responsive PDF Studio interface
-│   ├── store.js             # Local app data and persistence
-│   ├── styles.css           # Responsive UI and themes
-│   └── timer.js             # Focus timer logic
-├── scripts/                 # Python Android build-preparation tooling
-├── tests/                   # JavaScript core and Python tooling tests
-├── index.html               # Web app entry point
-├── manifest.webmanifest     # PWA metadata and icon
-└── package.json             # Scripts and dependencies
-```
-
-## 💻 Run locally
-
-**Requirements:** Node.js 22+ and npm. Android builds additionally require the Android toolchain; the GitHub Actions workflow configures it automatically.
-
+## Run locally
 ```bash
-git clone https://github.com/NATIONVK/FOCUS-FLOW-4.0.git
-cd FOCUS-FLOW-4.0
 npm install
-npm test
-python -m unittest discover -s tests -p 'test_*.py'\npython scripts/project_health.py --output reports
 npm run dev
-```
-
-Create a production web build:
-
-```bash
-npm run build
-npm run preview
-```
-
-## 🤖 Build Android locally
-
-```bash
-npm install
-npm run build
-npx cap add android       # only if the Android platform has not been added
-npx cap sync android
-```
-
-Then open the generated `android/` project in Android Studio, or build a debug APK with Gradle:
-
-```bash
-cd android
-./gradlew assembleDebug
-```
-
-## 🔐 Privacy & data
-
-- Study records are stored locally on the device by default.
-- No cloud sync or account system is required for the core study workflow.
-- Export a verified versioned backup before clearing app storage or uninstalling the app. Restore previews record counts, checks the backup integrity checksum, and confirms before replacing current study records. Legacy version-4 JSON backups remain supported.
-- Settings includes localStorage/IndexedDB availability, estimated browser storage usage, and persistent-storage protection status. PDF Library documents are stored separately; use PDF Studio → Files → Export Library Backup to back them up. Restore merges documents and skips duplicates.
-- Photo selection for PDF creation uses the Android system document picker and supports multi-select without granting broad gallery access. Created and imported PDFs are stored in the app's local IndexedDB library; Android Save As can also copy the PDF to a folder you choose.
-
-## 🧭 Development status
-
-FOCUS FLOW 5.1 is actively evolving. The repository includes automated core tests and an Android APK workflow. Native behavior—especially background execution, notifications, and gallery permissions—should be validated on physical devices across supported Android versions.
-
-### Planned improvements
-
-- More detailed subject-wise and weekly insights
-- Richer study reports and export options
-- Further dashboard and accessibility refinements
-- Continued Android reliability and performance improvements
-
-## 🤝 Contributing
-
-Suggestions, bug reports, and pull requests are welcome. Before opening a pull request, run:
-
-```bash
 npm test
-python -m unittest discover -s tests -p 'test_*.py'
 npm run build
 ```
 
-Please include clear reproduction steps for bugs and device/Android-version details for native issues.
+## Android APK
+Push to `main` or manually run **Build Android APK** in GitHub Actions. The workflow runs tests, builds the web app, synchronizes Capacitor and creates a debug APK artifact.
 
-## 📄 License
+## Project structure
+- `src/main.js` — app navigation, screens and interactions.
+- `src/store.js` — validated local study data and persistence.
+- `src/timer.js` — focus session state.
+- `src/analytics.js` and `src/productivity-intelligence.js` — study metrics and insights.
+- `src/data-safety.js` — verified study-data backup, restore and storage health.
+- `src/blackhole-focus.js` and related styles — focus scene settings and effects.
+- `native/android/` — Android focus timer bridge and foreground service.
 
-No license has been added yet. Unless a license is added to this repository, standard copyright restrictions apply; please contact the repository owner before redistributing or reusing the project.
-
----
-
-<div align="center">
-  <strong>FOCUS FLOW 5.1</strong><br>
-  <sub>Build focus. Track progress. Find your flow.</sub><br><br>
-  <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0">GitHub Repository</a> ·
-  <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/issues">Report an issue</a> ·
-  <a href="https://github.com/NATIONVK/FOCUS-FLOW-4.0/actions">Builds & checks</a>
-</div>
-
-
-### Python release tooling
-
-Generate a release metadata and notes report (optionally including APK size):
-
-```bash
-python scripts/release_manager.py --apk android/app/build/outputs/apk/debug/app-debug.apk --output release-report
-```
-
-The Android build workflow uploads the APK and a separate release-report artifact containing version, commit, branch, recent commit subjects, and APK size.
+## Safety
+Study records remain local to this device. Export a verified backup before reinstalling or clearing app data. Restore validates a selected backup before replacing current study records.
