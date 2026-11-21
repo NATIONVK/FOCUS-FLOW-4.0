@@ -11,6 +11,8 @@ import { mountBlackHoleFocus, renderBlackHoleSettings, bindBlackHoleSettings } f
 import './blackhole-focus.css';
 import './blackhole-focus-4.css';
 import './cosmic-models.css';
+import { mountBlueParticleHeart } from './blue-particle-heart.js';
+import './blue-particle-heart.css';
 
 const $ = (s, root=document) => root.querySelector(s);
 const esc = (v='') => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -27,7 +29,8 @@ let timerScreenActive=false;
 let timerTheme=store.data.settings.timerTheme||'blackhole';
 let timerRenderInterval=null;
 let updateBlackHoleFocus=()=>{};
-function stopTimerRenderLoop(){if(timerRenderInterval!==null){clearInterval(timerRenderInterval);timerRenderInterval=null;}}
+let unmountBlueParticleHeart=()=>{};
+function stopTimerRenderLoop(){if(timerRenderInterval!==null){clearInterval(timerRenderInterval);timerRenderInterval=null;}unmountBlueParticleHeart();unmountBlueParticleHeart=()=>{};}
 
 function paintTimer() {
   const clock=$('#clock'); if(!clock)return;
@@ -50,7 +53,7 @@ function paintTimer() {
   mainPart.textContent=`${hours}:${minutes}:`;
   secondsPart.textContent=seconds;
   $('#timerToggle')?.classList.toggle('paused',timer.paused);
-  const scene=$('#blackholeScene')||$('#atomicScene')||$('#cosmicScene');
+  const scene=$('#blackholeScene')||$('#atomicScene')||$('#cosmicScene')||$('#blueHeartScene');
   scene?.classList.toggle('is-paused',timer.paused);
   scene?.style.setProperty('--bh-energy',String(Math.min(1,0.25+elapsed/7200)));
   // Visual energy rises one level every 2 focused minutes (six levels total).
@@ -196,8 +199,8 @@ function applyDashboardLayout(){
 function saveDashboardLayout(order,hidden){store.setDashboardLayout({order,hidden});}
 
 function renderTimerThemePicker(){
- const themes=[['blackhole','Black Hole','Event horizon · gravitational waves','theme-preview-blackhole','<i></i>'],['atomic','Atomic System','Stable nucleus · electron orbits','theme-preview-atomic','<i></i><i></i><i></i>'],['spiral','Spiral Galaxy','Slow rotation · luminous star arms','theme-preview-spiral','<i></i><i></i><i></i>'],['binary','Binary Star','Dual stars · orbital mechanics','theme-preview-binary','<i></i><i></i>']];
- const label={blackhole:'BLACK HOLE',atomic:'ATOMIC SYSTEM',spiral:'SPIRAL GALAXY',binary:'BINARY STAR'};
+ const themes=[['blackhole','Black Hole','Event horizon · gravitational waves','theme-preview-blackhole','<i></i>'],['atomic','Atomic System','Stable nucleus · electron orbits','theme-preview-atomic','<i></i><i></i><i></i>'],['spiral','Spiral Galaxy','Slow rotation · luminous star arms','theme-preview-spiral','<i></i><i></i><i></i>'],['binary','Binary Star','Dual stars · orbital mechanics','theme-preview-binary','<i></i><i></i>'],['blueheart','Blue Particle Heart','Electric blue particles · heartbeat','theme-preview-blueheart','<i></i>']];
+ const label={blackhole:'BLACK HOLE',atomic:'ATOMIC SYSTEM',spiral:'SPIRAL GALAXY',binary:'BINARY STAR',blueheart:'BLUE PARTICLE HEART'};
  return '<section class="timer-theme-picker theme-gallery" aria-label="Choose your focus environment"><div class="theme-gallery-heading"><div><span class="eyebrow">PERSONALIZE YOUR FOCUS</span><h3>Choose your universe</h3><p>Switch the visual environment without changing your focus session or study data.</p></div><span class="theme-current"><i></i> '+(label[timerTheme]||'BLACK HOLE')+' ACTIVE</span></div><div class="timer-theme-options">'+themes.map(([id,name,desc,preview,art])=>'<button type="button" class="timer-theme-option theme-option-'+id+' '+(timerTheme===id?'active':'')+'" data-timer-theme="'+id+'" aria-pressed="'+(timerTheme===id)+'"><span class="theme-preview '+preview+'">'+art+'</span><span class="theme-option-copy"><b>'+name+'</b><small>'+desc+'</small></span><span class="theme-selected-mark">✓</span></button>').join('')+'</div></section>';
 }
 function overview(t,subjects) {
@@ -414,7 +417,7 @@ function bind(){
     }
   });
   document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>{page=b.dataset.page;render()}));
-  document.querySelectorAll('[data-timer-theme]').forEach(b=>b.addEventListener('click',()=>{const next=b.dataset.timerTheme;if(!['blackhole','atomic','spiral','binary'].includes(next))return;try{store.setTimerTheme(next);timerTheme=next;render();toast(({atomic:'Atomic System',blackhole:'Black Hole',spiral:'Spiral Galaxy',binary:'Binary Star'}[next])+' selected','success')}catch(error){toast(error.message||'Theme could not be saved','error')}}));
+  document.querySelectorAll('[data-timer-theme]').forEach(b=>b.addEventListener('click',()=>{const next=b.dataset.timerTheme;if(!['blackhole','atomic','spiral','binary','blueheart'].includes(next))return;try{store.setTimerTheme(next);timerTheme=next;render();toast(({atomic:'Atomic System',blackhole:'Black Hole',spiral:'Spiral Galaxy',binary:'Binary Star',blueheart:'Blue Particle Heart'}[next])+' selected','success')}catch(error){toast(error.message||'Theme could not be saved','error')}}));
   $('#moreNavToggle')?.addEventListener('click',()=>{const menu=$('#mobileMore');menu.hidden=!menu.hidden;});
   document.querySelectorAll('[data-subject]').forEach(b=>b.addEventListener('click',()=>{selectedSubject=b.dataset.subject;render()}));
   document.querySelectorAll('[data-focus-coach-start]').forEach(button=>button.addEventListener('click',()=>{const id=button.dataset.focusCoachStart;if(!store.data.subjects.some(subject=>subject.id===id))return;selectedSubject=id;showTimer();}));
@@ -484,13 +487,16 @@ function showTimer(){
   if(!history.state?.focusFlowTimer)history.pushState({focusFlowTimer:true},'','#focus');
   const atomicScene='<div class="atomic-scene '+(timer.paused?'is-paused':'')+'" id="atomicScene"><div class="atom-aura"></div><div class="atom-orbit orbit-one"><i class="electron electron-one"></i></div><div class="atom-orbit orbit-two"><i class="electron electron-two"></i></div><div class="atom-orbit orbit-three"><i class="electron electron-three"></i></div><div class="atom-nucleus"><i></i><i></i><i></i><i></i></div><div class="atom-energy-rings"><i></i><i></i><i></i></div><button class="focus-core" id="timerToggle" aria-label="Pause or resume focus timer"><strong id="clock" aria-live="off">00:00:00</strong></button></div>';
   const blackholeScene='<div class="blackhole-scene '+(timer.paused?'is-paused':'')+'" id="blackholeScene"><div class="bh-starfield" aria-hidden="true"></div><div class="bh-lensing" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-a" aria-hidden="true"></div><div class="bh-lensing-arc bh-lensing-arc-b" aria-hidden="true"></div><div class="bh-light-beams" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-energy-waves" aria-hidden="true"><i></i><i></i><i></i></div><div class="bh-disk bh-disk-outer" aria-hidden="true"></div><div class="bh-disk bh-disk-inner" aria-hidden="true"></div><div class="bh-corona" aria-hidden="true"></div><button class="focus-core" id="timerToggle" aria-label="Pause or resume focus timer"><strong id="clock" aria-live="off">00:00:00</strong></button><span class="bh-particle bh-particle-a" aria-hidden="true"></span><span class="bh-particle bh-particle-b" aria-hidden="true"></span><span class="bh-particle bh-particle-c" aria-hidden="true"></span></div>';
+  const blueHeartScene='<div class="blue-heart-scene" id="blueHeartScene"><canvas id="blueHeartCanvas" aria-label="Blue particle heart animation"></canvas><button class="focus-core blue-heart-clock" id="timerToggle" aria-label="Pause or resume focus timer"><strong id="clock" aria-live="off">00:00:00</strong></button></div>';
   const cosmicScene=timerTheme==='spiral'
     ? '<div class="cosmic-model-scene spiral-galaxy-scene" id="cosmicScene"><div class="cosmic-starfield" aria-hidden="true"></div><svg class="galaxy-art" viewBox="0 0 600 600" aria-hidden="true"><defs><linearGradient id="galaxyArm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0bd"/><stop offset=".28" stop-color="#ff9dcb"/><stop offset=".62" stop-color="#9a8cff"/><stop offset="1" stop-color="#65dff5" stop-opacity=".04"/></linearGradient><filter id="galaxyGlow"><feGaussianBlur stdDeviation="5"/></filter></defs><g class="galaxy-arms"><path d="M300 300 C326 272 365 255 402 271 C448 291 465 341 444 383 C419 431 359 449 306 425 C240 396 214 327 242 265 C274 193 363 162 441 196"/><path d="M300 300 C326 272 365 255 402 271 C448 291 465 341 444 383 C419 431 359 449 306 425 C240 396 214 327 242 265 C274 193 363 162 441 196" transform="rotate(90 300 300)"/><path d="M300 300 C326 272 365 255 402 271 C448 291 465 341 444 383 C419 431 359 449 306 425 C240 396 214 327 242 265 C274 193 363 162 441 196" transform="rotate(180 300 300)"/><path d="M300 300 C326 272 365 255 402 271 C448 291 465 341 444 383 C419 431 359 449 306 425 C240 396 214 327 242 265 C274 193 363 162 441 196" transform="rotate(270 300 300)"/></g><g class="galaxy-dust"><circle cx="402" cy="271" r="3"/><circle cx="444" cy="383" r="2.5"/><circle cx="242" cy="265" r="2"/><circle cx="198" cy="346" r="2.5"/><circle cx="365" cy="158" r="2"/></g></svg><div class="galaxy-core-glow" aria-hidden="true"></div><button class="focus-core cosmic-focus-core" id="timerToggle" aria-label="Pause or resume focus timer"><strong id="clock" aria-live="off">00:00:00</strong></button></div>'
     : '<div class="cosmic-model-scene binary-star-scene" id="cosmicScene"><div class="binary-starfield" aria-hidden="true"></div><div class="binary-orbit binary-orbit-wide" aria-hidden="true"><i class="binary-star star-blue"></i><i class="binary-star star-gold"></i></div><div class="binary-orbit binary-orbit-inner" aria-hidden="true"><i class="binary-star star-white"></i><i class="binary-star star-violet"></i></div><div class="binary-gravity-rings" aria-hidden="true"></div><button class="focus-core cosmic-focus-core" id="timerToggle" aria-label="Pause or resume focus timer"><strong id="clock" aria-live="off">00:00:00</strong></button></div>';
-  const sceneMarkup=timerTheme==='atomic'?atomicScene:timerTheme==='blackhole'?blackholeScene:cosmicScene;
-  const focusModeClass=timerTheme==='atomic'?'atomic-focus-screen':(['spiral','binary'].includes(timerTheme)?'cosmic-focus-screen':'');
-  $('#app').innerHTML='<div class="focus-screen '+focusModeClass+'"><button type="button" class="exit-focus" id="exitFocus" aria-label="Exit focus screen" title="Exit focus screen">×</button><div class="space-particles" aria-hidden="true"></div><div class="focus-nebula" aria-hidden="true"></div><div class="focus-orbit orbit-a" aria-hidden="true"></div><div class="focus-orbit orbit-b" aria-hidden="true"></div>'+sceneMarkup+'<div class="focus-session-controls"><button class="finish-session-btn" id="finishFocus" aria-label="Finish focus session">Finish Session</button></div></div>';
+  const sceneMarkup=timerTheme==='atomic'?atomicScene:timerTheme==='blackhole'?blackholeScene:timerTheme==='blueheart'?blueHeartScene:cosmicScene;
+  const focusModeClass=timerTheme==='atomic'?'atomic-focus-screen':(['spiral','binary'].includes(timerTheme)?'cosmic-focus-screen':timerTheme==='blueheart'?'blue-heart-focus-screen':'');
+  const backgroundMarkup=timerTheme==='blueheart'?'':'<div class="space-particles" aria-hidden="true"></div><div class="focus-nebula" aria-hidden="true"></div><div class="focus-orbit orbit-a" aria-hidden="true"></div><div class="focus-orbit orbit-b" aria-hidden="true"></div>';
+  $('#app').innerHTML='<div class="focus-screen '+focusModeClass+'"><button type="button" class="exit-focus" id="exitFocus" aria-label="Exit focus screen" title="Exit focus screen">×</button>'+backgroundMarkup+sceneMarkup+'<div class="focus-session-controls"><button class="finish-session-btn" id="finishFocus" aria-label="Finish focus session">Finish Session</button></div></div>';
   updateBlackHoleFocus=mountBlackHoleFocus($('#blackholeScene'))||(()=>{});
+  if(timerTheme==='blueheart')unmountBlueParticleHeart=mountBlueParticleHeart($('#blueHeartScene'));
   paintTimer();
   timerRenderInterval=setInterval(()=>{if(!$('#clock')){stopTimerRenderLoop();return}paintTimer();},1000);
   $('#timerToggle').addEventListener('click',()=>{try{timer.toggle();}catch(error){toast(error.message,'error');}});
